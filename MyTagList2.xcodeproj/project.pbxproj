@@ -1,0 +1,323 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		ADE185AE14D678DB001C349E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ADE185AD14D678DB001C349E /* UIKit.framework */; };
+		ADE185B014D678DB001C349E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ADE185AF14D678DB001C349E /* Foundation.framework */; };
+		ADE185B214D678DB001C349E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ADE185B114D678DB001C349E /* CoreGraphics.framework */; };
+		ADE185B814D678DB001C349E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = ADE185B614D678DB001C349E /* InfoPlist.strings */; };
+		ADE185BA14D678DB001C349E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = ADE185B914D678DB001C349E /* main.m */; };
+		ADE185BE14D678DB001C349E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = ADE185BD14D678DB001C349E /* AppDelegate.m */; };
+		ADE185C114D678DB001C349E /* MasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADE185C014D678DB001C349E /* MasterViewController.m */; };
+		ADE185C414D678DB001C349E /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADE185C314D678DB001C349E /* DetailViewController.m */; };
+		ADE185C714D678DB001C349E /* MasterViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = ADE185C514D678DB001C349E /* MasterViewController_iPhone.xib */; };
+		ADE185CA14D678DB001C349E /* MasterViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = ADE185C814D678DB001C349E /* MasterViewController_iPad.xib */; };
+		ADE185CD14D678DB001C349E /* DetailViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = ADE185CB14D678DB001C349E /* DetailViewController_iPhone.xib */; };
+		ADE185D014D678DB001C349E /* DetailViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = ADE185CE14D678DB001C349E /* DetailViewController_iPad.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		ADE185A914D678DB001C349E /* MyTagList2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyTagList2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADE185AD14D678DB001C349E /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		ADE185AF14D678DB001C349E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		ADE185B114D678DB001C349E /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		ADE185B514D678DB001C349E /* MyTagList2-Info.plist */ = {isa = PBXFileReference; path = "MyTagList2-Info.plist"; sourceTree = "<group>"; };
+		ADE185B714D678DB001C349E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		ADE185B914D678DB001C349E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		ADE185BB14D678DB001C349E /* MyTagList2-Prefix.pch */ = {isa = PBXFileReference; path = "MyTagList2-Prefix.pch"; sourceTree = "<group>"; };
+		ADE185BC14D678DB001C349E /* AppDelegate.h */ = {isa = PBXFileReference; path = AppDelegate.h; sourceTree = "<group>"; };
+		ADE185BD14D678DB001C349E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		ADE185BF14D678DB001C349E /* MasterViewController.h */ = {isa = PBXFileReference; path = MasterViewController.h; sourceTree = "<group>"; };
+		ADE185C014D678DB001C349E /* MasterViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MasterViewController.m; sourceTree = "<group>"; };
+		ADE185C214D678DB001C349E /* DetailViewController.h */ = {isa = PBXFileReference; path = DetailViewController.h; sourceTree = "<group>"; };
+		ADE185C314D678DB001C349E /* DetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
+		ADE185C614D678DB001C349E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MasterViewController_iPhone.xib; sourceTree = "<group>"; };
+		ADE185C914D678DB001C349E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MasterViewController_iPad.xib; sourceTree = "<group>"; };
+		ADE185CC14D678DB001C349E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/DetailViewController_iPhone.xib; sourceTree = "<group>"; };
+		ADE185CF14D678DB001C349E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/DetailViewController_iPad.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		ADE185A614D678DB001C349E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADE185AE14D678DB001C349E /* UIKit.framework in Frameworks */,
+				ADE185B014D678DB001C349E /* Foundation.framework in Frameworks */,
+				ADE185B214D678DB001C349E /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		ADE1859E14D678DB001C349E = {
+			isa = PBXGroup;
+			children = (
+				ADE185B314D678DB001C349E /* MyTagList2 */,
+				ADE185AC14D678DB001C349E /* Frameworks */,
+				ADE185AA14D678DB001C349E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		ADE185AA14D678DB001C349E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ADE185A914D678DB001C349E /* MyTagList2.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		ADE185AC14D678DB001C349E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ADE185AD14D678DB001C349E /* UIKit.framework */,
+				ADE185AF14D678DB001C349E /* Foundation.framework */,
+				ADE185B114D678DB001C349E /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		ADE185B314D678DB001C349E /* MyTagList2 */ = {
+			isa = PBXGroup;
+			children = (
+				ADE185BC14D678DB001C349E /* AppDelegate.h */,
+				ADE185BD14D678DB001C349E /* AppDelegate.m */,
+				ADE185BF14D678DB001C349E /* MasterViewController.h */,
+				ADE185C014D678DB001C349E /* MasterViewController.m */,
+				ADE185C214D678DB001C349E /* DetailViewController.h */,
+				ADE185C314D678DB001C349E /* DetailViewController.m */,
+				ADE185C514D678DB001C349E /* MasterViewController_iPhone.xib */,
+				ADE185C814D678DB001C349E /* MasterViewController_iPad.xib */,
+				ADE185CB14D678DB001C349E /* DetailViewController_iPhone.xib */,
+				ADE185CE14D678DB001C349E /* DetailViewController_iPad.xib */,
+				ADE185B414D678DB001C349E /* Supporting Files */,
+			);
+			path = MyTagList2;
+			sourceTree = "<group>";
+		};
+		ADE185B414D678DB001C349E /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				ADE185B514D678DB001C349E /* MyTagList2-Info.plist */,
+				ADE185B614D678DB001C349E /* InfoPlist.strings */,
+				ADE185B914D678DB001C349E /* main.m */,
+				ADE185BB14D678DB001C349E /* MyTagList2-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		ADE185A814D678DB001C349E /* MyTagList2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ADE185D314D678DB001C349E /* Build configuration list for PBXNativeTarget "MyTagList2" */;
+			buildPhases = (
+				ADE185A514D678DB001C349E /* Sources */,
+				ADE185A614D678DB001C349E /* Frameworks */,
+				ADE185A714D678DB001C349E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MyTagList2;
+			productName = MyTagList2;
+			productReference = ADE185A914D678DB001C349E /* MyTagList2.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		ADE185A014D678DB001C349E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = ADE185A314D678DB001C349E /* Build configuration list for PBXProject "MyTagList2" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = ADE1859E14D678DB001C349E;
+			productRefGroup = ADE185AA14D678DB001C349E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				ADE185A814D678DB001C349E /* MyTagList2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		ADE185A714D678DB001C349E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADE185B814D678DB001C349E /* InfoPlist.strings in Resources */,
+				ADE185C714D678DB001C349E /* MasterViewController_iPhone.xib in Resources */,
+				ADE185CA14D678DB001C349E /* MasterViewController_iPad.xib in Resources */,
+				ADE185CD14D678DB001C349E /* DetailViewController_iPhone.xib in Resources */,
+				ADE185D014D678DB001C349E /* DetailViewController_iPad.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		ADE185A514D678DB001C349E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADE185BA14D678DB001C349E /* main.m in Sources */,
+				ADE185BE14D678DB001C349E /* AppDelegate.m in Sources */,
+				ADE185C114D678DB001C349E /* MasterViewController.m in Sources */,
+				ADE185C414D678DB001C349E /* DetailViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		ADE185B614D678DB001C349E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ADE185B714D678DB001C349E /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		ADE185C514D678DB001C349E /* MasterViewController_iPhone.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ADE185C614D678DB001C349E /* en */,
+			);
+			name = MasterViewController_iPhone.xib;
+			sourceTree = "<group>";
+		};
+		ADE185C814D678DB001C349E /* MasterViewController_iPad.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ADE185C914D678DB001C349E /* en */,
+			);
+			name = MasterViewController_iPad.xib;
+			sourceTree = "<group>";
+		};
+		ADE185CB14D678DB001C349E /* DetailViewController_iPhone.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ADE185CC14D678DB001C349E /* en */,
+			);
+			name = DetailViewController_iPhone.xib;
+			sourceTree = "<group>";
+		};
+		ADE185CE14D678DB001C349E /* DetailViewController_iPad.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ADE185CF14D678DB001C349E /* en */,
+			);
+			name = DetailViewController_iPad.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		ADE185D114D678DB001C349E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		ADE185D214D678DB001C349E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		ADE185D414D678DB001C349E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MyTagList2/MyTagList2-Prefix.pch";
+				INFOPLIST_FILE = "MyTagList2/MyTagList2-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		ADE185D514D678DB001C349E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MyTagList2/MyTagList2-Prefix.pch";
+				INFOPLIST_FILE = "MyTagList2/MyTagList2-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		ADE185A314D678DB001C349E /* Build configuration list for PBXProject "MyTagList2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ADE185D114D678DB001C349E /* Debug */,
+				ADE185D214D678DB001C349E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ADE185D314D678DB001C349E /* Build configuration list for PBXNativeTarget "MyTagList2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ADE185D414D678DB001C349E /* Debug */,
+				ADE185D514D678DB001C349E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = ADE185A014D678DB001C349E /* Project object */;
+}
