@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="77" id="2" customClass="IASKPSLuxRangeSpecifierViewCell">
+            <rect key="frame" x="0.0" y="0.0" width="447" height="72"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="2" id="UY8-Yl-zLr">
+                <rect key="frame" x="0.0" y="0.0" width="447" height="71.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Range:" lineBreakMode="tailTruncation" minimumFontSize="10" id="15">
+                        <rect key="frame" x="20" y="8" width="390" height="21"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <fontDescription key="fontDescription" name="Avenir-Medium" family="Avenir" pointSize="15"/>
+                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <segmentedControl multipleTouchEnabled="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" apportionsSegmentWidthsByContent="YES" segmentControlStyle="plain" id="QF8-Wc-k2p">
+                        <rect key="frame" x="9" y="34.5" width="430" height="29"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <segments>
+                            <segment title="Twilight"/>
+                            <segment title="Indoor"/>
+                            <segment title="Cloudy"/>
+                            <segment title="Sunny"/>
+                            <segment title="Direct Sunlight"/>
+                        </segments>
+                        <color key="tintColor" red="0.18823529410000001" green="0.65490196079999996" blue="0.98823529409999999" alpha="1" colorSpace="calibratedRGB"/>
+                        <connections>
+                            <action selector="rangeChanged:" destination="2" eventType="valueChanged" id="eOS-nv-Nei"/>
+                        </connections>
+                    </segmentedControl>
+                </subviews>
+            </tableViewCellContentView>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+            <inset key="insetFor6xAndEarlier" minX="0.0" minY="0.0" maxX="0.0" maxY="15"/>
+            <connections>
+                <outlet property="rangeChoice" destination="QF8-Wc-k2p" id="lq3-nT-L8T"/>
+                <outlet property="title" destination="15" id="Mfc-Xr-z9y"/>
+            </connections>
+            <point key="canvasLocation" x="478.5" y="404"/>
+        </tableViewCell>
+    </objects>
+</document>

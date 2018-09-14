@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="ipad9_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment version="4352" identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Wireless Tag-->
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController autoresizesArchivedViewToFullSize="NO" title="Wireless Tag" modalPresentationStyle="currentContext" id="01J-lp-oVM" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="916"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="V1b-v3-Fx9">
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
+                                <items>
+                                    <navigationItem title="Wireless Tag" id="vJF-5r-ziX"/>
+                                </items>
+                            </navigationBar>
+                            <searchBar contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="JZF-Ls-fI8">
+                                <rect key="frame" x="0.0" y="44" width="768" height="56"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </searchBar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="68" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="g1I-9g-C1u">
+                                <rect key="frame" x="0.0" y="100" width="768" height="816"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="g1I-9g-C1u" firstAttribute="top" secondItem="JZF-Ls-fI8" secondAttribute="bottom" id="6aQ-dT-zCS"/>
+                            <constraint firstItem="g1I-9g-C1u" firstAttribute="leading" secondItem="JZF-Ls-fI8" secondAttribute="leading" id="9M3-HY-PIg"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="trailing" secondItem="g1I-9g-C1u" secondAttribute="trailing" id="GHs-bN-Xfs"/>
+                            <constraint firstItem="V1b-v3-Fx9" firstAttribute="trailing" secondItem="Bcu-3y-fUS" secondAttribute="trailing" id="GSw-kN-Kow"/>
+                            <constraint firstItem="g1I-9g-C1u" firstAttribute="bottom" secondItem="Bcu-3y-fUS" secondAttribute="bottom" id="IoE-Kd-uc0"/>
+                            <constraint firstItem="g1I-9g-C1u" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" id="L1b-2g-3eD"/>
+                            <constraint firstItem="JZF-Ls-fI8" firstAttribute="top" secondItem="V1b-v3-Fx9" secondAttribute="bottom" id="NmE-Rk-pZ2"/>
+                            <constraint firstItem="g1I-9g-C1u" firstAttribute="trailing" secondItem="JZF-Ls-fI8" secondAttribute="trailing" id="dnv-h7-ba3"/>
+                            <constraint firstItem="V1b-v3-Fx9" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="top" id="s7C-72-hN9"/>
+                            <constraint firstItem="V1b-v3-Fx9" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" id="yCR-Do-22y"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
+                    </view>
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics" translucent="NO"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="48.799999999999997" y="372.86356821589209"/>
+        </scene>
+    </scenes>
+</document>

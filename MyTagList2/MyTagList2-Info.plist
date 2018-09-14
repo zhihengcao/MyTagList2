@@ -9,27 +9,92 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFiles</key>
-	<array/>
+	<array>
+		<string>icon_57.png</string>
+		<string>icon_114.png</string>
+		<string>icon_72.png</string>
+	</array>
+	<key>CFBundleIcons</key>
+	<dict/>
+	<key>CFBundleIcons~ipad</key>
+	<dict/>
 	<key>CFBundleIdentifier</key>
-	<string>com.mytaglist.${PRODUCT_NAME:rfc1034identifier}</string>
+	<string>com.mytaglist.MyTagList2</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
+	<string>5.0</string>
 	<key>CFBundleName</key>
 	<string>${PRODUCT_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>2.13.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>wtg</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>2.13.0</string>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>192.168.0.109</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Enable taking a picture of a tag and assigning to it to help recognize from the app.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Enable KumoApps that trigger some actions when your phone leaves or enters some region, such as "automatically arm my tags when my phone leaves home"</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Even without the app open, enable KumoApps that trigger some actions when your phone leaves or enters some region, such as "automatically arm my tags when my phone leaves home"</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Enable KumoApps that trigger some actions when your phone leaves or enters some region, such as "automatically arm my tags when my phone leaves home"</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>When the app is open, enable KumoApps that trigger some actions when your phone leaves or enters some region, such as "automatically arm my tags when my phone leaves home"</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Enable assigning an existing photo you took previously to a tag.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AvenirNext-Italic</string>
+		<string>AvenirNext-Medium</string>
+		<string>AvenirNext-Regular</string>
+		<string>Avenir-Light</string>
+		<string>Avenir-LightOblique</string>
+		<string>Avenir-Medium</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+	<key>UILaunchStoryboardName</key>
+	<string>Launch Screen</string>
+	<key>UIPrerenderedIcon</key>
 	<true/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
 	</array>
+	<key>UIRequiresFullScreen</key>
+	<string>YES</string>
+	<key>UIStatusBarHidden</key>
+	<true/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>StringsTable</key>
+	<string>Root</string>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>DefaultValue</key>
+			<string>system</string>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Values</key>
+			<array>
+				<string>en</string>
+				<string>de</string>
+				<string>fr</string>
+				<string>es</string>
+				<string>ja</string>
+				<string>it</string>
+			</array>
+			<key>Titles</key>
+			<array>
+				<string>English</string>
+				<string>German</string>
+				<string>French</string>
+				<string>Spanish</string>
+				<string>Japanese</string>
+				<string>Italian</string>
+			</array>
+			<key>Title</key>
+			<string>App Language</string>
+			<key>Key</key>
+			<string>app_language</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Search WeMo Devices</string>
+			<key>Key</key>
+			<string>scan_wemo</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+	</array>
+</dict>
+</plist>
