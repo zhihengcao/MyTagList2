@@ -276,7 +276,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 			[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationFade];
 		}
 		else
-		if(oldtag.isWeMo != newTag.isWeMo || oldtag.isCam!=newTag.isCam)
+		if(oldtag.isWeMo != newTag.isWeMo || oldtag.isCam!=newTag.isCam || oldtag.hasALS != newTag.hasALS  || oldtag.hasMotion != newTag.hasMotion || oldtag.isKumostat != newTag.isKumostat)
 		{
 			[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationFade];
 		}
@@ -288,14 +288,17 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 
 					//[self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:0], [NSIndexPath indexPathForItem:0 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
 				}else{
-					if(moreCell2.expansionStyle==UIExpansionStyleExpanded){
+					[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationFade];
+
+					/*					if(moreCell2.expansionStyle==UIExpansionStyleExpanded){
 						[self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:2], [NSIndexPath indexPathForItem:3 inSection:2]] withRowAnimation:UITableViewRowAnimationFade];
 						[[self tableView] reloadData];
 					}else
-					[self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:2]] withRowAnimation:UITableViewRowAnimationFade];
+					[self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:2]] withRowAnimation:UITableViewRowAnimationFade];  */
 				}
 			}
 			
+			/*
 			//if(moreCell2.expansionStyle==UIExpansionStyleExpanded){
 				if(!oldtag.hasMotion && newTag.hasMotion)
 				[self.tableView insertRowsAtIndexPaths:
@@ -304,14 +307,14 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 				[self.tableView deleteRowsAtIndexPaths:
 				 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:1 inSection:2],nil] withRowAnimation:UITableViewRowAnimationFade];
 			//}
-			
+
 			if(!oldtag.isKumostat && newTag.isKumostat)
 			[self.tableView insertRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:0 inSection:2],nil] withRowAnimation:UITableViewRowAnimationFade];
 			else if(oldtag.isKumostat && !newTag.isKumostat)
 			[self.tableView deleteRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:0 inSection:2],nil] withRowAnimation:UITableViewRowAnimationFade];
-
+			 */
 		}
 		[oldtag release];
 		if(oldtag!=nil)
@@ -357,7 +360,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		[ips2 addObject:[NSIndexPath indexPathForRow:i inSection:1]];
 	[self.tableView reloadRowsAtIndexPaths:ips2 withRowAnimation:UITableViewRowAnimationFade];
 	*/
-	[self.tableView reloadData];
+	else [self.tableView reloadData];
 }
 -(void)animateCellPresence:(UITableViewCell*)cell fromArray:(NSArray*)oldCells toArray:(NSArray*)newCells{
 	NSUInteger oldIndex = [oldCells indexOfObject:cell];
@@ -396,8 +399,8 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		case MotionRH:
 		case TagPro:
 		case ALS8k:
-			self.staticToolBarItems = [NSArray arrayWithObjects:_pictureBtn, spacerItem , _stopBeepBtn,
-									   spacerItem, _armBtn, spacerItem, _pingBtn, spacerItem, _optionsBtn, nil];
+			self.staticToolBarItems = [NSArray arrayWithObjects:_pictureBtn,
+									   spacerItem, _armBtn, spacerItem, _pingBtn, spacerItem , _stopBeepBtn, spacerItem ,_optionsBtn, nil];
 			capCell.label.text=NSLocalizedString(@"Humidity",nil);
 			break;
 
@@ -422,8 +425,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		break;
 		
 		default:
-			self.staticToolBarItems = [NSArray arrayWithObjects:_pictureBtn, spacerItem,_stopBeepBtn, 
-									   spacerItem, _pingBtn, spacerItem, _optionsBtn, nil];
+			self.staticToolBarItems = [NSArray arrayWithObjects:_pictureBtn, spacerItem,_pingBtn, spacerItem, _optionsBtn, nil];
 			break;
 			
 	}
@@ -462,7 +464,8 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 			break;			
 	}
 	if(_tag.hasALS){
-		tempStatsCell.textLabel.text =NSLocalizedString(@"Temperature/RH/Lux Chart",nil);
+		tempStatsCell.textLabel.text =NSLocalizedString(@"Temperature/RH Chart",nil);
+//		tempALSStatsCell.textLabel.text =NSLocalizedString(@"Temperature/Lux Chart",nil);
 	}else if(_tag.hasCap){
 		tempStatsCell.textLabel.text = _tag.tagType==CapSensor?NSLocalizedString(@"Temperature/Moisture Chart",nil): NSLocalizedString(@"Temperature/RH Chart",nil);
 	}else{
@@ -759,7 +762,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		if(_tag.isNest)return _tag.supportsHomeAway?3:2;
 		if(_tag.isWeMo || _tag.isCam)return 1;  // only unassociate.
 		// light on, light off, more... (temp stats, door stats, reset tag, unassociate)
-		return (_tag.hasThermostat?4: 3) + (moreCell2.expansionStyle==UIExpansionStyleExpanded?4:0) + (_tag.hasMotion?1:0);
+		return (_tag.hasThermostat?4: 3) + (moreCell2.expansionStyle==UIExpansionStyleExpanded?4:0) + (_tag.hasMotion?1:0) + (_tag.hasALS?1:0);
 	}else{
 		return (_tag.scripts.count)+1;
 	}
@@ -797,12 +800,16 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
+	
 	if(indexPath.section==1 && indexPath.row>0){
 		[_delegate reconfigureScriptBtnPressed:(int)(indexPath.row-1)];
 		return;
 	}
+	if(_tag==nil)return;
+	
 	UITableViewCell* btn = (UITableViewCell*)[tableView cellForRowAtIndexPath:indexPath];
-
+	if(btn==nil)return;
+	
 	if([btn isKindOfClass:[IASKPSToggleSwitchSpecifierViewCell class]]){
 		[((IASKPSToggleSwitchSpecifierViewCell*)btn) toggleHelp];
 		[tableView beginUpdates];
@@ -964,7 +971,9 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		}else
 			[_delegate lightOffBtnPressed:btn];
 	}else if(btn==tempStatsCell)
-		[_delegate tempStatsBtnPressed:btn];
+		[_delegate tempStatsBtnPressed:btn withLux:NO];
+	else if(btn==tempALSStatsCell)
+		[_delegate tempStatsBtnPressed:btn withLux:YES];
 	else if(btn==doorStatsCell)
 		[_delegate doorStatsBtnPressed:btn];
 }
@@ -1079,6 +1088,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		}else{
 			NSMutableArray* cellArray2 = [[[NSMutableArray alloc] initWithCapacity:10]autorelease];
 			[cellArray2 addObject:tempStatsCell];
+			if(_tag.hasALS)[cellArray2 addObject:tempALSStatsCell];
 			if(_tag.hasMotion)[cellArray2 addObject:doorStatsCell];
 			
 			if(!_tag.isNest){
@@ -1294,8 +1304,9 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	dimCell = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"LED Brightness",nil) Min:0 Max:100 Step:0.5 Unit:@"%" delegate:self];
 	dimSpeedCell = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"   Transition Speed",nil)];
 	
-	tempStatsCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Temperature Graphs",nil) Progress:NSLocalizedString(@"Loading...",nil) andIcon:@"icon_graph.png"];
-	
+	tempStatsCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Temperature Chart",nil) Progress:NSLocalizedString(@"Loading...",nil) andIcon:@"icon_graph.png"];
+	tempALSStatsCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Temperature/Lux Chart",nil) Progress:NSLocalizedString(@"Loading...",nil) andIcon:@"icon_graph.png"];
+
 	addScriptCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Install KumoApps...",nil) Progress:NSLocalizedString(@"Loading Compatible Apps...",nil) andIcon:@"icon_cloud.png"];
 	addScriptCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
@@ -1386,6 +1397,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	[lightOnCell release]; lightOnCell=nil;
 	[lightOffCell release]; lightOffCell=nil;
 	[tempStatsCell release]; tempStatsCell=nil;
+	[tempALSStatsCell release]; tempALSStatsCell=nil;
 	[allowLocalCell release]; allowLocalCell=nil;
 	[ds18Cell release]; ds18Cell=nil;
 	[thermostatChoiceCell release]; thermostatChoiceCell=nil;

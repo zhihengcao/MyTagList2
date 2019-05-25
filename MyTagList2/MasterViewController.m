@@ -270,10 +270,6 @@
 -(IBAction)tempDegViewTapped{
 	self.mvc.currentDisplayMode = (self.mvc.currentDisplayMode+1)%(self.mvc.anyLightSensor?4:3);
 }
-/*- (IBAction)imageViewTapped{
-	[self.delegate tagPictureRequest:_tag fromCell:self];
-}
-*/
 
 -(id)initForShotEntryWithID:(NSString*)ID{
 	self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:ID];
@@ -594,11 +590,12 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 }
 @synthesize topPVC;
 //@synthesize stopBeepAllBtn = _stopBeepAllBtn;
-@synthesize armAllBtn = _armAllBtn;
+@synthesize armAllBtn = _armAllBtn, helpBtn = _helpBtn;
 @synthesize updateAllBtn = _updateAllBtn;
 @synthesize multiStatsBtn  = _multiStatsBtn;
 @synthesize wirelessConfigBtn = _wirelessConfigBtn;
-@synthesize associateTagBtn = _associateTagBtn;
+//@synthesize associateTagBtn = _associateTagBtn;
+@synthesize associateBtnCell = _associateBtnCell;
 @synthesize delegate = _delegate;
 @synthesize tagList=_tagList;
 
@@ -617,18 +614,24 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 		CGSize reqsz =  self.tableView.contentSize;
 		self.topPVC.navigationController.contentSizeForViewInPopover = CGSizeMake(480, reqsz.height>800?800:reqsz.height);
 	}
+
 	if(_tagList.count==0){
 		self.searchDisplayController.searchBar.hidden=YES;
+		[[self tableView] setContentOffset:CGPointMake(0, 48)];
 	}
 	else{
 		self.searchDisplayController.searchBar.hidden=NO;
+		[[self tableView] setContentOffset:CGPointMake(0, 0)];
 	}
 }
 
 -(void) addNewTag:(NSMutableDictionary*)tag{	
 //	if(_tagList.count>0){
 		[self.tableView beginUpdates];
-		[_tagList insertObject:tag atIndex:0];
+	
+	[_tagList insertObject:tag atIndex:0];
+//	[self.tableView reloadData];
+	
 		[self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
 		[self.tableView endUpdates];
 /*	}else{
@@ -636,6 +639,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 		[self.tableView reloadData];
 	}*/
 	self.searchDisplayController.searchBar.hidden=NO;
+	[[self tableView] setContentOffset:CGPointMake(0, 0)];
 //	[self.tableView reloadData];
 }
 -(void) deleteTagWithSlaveId:(int)slaveId{
@@ -747,7 +751,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 		TagTableViewCell* cell = (TagTableViewCell*)[self.tableView
 													 cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
 		if(cell){
-			[cell setData:tag loadImage:loadimage animated:YES];
+			//[cell setData:tag loadImage:loadimage animated:YES];  // already done in cellForRowAtIndexPath
 			if([self.searchDisplayController isActive])
 				[self.searchDisplayController.searchResultsTableView reloadData];
 			else
@@ -780,12 +784,16 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 														 target:_delegate action:@selector(logoutBtnPressed:)] autorelease];
 		[self.navigationItem setLeftBarButtonItem:_logoutBtn];
 		
-		_associateTagBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
-																		 target:_delegate action:@selector(associateTagBtnPressed:)];
+		//_associateTagBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:_delegate action:@selector(associateTagBtnPressed:)];
+		_associateBtnCell = [[UITableViewCell alloc] initWithStyle: UITableViewCellStyleDefault reuseIdentifier:nil];
+		_associateBtnCell.accessoryView = [[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"iOS_addbutton"]] autorelease];
+//		_associateBtnCell.imageView.image =[UIImage imageNamed:@"iOS_addbutton"];
+		_associateBtnCell.textLabel.text=@"Associate New ...";
+		_associateBtnCell.textLabel.textAlignment = NSTextAlignmentCenter;
 		
 		if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
 			self.automaticallyAdjustsScrollViewInsets = true;
-			[self.navigationItem setRightBarButtonItem:_associateTagBtn];
+			//[self.navigationItem setRightBarButtonItem:_associateTagBtn];
 			
 		}else{
 			searchBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch
@@ -810,8 +818,9 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	CGPoint touchPoint = [recognizer locationOfTouch:0 inView:recognizer.view];
 	NSLog(@"%f",recognizer.view.frame.size.width);
 	if(touchPoint.x > 100 && touchPoint.x < recognizer.view.frame.size.width-100){
-		if(self.topPVC.isMVCVisible)
-			[_delegate tagManagerDropdownPressed:self.navigationController.navigationBar];
+		if(self.topPVC.isTagManagerChoiceVisible)
+//			[_delegate tagManagerDropdownPressed:self.navigationController.navigationBar];
+			[_delegate tagManagerDropdownPressed:recognizer.view];
 	}
 }
 /*-(void)showDropdown{
@@ -907,7 +916,11 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 //													  target:_delegate action:@selector(stopBeepAllBtnPressed:)];
     _armAllBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"disarm.png"] style:UIBarButtonItemStylePlain
 												 target:_delegate action:@selector(armAllBtnPressed:)];
-    _updateAllBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh 
+	
+	_helpBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"question.png"] style:UIBarButtonItemStylePlain
+												 target:_delegate action:@selector(helpBtnPressed:)];
+	
+    _updateAllBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
 																  target:_delegate action:@selector(updateAllBtnPressed:)];
 	_multiStatsBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"statistics.png"] style:UIBarButtonItemStylePlain
 														 target:_delegate action:@selector(multiStatsBtnPressed:)];
@@ -919,10 +932,10 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	
 	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
 //		self.staticToolBarItems = [NSArray arrayWithObjects:_stopBeepAllBtn, spacerItem, _armAllBtn, spacerItem, _updateAllBtn, spacerItem, _multiStatsBtn, spacerItem,_wirelessConfigBtn, nil];
-		self.staticToolBarItems = [NSArray arrayWithObjects:_multiStatsBtn, spacerItem, _armAllBtn, spacerItem, _updateAllBtn, spacerItem, _wirelessConfigBtn, nil];
+		self.staticToolBarItems = [NSArray arrayWithObjects:_multiStatsBtn, spacerItem, _armAllBtn, spacerItem, _updateAllBtn, spacerItem, _wirelessConfigBtn, spacerItem, _helpBtn, nil];
 	}else{
 //		self.staticToolBarItems = [NSArray arrayWithObjects:_stopBeepAllBtn, spacerItem, _armAllBtn, spacerItem, _updateAllBtn, spacerItem, _multiStatsBtn, spacerItem,_wirelessConfigBtn, spacerItem, _associateTagBtn, nil];
-		self.staticToolBarItems = [NSArray arrayWithObjects:_multiStatsBtn, spacerItem, _armAllBtn, spacerItem, _updateAllBtn, spacerItem, _wirelessConfigBtn, spacerItem, _associateTagBtn, nil];
+		self.staticToolBarItems = [NSArray arrayWithObjects:_multiStatsBtn, spacerItem, _armAllBtn, spacerItem, _updateAllBtn, spacerItem, _wirelessConfigBtn, nil];
 	}
 //	self.staticToolBarItems = [NSArray arrayWithObjects:_stopBeepAllBtn, spacerItem, _armAllBtn, spacerItem, _updateAllBtn, spacerItem, _associateTagBtn, nil];
 	
@@ -1026,24 +1039,28 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 {
 	if (tableView == self.searchDisplayController.searchResultsTableView)
 	{
-        return [_filteredTagList count];
+        return [_filteredTagList count]+1;
     }
 	else{
 		/*NSInteger count =_tagList.count;
 		return count==0?1:count;*/
-		return _tagList.count;
+		return _tagList.count+1;
 	}
 }
 -(UITableViewCell*)cellForTag:(NSMutableDictionary *)t1{
 
+	if(_tagList==nil || _tagList.count==0)return nil;
+	
 	UITableView *tableView = self.tableView; // Or however you get your table view
 	for(NSIndexPath* ip in [tableView indexPathsForVisibleRows]){
 		NSDictionary *tag;
 		if ([self.searchDisplayController isActive])
 		{
+			if(ip.row >= _filteredTagList.count)continue;
 			tag = [_filteredTagList objectAtIndex:ip.row];
 		}else{
-			tag = [_tagList objectAtIndex:[ip row]];
+			if(ip.row >= _tagList.count)continue;
+			tag = [_tagList objectAtIndex:ip.row];
 		}
 		if([tag.uuid isEqualToString:t1.uuid])return [tableView cellForRowAtIndexPath:ip];
 	}
@@ -1056,6 +1073,9 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath 
 {
+	if(indexPath.row == [self tableView:tableView numberOfRowsInSection:0]-1 ){
+		return _associateBtnCell;
+	}
 /*	if(_tagList.count==0){
 		UITableViewCell* cell0 = [[[UITableViewCell alloc]init] autorelease];
 		cell0.textLabel.text = @"Tap the '+' button on the upper right corner to add your first tag.";
@@ -1084,9 +1104,11 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	NSMutableDictionary *tag;
 	if (tableView == self.searchDisplayController.searchResultsTableView)
 	{
-        tag = [_filteredTagList objectAtIndex:indexPath.row];
+		if(indexPath.row >= _filteredTagList.count)return cell;
+		tag = [_filteredTagList objectAtIndex:indexPath.row];
     }else{
-		tag = [_tagList objectAtIndex:[indexPath row]];		
+		if(indexPath.row >= _tagList.count)return cell;
+		tag = [_tagList objectAtIndex:[indexPath row]];
 	}
 	
 	if([tag isKindOfClass:[NSMutableDictionary class]])
@@ -1162,15 +1184,22 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+	if(indexPath.row == [self tableView:tableView numberOfRowsInSection:0]-1 ){
+		[_delegate associateTagBtnPressed:_associateBtnCell];
+		return;
+	}
+
 	NSDictionary *tag;
 	if (tableView == self.searchDisplayController.searchResultsTableView)
 	{
+		if(indexPath.row >= _filteredTagList.count)return;
         tag = [_filteredTagList objectAtIndex:indexPath.row];
     }else{
-		tag = [_tagList objectAtIndex:[indexPath row]];		
+		if(indexPath.row >= _tagList.count)return;
+		tag = [_tagList objectAtIndex:[indexPath row]];
 	}
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	[_delegate tagSelected:tag fromCell:[tableView cellForRowAtIndexPath:indexPath]];
+	[_delegate tagSelected:tag.uuid fromCell:[tableView cellForRowAtIndexPath:indexPath]];
 /*	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
 		self.topPVC.pcDots.alpha=0;
 	}*/
@@ -1199,22 +1228,24 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 
 -(void)reorderDoneButtonPressed{
 	[self setEditing:NO animated:YES];
-	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
-		[self.navigationItem setRightBarButtonItem:_associateTagBtn];
-		self.topPVC.mvc_right =_associateTagBtn;
-	}else{
-		[self.navigationItem setRightBarButtonItem:searchBtn];
-		self.topPVC.mvc_right = searchBtn;
-	}
+	
+	[self.navigationItem setRightBarButtonItem:self.reorderDoneReplacingBtn];
+	self.topPVC.mvc_right =self.reorderDoneReplacingBtn;
+	self.reorderDoneReplacingBtn=nil;
 }
 -(void)startReordering{
 	reorderDoneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
 															  target:self action:@selector(reorderDoneButtonPressed)];
+
+	self.reorderDoneReplacingBtn = self.navigationItem.rightBarButtonItem;
 	[self.navigationItem setRightBarButtonItem:reorderDoneBtn];
 	self.topPVC.mvc_right = reorderDoneBtn;
 	[self setEditing:YES animated:YES];
 }
 -(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath{
+	if(indexPath.row == [self tableView:tableView numberOfRowsInSection:0]-1 ){
+		return NO;
+	}
 	return YES;
 }
 -(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -1224,17 +1255,23 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	return NO;
 }
 -(BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath{
+	if(indexPath.row > _tagList.count-1){
+		return NO;
+	}
 	return YES;
 }
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath{
 	//NSLog(@"moved from %d to %d", sourceIndexPath.row, destinationIndexPath.row);
-	NSDictionary* tag1 = [_tagList objectAtIndex:sourceIndexPath.row];
-	NSDictionary* tag_prev = destinationIndexPath.row==0? nil : [_tagList objectAtIndex:destinationIndexPath.row-1];
-	NSDictionary* tag_next = destinationIndexPath.row == _tagList.count-1? nil : [_tagList objectAtIndex:destinationIndexPath.row];
-	[_delegate swapOrderOf:tag1 between:tag_prev and:tag_next];
+	if(sourceIndexPath.row>_tagList.count-1 || destinationIndexPath.row>_tagList.count-1)return;
+	
+	NSDictionary* tag1 = [[_tagList objectAtIndex:sourceIndexPath.row] retain];
+	NSString* tag_prev = destinationIndexPath.row==0? nil : ((NSDictionary*)[_tagList objectAtIndex:destinationIndexPath.row-1]).uuid;
+	NSString* tag_next = destinationIndexPath.row == _tagList.count-1? nil : ((NSDictionary*)[_tagList objectAtIndex:destinationIndexPath.row]).uuid;
+	[_delegate swapOrderOf:tag1.uuid between:tag_prev and:tag_next];
 	//[_tagList exchangeObjectAtIndex:sourceIndexPath.row withObjectAtIndex:destinationIndexPath.row];
 	[_tagList removeObjectAtIndex:sourceIndexPath.row];
 	[_tagList insertObject:tag1 atIndex:destinationIndexPath.row];
+	[tag1 release];
 }
 
 #pragma mark -
@@ -1277,4 +1314,10 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	self.attributedText = [[[NSAttributedString alloc] initWithString:text attributes:@{ NSForegroundColorAttributeName : self.textColor }] autorelease];
 }
 
+@end
+
+@implementation UIViewController (Additions)
+- (BOOL)isVisible {
+	return [self isViewLoaded] && self.view.window;
+}
 @end

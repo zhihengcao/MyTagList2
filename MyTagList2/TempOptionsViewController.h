@@ -32,7 +32,7 @@
 	IASKPSDualSliderSpecifierViewCell *temp_range;
 	
 	IASKPSTextFieldSpecifierViewCell *email;
-	IASKPSToggleSwitchSpecifierViewCell *monitor_temp, *send_email, *send_tweet, *beep_pc, *use_speech, *vibrate;
+	IASKPSToggleSwitchSpecifierViewCell *monitor_temp, *send_email, *send_tweet, *beep_pc, *use_speech, *vibrate, *notify_normal;
 	TableLoadingButtonCell* tweetLogin;
 	IASKPSTextFieldSpecifierViewCell *apns_sound, *interval, *th_low_delay, *th_high_delay, *apns_pause, *rn_toohot, *rn_toocold;
 

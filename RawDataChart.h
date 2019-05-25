@@ -10,7 +10,7 @@
 #import "SpinnerView.h"
 
 extern NSString * const LogScalePrefKey;
-
+extern NSDate* nsdateFromFileTime(int64_t filetime);
 extern BOOL temp_unit;
 extern int ZoomLevelFromTI(NSTimeInterval ti);
 extern NSString * const graphTIPrefix;
@@ -64,6 +64,7 @@ typedef NSArray* (^syncLoadRawData_t)(NSString* startDate, NSString* endDate);
 	float ymax2, ymin2;
 	int translatedStart, translatedEnd;
 	int queue_length;
+	BOOL noDynamicLoading;
 }
 @property (nonatomic, assign)BOOL dewPointMode;
 @property(nonatomic, assign) BOOL useLogScaleForLight;
@@ -111,6 +112,10 @@ typedef NSArray* (^syncLoadRawData_t)(NSString* startDate, NSString* endDate);
 + (LuxTickFormatter*)instance;
 @end
 
+@interface RecentTrendTimeTickFormatter : SChartTickLabelFormatter
++ (RecentTrendTimeTickFormatter*)instance;
+@end
+
 
 @interface SignalTypeTranslator : NSObject <StatTypeTranslator>
 @end
@@ -123,7 +128,7 @@ typedef NSArray* (^syncLoadRawData_t)(NSString* startDate, NSString* endDate);
 @end
 @interface TimeOfDayAxis : SChartDateTimeAxis
 +(NSDate*) baseDate;
--(id)initWithFont:(UIFont*)font;
+-(id)initWithFont:(UIFont*)font forTrend:(BOOL)forTrend;
 @end
 @interface CapTypeTranslator : NSObject <StatTypeTranslator>
 @property(nonatomic)BOOL dewPointMode;
@@ -133,3 +138,7 @@ typedef NSArray* (^syncLoadRawData_t)(NSString* startDate, NSString* endDate);
 @interface DewPointTypeTranslator : NSObject <StatTypeTranslator>
 @end
 
+@interface NSMutableArray (ChartSeries)
+-(void)addDataPoint:(SChartDataPoint*)dataPoint;
+-(void)addDailyDataPoint:(SChartMultiYDataPoint*)dataPoint;
+@end

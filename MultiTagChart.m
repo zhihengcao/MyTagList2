@@ -57,8 +57,8 @@
 				   ];
 
 		
-		UIFont* labelFont = [self.titleLabel.font fontWithSize:10.0];
-		self.xAxis =[[[TimeOfDayAxis alloc]initWithFont:labelFont]autorelease];
+		UIFont* labelFont = [UIFont systemFontOfSize:11.0]; //[self.titleLabel.font fontWithSize:10.0];
+		self.xAxis =[[[TimeOfDayAxis alloc]initWithFont:labelFont forTrend:NO]autorelease];
 		self.xAxis.allowPanningOutOfDefaultRange=self.xAxis.allowPanningOutOfMaxRange= YES;
 		
 		_type=type;
@@ -92,18 +92,6 @@
 	self.id2nameMapping=nil;
 	[super dealloc];
 }
-/*-(void)zoomLevelChanged{
-	if([_type isKindOfClass:[MotionTypeTranslator class]]){
- if(zoomLevel<ChartZoomLevelNormal){
- org_formatter=self.yAxis.labelFormatter.formatter;
- self.yAxis.labelFormatter.formatter=EventTypeFormatter.instance;
- }else{
- if(org_formatter)
- self.yAxis.labelFormatter.formatter=org_formatter;
- }
-	}
-	[super zoomLevelChanged];
- }*/
 -(void)resetNormalData{
 	[id2Series removeAllObjects];
 	[id2BandSeries removeAllObjects];
@@ -129,7 +117,7 @@
 			tod=[tods objectAtIndex:tagi];
 			rawSeries=[id2RawSeries objectForKey:tagId];
 			if(rawSeries==nil){
-				rawSeries = [[NSMutableArray alloc]initWithCapacity:[tagv count]];
+				rawSeries = [[[NSMutableArray alloc]initWithCapacity:[tagv count]] autorelease];
 				[id2RawSeries setObject:rawSeries forKey:tagId];
 			}
 		}else{
@@ -152,7 +140,7 @@
 				
 				
 				if(tod){
-					[rawSeries addObject:dataPoint];
+					[rawSeries addDataPoint:dataPoint];
 
 					if([self.latestDate timeIntervalSinceDate:dataPoint.xValue]<0)
 						self.latestDate = dataPoint.xValue;
@@ -160,7 +148,7 @@
 					//NSLog(@"added %@", dataPoint.xValue);
 				}else{
 					ymax = fmax(ymax, [val floatValue]); ymin=fmin(ymin, [val floatValue]);
-					[series addObject:dataPoint];
+					[series addDataPoint:dataPoint];
 				}
 				ymax2 = fmax([val floatValue], ymax2);
 				ymin2 = fmin([val floatValue], ymin2);
@@ -175,19 +163,21 @@
 				[id2BandSeries setObject:bandSeries forKey:tagId];
 			}
 			
-			int bandi= [self findBandArrayIndexFor:baseDate fromSeries:bandSeries];
+			//int bandi= [self findBandArrayIndexFor:baseDate fromSeries:bandSeries];
 			
 			if([_type isKindOfClass:[MotionTypeTranslator class]]){
 				SChartDataPoint* band = [[SChartDataPoint new] autorelease];
 				band.xValue = [baseDate dateByAddingTimeInterval:3600*12];
 				band.yValue = [NSNumber numberWithInteger:avg];
-				[bandSeries insertObject:band atIndex:bandi];
+				//[bandSeries insertObject:band atIndex:bandi];
+				[bandSeries addObject:band];
 			}else{
 				SChartMultiYDataPoint* band = [[SChartMultiYDataPoint new] autorelease];
 				band.xValue = [baseDate dateByAddingTimeInterval:3600*12];
 				band.yValues = [NSMutableDictionary dictionaryWithDictionary:
 								@{SChartBandKeyHigh: [NSNumber numberWithFloat:ymax], SChartBandKeyLow: [NSNumber numberWithFloat:ymin]}];
-				[bandSeries insertObject:band atIndex:bandi];
+				//[bandSeries insertObject:band atIndex:bandi];
+				[bandSeries addDailyDataPoint:band];
 			}
 		}
 		
@@ -367,20 +357,22 @@
 	}else{
 		if(_zoomLevel>=ChartZoomLevelBand){
 			SChartBandSeries* bandSeries = [[[SChartBandSeries alloc]init]autorelease];
-			bandSeries.style.lineWidth=@2;
-			bandSeries.style.lineColorHigh = bandSeries.style.lineColorLow =color;
-			bandSeries.style.areaColorNormal = bandSeries.style.areaColorInverted = [color colorWithAlphaComponent:0.65];
+			SChartBandSeriesStyle *bss =bandSeries.style;
+			bss.lineWidth=@2;
+			bss.lineColorHigh = bss.lineColorLow =color;
+			bss.areaColorNormal = bss.areaColorInverted = [color colorWithAlphaComponent:0.65];
 			bandSeries.title=[self.id2nameMapping objectForKey:[arrayOfIds objectAtIndex:index]];
 			return bandSeries;
 		}else{
 			SChartLineSeries* lineSeries = [[[SChartLineSeries alloc] init] autorelease];
 			lineSeries.title=[self.id2nameMapping objectForKey:[arrayOfIds objectAtIndex:index]];
-			lineSeries.style.lineWidth=@2;
-			lineSeries.style.pointStyle.radius=@4;
-			lineSeries.style.pointStyle.innerRadius=@0.5;
-			lineSeries.style.pointStyle.showPoints=(_zoomLevel<ChartZoomLevelNormal);
-			lineSeries.style.lineColor = color;
-			lineSeries.style.pointStyle.color = lineSeries.style.pointStyle.innerColor = color;
+			SChartLineSeriesStyle * lss =lineSeries.style;
+			lss.lineWidth=@2;
+			lss.pointStyle.radius=@4;
+			lss.pointStyle.innerRadius=@0.5;
+			lss.pointStyle.showPoints=(_zoomLevel<ChartZoomLevelNormal);
+			lss.lineColor = color;
+			lss.pointStyle.color = lss.pointStyle.innerColor = color;
 			return lineSeries;
 		}
 	}

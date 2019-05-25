@@ -23,6 +23,8 @@
 }
 
 - (void)updateHandleImages;
+@property(nonatomic) float currentValue;
+@property(nonatomic) BOOL forceInRange;
 @property(nonatomic) float minimumValue;
 @property(nonatomic) float maximumValue;
 @property(nonatomic) float stepSize;

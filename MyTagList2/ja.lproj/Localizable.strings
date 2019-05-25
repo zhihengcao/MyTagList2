@@ -120,9 +120,9 @@
 "Beep Options" = "ビープ音オプション";
 "Brightness Triggers" = "明るさトリガ";
 "Calibrate" = "キャリブレーション";
-"Calibrate Current Humidity:" = "現在の湿度を較正する：";
-"Calibrate Current Temperature:" = "現在の温度を較正する：";
-"Calibrate Current Water-Level/Soil-Moisture:" = "現在の水位/土壌水分を較正する：";
+"Humidity Calibration" = "湿度較正";
+"Temperature Calibration" = "温度較正";
+"Water-Level/Moisture Calibration" = "水位/土壌水分の較正";
 "Calibrate Radio" = "ラジオを較正する";
 "Calibrating..." = "キャリブレーション...";
 "Camera" = "カメラ";
@@ -364,7 +364,7 @@
 "Post Tweet" = "Tweetを投稿";
 "Quit" = "終了する";
 "Range:" = "範囲：";
-"Rate Us 5 Starts!" = "5つ星として評価してください！";
+"Rate Us 5 Stars!" = "5つ星として評価してください！";
 "Rate Wireless Tag" = "評価する";
 "Re-arrange Tag Order" = "タグ順序を変える";
 "Receive push notifications on iOS/Android devices chosen at 'Phone Options' when the tag is out of range and when it is back in range." = "タグが範囲外で、範囲内にある場合、[電話オプション]で選択したiOS / Android端末でプッシュ通知を受信します。";

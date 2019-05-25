@@ -92,7 +92,7 @@ static NSString * const reuseIdentifier = @"CategoryCell";
 
 	CGSize defaultSize = [(UICollectionViewFlowLayout*)collectionViewLayout itemSize];
 
-	if(indexPath.row==9){
+	if(indexPath.row==12){
 		return CGSizeMake(self.collectionView.bounds.size.width- ((UICollectionViewFlowLayout*)collectionViewLayout).minimumInteritemSpacing*2, 40);
 	}else{
 		return defaultSize;
@@ -107,25 +107,42 @@ static NSString * const reuseIdentifier = @"CategoryCell";
 	[self.collectionView registerClass:[SnippetCategoryCell class] forCellWithReuseIdentifier:reuseIdentifier];
 	
 	self.categoryIcons = [NSArray arrayWithObjects:
-						  [UIImage imageNamed:@"ka_location.png"],
-						  [UIImage imageNamed:@"ka_users.png"],
-						  [UIImage imageNamed:@"ka_leaf.png"],
 						  [UIImage imageNamed:@"ka_temperature.png"],
 						  [UIImage imageNamed:@"ka_scheduling.png"],
 						  [UIImage imageNamed:@"ka_dropcam.png"],
 						  [UIImage imageNamed:@"ka_log.png"],
 						  [UIImage imageNamed:@"ka_bell.png"],
-						  [UIImage imageNamed:@"ka_wemo.png"],nil];
-	
-	self.titleTexts = @[@"Save energy using your iPhone location",
-						@"Arm/disarm if someone’s at home",
-						@"Save energy using motion sensors",
-						@"Optimize room temperature using tag/sensor",
+						  [UIImage imageNamed:@"ka_wemo.png"],
+
+						  [UIImage imageNamed:@"ka_humidity.png"],
+						  [UIImage imageNamed:@"ka_ambientlight.png"],
+						  [UIImage imageNamed:@"ka_winery.png"],
+
+						  [UIImage imageNamed:@"ka_location.png"],
+						  [UIImage imageNamed:@"ka_users.png"],
+						  [UIImage imageNamed:@"ka_leaf.png"]
+						  ,nil];
+	self.categoryIds = @[@40, @50, @60,
+						 @70, @80, @90,
+						 @100, @110, @120,
+						 @10, @20, @30,
+						 @0];
+	self.titleTexts = @[
+						@"Optimize room temperature",
 						@"Advanced scheduling",
-						@"Control your Dropcam using tag events",
+						@"Control Dropcam using tag events",
 						@"Log & download advanced tag/sensor data",
 						@"Special ways of getting notified of events",
-						@"Be the master of lights...",
+						@"Control WeMo switch/lights using tag events",
+						
+						@"Optimize room humidity",
+						@"Optimize ambient light",
+						@"For wine cellars",
+						
+						@"Save energy using iPhone location",
+						@"Arm/disarm if someone’s at home",
+						@"Save energy using motion sensor tags",
+						
 						@"Search all apps..."
 						];
 	
@@ -157,6 +174,7 @@ static NSString * const reuseIdentifier = @"CategoryCell";
 	self.categoryIcons=nil;
 	self.done=nil;
 	self.titleTexts=nil;
+	self.categoryIds=nil;
 	[super dealloc];
 }
 - (void)didReceiveMemoryWarning {
@@ -170,7 +188,7 @@ static NSString * const reuseIdentifier = @"CategoryCell";
 }*/
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return 10;
+    return 13;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -197,7 +215,9 @@ static NSString * const reuseIdentifier = @"CategoryCell";
 
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-	self.done( indexPath.row==9? 0: 10*(indexPath.row+1),[_titleTexts objectAtIndex:indexPath.row]
+	self.done( [[_categoryIds objectAtIndex:indexPath.row] integerValue],
+			  //indexPath.row==9? 0: 10*(indexPath.row+1),
+			  [_titleTexts objectAtIndex:indexPath.row]
 			  , (SnippetCategoryCell*)[self.collectionView cellForItemAtIndexPath:indexPath]);
 }
 

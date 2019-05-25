@@ -46,10 +46,13 @@ BOOL dewPointMode = NO;
 	[monitor_temp release]; monitor_temp=nil;
 	[email release]; email=nil;
 	[send_email release]; send_email=nil;
-	[beep_pc release]; beep_pc=nil; [use_speech release]; use_speech=nil; [vibrate release]; vibrate=nil;
+	[beep_pc release]; beep_pc=nil;
+	[use_speech release]; use_speech=nil;
+	[vibrate release]; vibrate=nil;
 	[apns_sound release]; apns_sound=nil;
 	[apns_pause release]; apns_pause=nil;
 	[send_tweet release]; send_tweet=nil;
+	[notify_normal release]; notify_normal=nil;
 	[tweetLogin release]; tweetLogin=nil;
 	[interval release]; interval=nil;
 	[th_low_delay release]; th_low_delay=nil;
@@ -93,6 +96,7 @@ BOOL dewPointMode = NO;
 	c.email=email.textField.text;
 	c.beep_pc = beep_pc.toggle.on;
 	c.beep_pc_tts = use_speech.toggle.on;
+	c.notify_normal = notify_normal.toggle.on;
 	c.beep_pc_vibrate = vibrate.toggle.on;
 	c.send_tweet = send_tweet.toggle.on;
 	
@@ -131,6 +135,7 @@ BOOL dewPointMode = NO;
 	temp_units.textField.text = [temp_unit_choices objectAtIndex:chosen_temp_unit];
 	temp_cal.unit=temp_range.unit =chosen_temp_unit?@"°F": @"°C";
 
+	temp_range.slider.currentValue = chosen_temp_unit? tag.temperatureDegC*9.0/5.0+32 : tag.temperatureDegC;
 	temp_range.slider.maximumValue = chosen_temp_unit?c.threshold_q.max*9.0/5.0+32:c.threshold_q.max;
 	temp_range.slider.minimumValue = chosen_temp_unit?c.threshold_q.min*9.0/5.0+32:c.threshold_q.min;
 	temp_range.slider.stepSize = chosen_temp_unit?c.threshold_q.step*9.0/5.0:c.threshold_q.step;
@@ -145,6 +150,7 @@ BOOL dewPointMode = NO;
 	if( !c.email.isEmpty) email.textField.text = c.email;
 	else email.textField.text=c.loginEmail;
 	beep_pc.toggleOn= c.beep_pc;
+	notify_normal.toggleOn = c.notify_normal;
 	use_speech.toggleOn=c.beep_pc_tts; vibrate.toggleOn=c.beep_pc_vibrate;
 	apns_sound.textField.text = c.apnsSound.isEmpty?apns_sound_choices[0]:c.apnsSound;
 	apns_pause.textField.text = apns_pause_choices[ c.apns_pause_index ];
@@ -180,11 +186,11 @@ BOOL dewPointMode = NO;
 	temp_units.textField.text = [temp_unit_choices objectAtIndex:chosen_temp_unit];
 	if(chosen_temp_unit==0){
 		temp_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:degC_min Max:degC_max Unit:@"°C"	numberFormat:@"%.1f"	delegate:self];
-		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Current Temperature at Tag",nil) Min:degC_min Max:degC_max Step:0.1 Unit:@"°C" delegate:self];
+		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate To:",nil) Min:degC_min Max:degC_max Step:0.1 Unit:@"°C" delegate:self];
 		threshold_window = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold Window",nil) Min:0 Max:5 Step:0.05 Unit:@"°C" delegate:self];
 	}else{
 		temp_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:degF_min Max:degF_max Unit:@"°F" numberFormat:@"%.1f" delegate:self];
-		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Current Temperature at Tag",nil) Min:degF_min Max:degF_max Step:0.1 Unit:@"°F" delegate:self];
+		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate To:",nil) Min:degF_min Max:degF_max Step:0.1 Unit:@"°F" delegate:self];
 		threshold_window = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold Window",nil) Min:0 Max:9 Step:0.1 Unit:@"°F" delegate:self];
 	}
 	temp_cal_btn = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Calibrate",nil) Progress:NSLocalizedString(@"Saving...",nil)];
@@ -197,6 +203,9 @@ BOOL dewPointMode = NO;
 	
 	beep_pc = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notification",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' when temperature becomes too high, too low or returns within the normal range.",nil) delegate:self];
 	use_speech = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
+
+	notify_normal = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tNotify back to normal",nil) helpText:NSLocalizedString(@"In addition to when too hot/too cold, send push notification also when temperature is back to normal range.",nil) delegate:self];
+
 	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
 	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
 	apns_pause =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPause Action Effective For: ",nil)];
@@ -242,7 +251,11 @@ BOOL dewPointMode = NO;
 	if(section==0)
 		return nil;
 	else if(section==2 && !_tag.isNest)
-		return NSLocalizedString(@"Calibrate Current Temperature:",nil);
+		if(chosen_temp_unit)
+			return [NSLocalizedString(@"Temperature Calibration",nil) stringByAppendingFormat:@" (Raw Reading: %.1f°F)", (_tag.temperatureDegC-_tag.tempCalOffset)*9.0/5.0+32.0];
+		else
+			return [NSLocalizedString(@"Temperature Calibration",nil) stringByAppendingFormat:@" (Raw Reading: %.1f°C)", _tag.temperatureDegC-_tag.tempCalOffset];
+
 	else
 		return NSLocalizedString(@"Monitor Temperature:",nil);
 }
@@ -289,6 +302,7 @@ BOOL dewPointMode = NO;
 		[self.tableView beginUpdates];
 		[beep_pc updateToggleOn];
 		[self updateCellArray];
+		[self animateCellPresence:notify_normal fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:use_speech fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_pause fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_sound fromArray:oldCells toArray:self.cellArray];
@@ -313,6 +327,7 @@ BOOL dewPointMode = NO;
 		[self animateCellPresence:send_tweet fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:tweetLogin fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:beep_pc fromArray:oldCells toArray:self.cellArray];
+		[self animateCellPresence:notify_normal fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:use_speech fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_pause fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_sound fromArray:oldCells toArray:self.cellArray];
@@ -354,6 +369,7 @@ BOOL dewPointMode = NO;
 		}
 		[cells addObject:beep_pc];
 		if(beep_pc.toggleOn){
+			[cells addObject:notify_normal];
 			[cells addObject:use_speech];
 			[cells addObject:apns_pause];
 			[cells addObject:apns_sound];
@@ -594,7 +610,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 			NSMutableArray* labels = [[NSMutableArray alloc]initWithCapacity:99];
 			for(int i=1;i<=99;i++){
 				choices[i-1]=i;
-				[labels addObject:[NSString stringWithFormat:NSLocalizedString(@"%d reading",nil), i]];
+				[labels addObject:[NSString stringWithFormat:@"%d reading%@", i, i>1?@"s":@"", nil]];
 			}
 			int selected =[[self.config objectForKey:key] intValue]-1;
 			picker = [[[OptionPicker alloc]initWithOptions:labels

@@ -120,9 +120,9 @@
 "Beep Options" = "Beep-Optionen";
 "Brightness Triggers" = "Helligkeitsauslöser";
 "Calibrate" = "Kalibrieren";
-"Calibrate Current Humidity:" = "Kalibrieren der aktuellen Feuchtigkeit:";
-"Calibrate Current Temperature:" = "Kalibrieren der Aktuelle Temperatur:";
-"Calibrate Current Water-Level/Soil-Moisture:" = "Kalibrieren des aktuellen Wasserstandes / Bodenfeuchte:";
+"Humidity Calibration" = "Kalibrieren der aktuellen Feuchtigkeit";
+"Temperature Calibration" = "Kalibrieren der Aktuelle Temperatur";
+"Water-Level/Moisture Calibration" = "Kalibrieren des Bodenfeuchte";
 "Calibrate Radio" = "Kalibrieren von Frequenz";
 "Calibrating..." = "Kalibrieren...";
 "Camera" = "Kamera";
@@ -364,7 +364,7 @@
 "Post Tweet" = "Post Tweet";
 "Quit" = "Verlassen";
 "Range:" = "Bereich:";
-"Rate Us 5 Starts!" = "Bewerte uns 5 Sterne!";
+"Rate Us 5 Stars!" = "Bewerte uns 5 Star!";
 "Rate Wireless Tag" = "Bewerte WirelessTag";
 "Re-arrange Tag Order" = "WirelessTag neu ordnen";
 "Receive push notifications on iOS/Android devices chosen at 'Phone Options' when the tag is out of range and when it is back in range." = "Empfangen Sie Push-Benachrichtigungen auf iOS / Android-Geräten, die bei 'Phone Options' gewählt wurden, wenn das Tag außerhalb des Bereichs liegt und wenn es wieder in Reichweite ist.";

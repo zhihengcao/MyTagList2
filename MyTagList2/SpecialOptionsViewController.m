@@ -81,12 +81,12 @@
 	CGPoint tapLocation = [recognizer locationInView:textLabel];
 	
 	// init text storage
-	NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:textLabel.attributedText];
-	NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
+	NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithAttributedString:textLabel.attributedText] autorelease];
+	NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
 	[textStorage addLayoutManager:layoutManager];
 	
 	// init text container
-	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(textLabel.frame.size.width, textLabel.frame.size.height+100) ];
+	NSTextContainer *textContainer = [[[NSTextContainer alloc] initWithSize:CGSizeMake(textLabel.frame.size.width, textLabel.frame.size.height+100) ] autorelease];
 	textContainer.lineFragmentPadding  = 0;
 	textContainer.maximumNumberOfLines = textLabel.numberOfLines;
 	textContainer.lineBreakMode        = textLabel.lineBreakMode;
@@ -98,7 +98,8 @@
 							 fractionOfDistanceBetweenInsertionPoints:NULL];
 	//NSLog(@"characterIndex=%uld",characterIndex);
 	if(characterIndex> textLabel.text.length-8){
-		[[[iToast makeText:@"For example, if you set logging interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You may not see more recent temperature on screen unless you manually update, but you may get longer battery life and add more tags at a shorter logging interval to a single tag manager."] setDuration:iToastDurationNormal] show];
+
+		[[[iToast makeText:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life (because it is more efficient to send more data in one transmission), and can add more tags at a shorter logging interval to a single tag manager. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes. "] setDuration:iToastDurationLong] show];
 		recognizer.cancelsTouchesInView=YES;
 	}else{
 		recognizer.cancelsTouchesInView=NO;
@@ -157,6 +158,20 @@
 		}
 		else{
 			_cachePostbackCell.accessoryType = UITableViewCellAccessoryCheckmark;
+
+			if(![[NSUserDefaults standardUserDefaults] boolForKey:@"DisplayedMultipleTransmitWarning"] ){
+				
+				UIAlertView *alert = [[UIAlertView alloc] init];
+				[alert setTitle:@"Please read below to understand what to expect when this option is ON"];
+				[alert setMessage:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life because it is more efficient to send more data in one transmission. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes."];
+				[alert addButtonWithTitle:NSLocalizedString(@"Continue",nil)];
+				[alert setCancelButtonIndex:0];
+				[alert show];
+				[alert release];
+				
+				[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"DisplayedMultipleTransmitWarning"];
+			}
+
 		}
 	}
 	

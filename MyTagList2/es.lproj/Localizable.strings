@@ -118,9 +118,9 @@
 "Beep Options" = "Opciones de Beep";
 "Brightness Triggers" = "Umbral de intensidad del brillo";
 "Calibrate" = "Calibrar";
-"Calibrate Current Humidity:" = "Calibrar la humedad actual:";
-"Calibrate Current Temperature:" = "Calibre la temperatura actual:";
-"Calibrate Current Water-Level/Soil-Moisture:" = "Calibre el nivel de agua/humedad del suelo actual:";
+"Humidity Calibration" = "Calibrar la humedad actual";
+"Temperature Calibration" = "Calibre la temperatura actual";
+"Water-Level/Moisture Calibration" = "Calibre el humedad del suelo";
 "Calibrate Radio" = "Calibrar Radio";
 "Calibrating..." = "Calibrando...";
 "Camera" = "Cámara";
@@ -362,7 +362,7 @@
 "Post Tweet" = "Publicar Tweet";
 "Quit" = "Abandonar";
 "Range:" = "Distancia:";
-"Rate Us 5 Starts!" = "¡Califíquenos con 5 estrellas!";
+"Rate Us 5 Stars!" = "¡Califíquenos con 5 estrellas!";
 "Rate Wireless Tag" = "Califique 'Wireless Tag'";
 "Re-arrange Tag Order" = "Reorganizar el orden de los Sensores Inalámbricos (Tags)";
 "Receive push notifications on iOS/Android devices chosen at 'Phone Options' when the tag is out of range and when it is back in range." = "Recibir notificaciones Push en dispositivos iOS/Android elegidos en 'Opciones de teléfono' cuando el Sensor Inalámbrico (Tag) esté fuera de cobertura y cuando vuelva a su zona de cobertura.";

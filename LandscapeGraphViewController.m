@@ -12,7 +12,6 @@
 
 NSString * const LogScalePrefKey = @"LogScalePrefKey";
 
-#define EPOCH_DIFF 11644473600LL
 
 NSString * const showedGraphLandscapeTooltip = @"showedGraphLandscapeTooltip";
 NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
@@ -45,7 +44,7 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 	
 	[self.chart updateZoomPanMinDate:min MaxDate:max Done:^(){
 		[self enableOrDisableDataRangeLimit];
-		[self.chart.xAxis setRangeWithMinimum:min andMaximum:max withAnimation:YES];
+		[self.chart.xAxis setRangeWithMinimum:min andMaximum:max withAnimation:NO];
 	}];
 }
 
@@ -71,7 +70,7 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 
 			[NSTimer scheduledTimerWithTimeInterval:0.4 block:^{
 				[self enableOrDisableDataRangeLimit];
-				[self.chart.xAxis setRangeWithMinimum:range.minimumAsDate andMaximum:range.maximumAsDate withAnimation:NO];
+				[self.chart.xAxis setRangeWithMinimum:range.minimumAsDate andMaximum:range.maximumAsDate withAnimation:YES];
 			} repeats:NO];
 			
 		}];
@@ -193,6 +192,8 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 
 -(void)viewDidAppear:(BOOL)animated{
 	[super viewDidAppear:animated];
+	[self setSplitViewRatio:0.1];
+
 	self.navigationController.toolbarHidden=YES;
 	//	[self.navigationController.parentViewController toggleMasterVisible:nil];
 	
@@ -230,9 +231,6 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 	}
 }*/
 
-static NSDate* nsdateFromFileTime(int64_t filetime){
-	return [NSDate dateWithTimeIntervalSince1970:((filetime / 10000000) - EPOCH_DIFF)];
-}
 
 // called from detailviewcontroller
 - (id)initPrimaryWithTitle:(NSString*)title andFrame:(CGRect)frame
@@ -291,13 +289,13 @@ static NSDate* nsdateFromFileTime(int64_t filetime){
 			if(_chart.zoomLevel>=ChartZoomLevelNormal){
 				[_chart enteredNormalLevelWithRange:range done:^(){
 
-					[_chart.xAxis setRangeWithMinimum:[_chart.latestDate dateByAddingTimeInterval:-ti] andMaximum:_chart.latestDate withAnimation:YES];
+					[_chart.xAxis setRangeWithMinimum:[_chart.latestDate dateByAddingTimeInterval:-ti] andMaximum:_chart.latestDate withAnimation:NO];
 					
 				}];
 			}else{
 				[_chart enteredRawLevelWithRange:range done:^(){
 					
-					[_chart.xAxis setRangeWithMinimum:[_chart.latestDate dateByAddingTimeInterval:-ti] andMaximum:_chart.latestDate withAnimation:YES];
+					[_chart.xAxis setRangeWithMinimum:[_chart.latestDate dateByAddingTimeInterval:-ti] andMaximum:_chart.latestDate withAnimation:NO];
 				}];
 			}
 			
@@ -359,7 +357,7 @@ static NSDate* nsdateFromFileTime(int64_t filetime){
 	self.view.backgroundColor=[UIColor whiteColor];
 }
 -(void)viewWillAppear:(BOOL)animated{
-	
+
 	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
 		UINavigationBar* bar = self.navigationController.navigationBar;
 		bgImage = bar.backIndicatorImage;
@@ -375,10 +373,43 @@ static NSDate* nsdateFromFileTime(int64_t filetime){
 	//	if([bar respondsToSelector:@selector(setBarTintColor:)])
 	//		bar.barTintColor= [UIColor colorWithWhite:1 alpha:0.4];
 	[UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+	
 	[super viewWillAppear:animated];
 }
+-(void)restoreSplitViewRatio{
+	if(originalSplitViewRatio==0)return;
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+		UISplitViewController* svc = (UISplitViewController*)self.parentViewController.parentViewController;
+		if(	svc.preferredPrimaryColumnWidthFraction!=originalSplitViewRatio){
+
+			//svc.preferredPrimaryColumnWidthFraction=originalSplitViewRatio;
+
+			[NSTimer scheduledTimerWithTimeInterval:0.7 block:^{
+				//[UIView animateWithDuration:0.25f animations:^{
+					svc.preferredPrimaryColumnWidthFraction=originalSplitViewRatio;
+					originalSplitViewRatio=0;
+				//}];
+			} repeats:NO];
+		}
+	}
+}
+-(void)setSplitViewRatio:(float)ratio{
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+		UISplitViewController* svc = (UISplitViewController*)self.parentViewController.parentViewController;
+		originalSplitViewRatio = svc.preferredPrimaryColumnWidthFraction;
+		
+		if(	svc.preferredPrimaryColumnWidthFraction!=ratio){
+			[NSTimer scheduledTimerWithTimeInterval:0.7 block:^{
+//				[UIView animateWithDuration:0.25f animations:^{
+					svc.preferredPrimaryColumnWidthFraction=ratio;
+//				}];
+			} repeats:NO];
+			svc.preferredPrimaryColumnWidthFraction=ratio;
+		}
+	}
+}
 -(void)viewWillDisappear:(BOOL)animated{
-	
+
 	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
 		UINavigationBar* bar = self.navigationController.navigationBar;
 		[bar setBackgroundImage:bgImage  forBarMetrics:UIBarMetricsDefault]; [bgImage release];
@@ -388,8 +419,10 @@ static NSDate* nsdateFromFileTime(int64_t filetime){
 	//		bar.barTintColor= [UIColor colorWithWhite:1 alpha:1];
 	[UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
 	[super viewWillDisappear:animated];
-	
-	if(_chart.askForReview && ![[NSUserDefaults standardUserDefaults] boolForKey:@"AskedForReview1"]){
+
+	[self restoreSplitViewRatio];
+
+	if(_chart.askForReview && ![[NSUserDefaults standardUserDefaults] boolForKey:@"AskedForReview2"]){
 /*		if ([UIAlertController class]) {
 			
 		} else {
@@ -397,16 +430,26 @@ static NSDate* nsdateFromFileTime(int64_t filetime){
 		} 
  */
 		
-		[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Rate Us 5 Starts!",nil)
+/*		[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Rate Us 5 Stars!",nil)
 										message:NSLocalizedString(@"If you enjoy Wireless Tags, would you mind taking a moment to give us a 5 star rating in the App Store? It will only take a minute. Thanks for your support!",nil)
 							cancelButtonItem:[RIButtonItem itemWithLabel:NSLocalizedString(@"Remind me later",nil) action:^{}]
 							otherButtonItems:[RIButtonItem itemWithLabel:NSLocalizedString(@"Rate Wireless Tag",nil) action:^{
 			
 			[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=508973799&pageNumber=0&sortOrdering=1&type=Purple+Software&mt=8" ]];
 			[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"AskedForReview1"];
+ */
+		[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Please Rate This Product",nil)
+									 message:NSLocalizedString(@"If you enjoy Wireless Tag by Cao Gadgets, would you mind taking a moment to give it a 5 star rating? It will only take a minute. Thanks for your support!",nil)
+							cancelButtonItem:[RIButtonItem itemWithLabel:NSLocalizedString(@"Remind me later",nil) action:^{}]
+							otherButtonItems:[RIButtonItem itemWithLabel:NSLocalizedString(@"Rate Wireless Tag",nil) action:^{
+			
+//			[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"https://www.amazon.com/review/create-review/ref=cm_cr_dp_d_wr_but_top?ie=UTF8&channel=glance-detail&asin=B00FE9TEOU" ]];
+			[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"https://www.google.com/search?hl=en-US&gl=us&q=CAO+GADGETS+LLC,+4603,+50+Tesla,+Irvine,+CA+92618&ludocid=1632316189981625371#lrd=0x80dce7df4e54475f:0x16a726ed28f94c1b,3"]];
+			[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"AskedForReview2"];
+
 		}],
 		   [RIButtonItem itemWithLabel:NSLocalizedString(@"No, thanks",nil) action:^{
-			[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"AskedForReview1"];
+			[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"AskedForReview2"];
 		}], nil]autorelease ] show];
 		
 	}

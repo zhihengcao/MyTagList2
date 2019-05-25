@@ -47,11 +47,13 @@ float dewPoint(float RH, float T){
 		AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 	}else{
 		NSString *soundPath =[[NSBundle mainBundle] pathForResource:apns_sound_choices[index] ofType:@"aiff"];
-		NSURL *soundURL = [NSURL fileURLWithPath:soundPath];
-		if(soundURL==nil)return;
-		NSError *error = nil;
-		apnsSoundPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundURL error:&error];
-		[apnsSoundPlayer play];
+		if(soundPath!=nil){
+			NSURL *soundURL = [NSURL fileURLWithPath:soundPath];
+			if(soundURL==nil)return;
+			NSError *error = nil;
+			apnsSoundPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundURL error:&error];
+			[apnsSoundPlayer play];
+		}
 	}
 }
 -(void)dealloc{
@@ -1535,6 +1537,10 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 -(void)setBeep_pc_oor:(BOOL)beep_pc_oor{[self setObject:[NSNumber numberWithBool:beep_pc_oor] forKey:@"beep_pc_oor"];}
 -(BOOL) beep_pc_tts{return [[self objectForKey:@"beep_pc_tts"] boolValue];}
 -(void)setBeep_pc_tts:(BOOL)beep_pc_tts{[self setObject:[NSNumber numberWithBool:beep_pc_tts] forKey:@"beep_pc_tts"];}
+
+-(BOOL) notify_normal{return [[self objectForKey:@"notify_normal"] boolValue];}
+-(void)setNotify_normal:(BOOL)notify_normal{[self setObject:[NSNumber numberWithBool:notify_normal] forKey:@"notify_normal"];}
+
 -(BOOL) beep_pc_tts_oor{return [[self objectForKey:@"beep_pc_tts_oor"] boolValue];}
 -(void)setBeep_pc_tts_oor:(BOOL)beep_pc_tts_oor{[self setObject:[NSNumber numberWithBool:beep_pc_tts_oor] forKey:@"beep_pc_tts_oor"];}
 -(BOOL) beep_pc_vibrate{return [[self objectForKey:@"beep_pc_vibrate"] boolValue];}
@@ -1656,6 +1662,9 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 
 -(int) intervalSec{return [[self objectForKey:@"intervalSec"] intValue];}
 -(void)setIntervalSec:(int)interval{[self setObject:[NSNumber numberWithInt:interval] forKey:@"intervalSec"];}
+
+-(int)th_monitor_interval{return [[self objectForKey:@"th_monitor_interval"] intValue];}
+-(void)setTh_monitor_interval:(int)th_monitor_interval{ [self setObject:[NSNumber numberWithInt:th_monitor_interval] forKey:@"th_monitor_interval"];}
 
 -(int) interval{return [[self objectForKey:@"interval"] intValue];}
 -(void)setInterval:(int)interval{[self setObject:[NSNumber numberWithInt:interval] forKey:@"interval"];}

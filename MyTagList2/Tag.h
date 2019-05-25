@@ -75,6 +75,8 @@ extern NSTimeInterval serverTime2LocalTime;
 @property (nonatomic, readonly) NSString *name;
 @property (nonatomic, readonly) NSString *lastError;
 
+@property (nonatomic, readonly) NSString *uuidFromEventEntry;
+
 
 @property (nonatomic, readonly) NSString *comment;
 @property (nonatomic, readonly) NSString *image_md5;
@@ -111,10 +113,13 @@ extern NSTimeInterval serverTime2LocalTime;
 @property (nonatomic, readonly) BOOL needFreqCal;
 
 @property (nonatomic, readonly) TempEventState tempEventState;
+@property (nonatomic, readonly) TempEventState tempState;
 @property(nonatomic, readonly) NSString* tempEventStateSwatch;
 
 @property (nonatomic, readonly) CapEventState capEventState;
+@property (nonatomic, readonly) CapEventState rhState;
 @property (nonatomic, readonly) LightEventState lightEventState;
+@property (nonatomic, readonly) LightEventState lightState;
 @property(nonatomic, readonly) NSString* capEventStateSwatch;
 @property(nonatomic, readonly) NSString* lightEventStateSwatch;
 
@@ -137,6 +142,7 @@ extern NSTimeInterval serverTime2LocalTime;
 
 @property (nonatomic, readonly) int capRaw;
 @property (nonatomic, readonly) float cap;
+@property (nonatomic, readonly) float capCalOffset;
 
 @property (nonatomic, readonly) int version1;
 @property (nonatomic, readonly) int version2;
@@ -212,4 +218,8 @@ extern NSTimeInterval serverTime2LocalTime;
 
 @property (nonatomic, assign) int v2flag;
 
+@end
+
+@interface NSString (NoCrash)
+-(NSString*)stringByAppendingString:(NSString*)str;
 @end

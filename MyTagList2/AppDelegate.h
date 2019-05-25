@@ -29,6 +29,7 @@
 #import "EventsViewController.h"
 #import "GCDAsyncUdpSocket.h"
 #import "WebViewController.h"
+#import "TrendTableViewController.h"
 //#import <UserNotifications/UserNotifications.h>
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate, MasterViewControllerDelegate, LoginControllerDelegate, DetailViewControllerDelegate, OptionsViewControllerDelegate, TempOptionsViewControllerDelegate, CapOptionsViewControllerDelegate, LightOptionsViewControllerDelegate, AssociationDoneDelegate, RegisterViewControllerDelegate, ScriptConfigViewControllerDelegate, CLLocationManagerDelegate, UIDocumentInteractionControllerDelegate, NSXMLParserDelegate, UIPopoverControllerDelegate>
@@ -42,6 +43,7 @@
 	BOOL logged_in;
 	NotificationJSQueue* _notificationJS_queue;
 	NSMutableArray* comets;
+	BOOL should_run_comet;
 	//AsyncSoapURLConnection* comet;
 	NSTimer* updateTimer;
 	Reachability* hostReach;
@@ -66,6 +68,7 @@
 	AccountOptionsViewController* _opv_ac;
 	OorOptionsViewController* _opv_oor;
 	PhoneOptionsViewController* _opv_phone;
+	UINavigationController* _optnav;
 	BOOL isOS8;
 	UIVisualEffectView *bluredEffectView;
 
@@ -92,6 +95,7 @@
 @property (nonatomic, retain) CLLocationManager *locationManager;
 @property(nonatomic, retain)CLGeocoder* geocoder;
 
+- (NSMutableDictionary*)findTagFromUuid:(NSString*)uuid;
 -(void)reloadTagListWithCompletion:(void (^)())completion;
 -(void)getNextUpdate;
 - (void)stopBeepAllBtnPressed:(id)sender;
@@ -133,12 +137,14 @@
 @property (nonatomic, retain)	SpinnerView* spinner;
 @property (retain, nonatomic) AsyncURLConnection* loginConn;
 @property (strong, nonatomic) UIPopoverController* opv_popov;
+
 @property (strong, nonatomic) UIPopoverController* updateOption_popov;
 @property (strong, nonatomic) UIPopoverController* associate_popov;
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) MasterViewController *mvc;
 @property (strong, nonatomic) DetailViewController *dvc;
 @property(retain, nonatomic) EventsViewController* evc;
+@property(retain, nonatomic) TrendTableViewController* tvc;
 @property (strong, nonatomic) UISplitViewController *splitViewController;
 -(void) updateTagList:(NSMutableArray*)list;
 

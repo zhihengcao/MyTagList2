@@ -296,6 +296,14 @@ NSTimeInterval serverTime2LocalTime = 0.0;
 -(ThermostatState) issuedState{return [[self objectForKey:@"issuedState"] intValue];}
 
 -(NSString*)uuid{return [self stringForKey:@"uuid"];}
+-(NSString*)uuidFromEventEntry{
+	NSString* uuid = [self stringForKey:@"uuid"];
+	if(uuid==nil || uuid.length==0 || (id)uuid==[NSNull null]){
+		uuid = [self stringForKey:@"picture"];
+		return [uuid stringByDeletingPathExtension];
+	}
+	else return uuid;
+}
 
 -(NSString*)mac{ 
 	NSString* mac = [self objectForKey:@"mac"];
@@ -307,6 +315,7 @@ NSTimeInterval serverTime2LocalTime = 0.0;
 
 -(int) capRaw{return [[self objectForKey:@"capRaw"] intValue];}
 -(float) cap{return [[self objectForKey:@"cap"] floatValue];}
+-(float) capCalOffset{return [[self objectForKey:@"capCalOffset"] floatValue];}
 
 -(NSString*)managerName{ 
 	NSString* managerName = [self objectForKey:@"managerName"];
@@ -377,8 +386,12 @@ NSTimeInterval serverTime2LocalTime = 0.0;
 -(BOOL) ds18{return [[self objectForKey:@"ds18"] boolValue];}
 
 -(TempEventState) tempEventState{return [[self objectForKey:@"tempEventState"] intValue];}
+-(TempEventState) tempState{return [[self objectForKey:@"tempState"] intValue];}
 -(CapEventState) capEventState{return [[self objectForKey:@"capEventState"] intValue];}
+-(CapEventState) rhState{return [[self objectForKey:@"rhState"] intValue];}
+
 -(LightEventState) lightEventState{return [[self objectForKey:@"lightEventState"] intValue];}
+-(LightEventState) lightState{return [[self objectForKey:@"lightState"] intValue];}
 
 -(BOOL) shorted{return [[self objectForKey:@"shorted"] boolValue];}
 -(BOOL) rssiMode{return [[self objectForKey:@"rssiMode"] boolValue];}
@@ -567,4 +580,18 @@ NSTimeInterval serverTime2LocalTime = 0.0;
 			return NSLocalizedString(@"All",nil);
 	}
 }
+@end
+
+@implementation NSString (NoCrash)
+
+-(NSString*)stringByAppendingString:(NSString *)str{
+	if(str!=nil && (NSObject*)str!=[NSNull null]){
+		NSMutableString* newStr = [[NSMutableString new] autorelease];
+		[newStr appendString:self];
+		[newStr appendString:str];
+		return newStr;
+	}
+	else return self;
+}
+
 @end

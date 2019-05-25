@@ -15,149 +15,159 @@
 -(void)setUseLogScaleForLight:(BOOL)useLogScaleForLight{
 	if(self.hasALS){
 		if(!_useLogScaleForLight  && useLogScaleForLight){
-			[self replaceYAxis:capAxis withAxis:logAxis];
+			[self replaceYAxis:luxAxis withAxis:logAxis];
 //			[self redrawChartIncludePlotArea:YES];
 		}
 		else if(_useLogScaleForLight  && !useLogScaleForLight){
-			[self replaceYAxis:logAxis withAxis:capAxis];
+			[self replaceYAxis:logAxis withAxis:luxAxis];
 
 //			[self redrawChartIncludePlotArea:YES];
 		}
 	}
 	_useLogScaleForLight=useLogScaleForLight;
 }
+-(void)setup{
+	NSLog(@"SingleTagChart::init begins");
+
+	_useLogScaleForLight = [[NSUserDefaults standardUserDefaults] boolForKey:LogScalePrefKey];
+	
+	self.backgroundColor=[UIColor clearColor];
+	self.clipsToBounds = NO;
+	
+	self.type = TemperatureTypeTranslator.instance;
+	UIFont* labelFont = [UIFont systemFontOfSize:11.0];
+//[self.titleLabel.font fontWithSize:11.0];
+	
+	
+	self.xAxis =[[[TimeOfDayAxis alloc]initWithFont:labelFont forTrend: forTrend]autorelease];
+	self.xAxis.allowPanningOutOfDefaultRange=self.xAxis.allowPanningOutOfMaxRange=YES;
+	if(forTrend){
+		[self.xAxis.labelFormatter.dateFormatter setTimeStyle:NSDateFormatterShortStyle]; //= RecentTrendTimeTickFormatter.instance;
+		self.xAxis.style.lineColor=[UIColor clearColor];
+	}
+	
+	temperatureAxis = [[[SChartNumberAxis alloc] init] autorelease];
+	
+	capAxis = [[SChartNumberAxis alloc] init] ;
+	
+	SChartAxisStyle* tas =temperatureAxis.style;
+	tas.interSeriesSetPadding=@0;
+	tas.majorTickStyle.labelFont = labelFont;
+	tas.majorTickStyle.showTicks=NO; //YES;
+	tas.majorTickStyle.labelColor=[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1];
+	tas.majorTickStyle.tickGap=@-2;
+
+	if(forTrend){
+		temperatureAxis.enableGesturePanning=NO;
+		tas.majorGridLineStyle.showMajorGridLines=NO;
+		tas.lineWidth=@0;
+	}else{
+		temperatureAxis.enableGesturePanning=YES;
+		tas.majorGridLineStyle.showMajorGridLines=YES;
+		tas.lineWidth=@0.5;
+	}
+	temperatureAxis.enableGestureZooming=YES;
+
+	SChartAxisStyle* cas =capAxis.style;
+	cas.lineWidth=@0;
+	cas.interSeriesSetPadding=@0;
+	
+	SChartTickStyle* casmt =cas.majorTickStyle;
+	casmt.labelFont= labelFont;
+	casmt.showTicks=YES;
+	casmt.labelColor=CAPCOLOR; //[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:1];
+	casmt.tickGap=@-5;
+	capAxis.axisPosition = SChartAxisPositionReverse;
+	
+	capAxis.labelFormatString =[CapTypeTranslator.instance labelFormat];
+	temperatureAxis.labelFormatString = @"%.0f°";
+	
+	if(forTrend){
+		capAxis.enableGesturePanning=NO;
+	}else{
+		capAxis.enableGesturePanning=YES;
+		capAxis.majorTickFrequency=@20;
+	}
+	capAxis.enableGestureZooming=YES;
+	
+	
+	self.yAxis = temperatureAxis;
+	
+	
+	self.datasource=self;
+	
+	tempSeries=[[NSMutableArray alloc]init];
+	capSeries=[[NSMutableArray alloc]init];
+
+	rawTempSeries=[[NSMutableArray alloc]init];
+	rawCapSeries=[[NSMutableArray alloc]init];
+	bandCapSeries=[[NSMutableArray alloc]init];
+	bandTempSeries = [[NSMutableArray alloc] init];
+	
+	self.date2DLI=[[[NSMutableDictionary alloc]init] autorelease];
+	NSLog(@"SingleTagChart::init ends");
+}
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+	self = [super initWithCoder:aDecoder];
+	if (self) {
+		forTrend=YES;
+		[self setup];
+	}
+	return self;
+}
 -(id)initWithFrame:(CGRect)frame{
 	self=[super initWithFrame:frame];
 	if(self){
-		_useLogScaleForLight = [[NSUserDefaults standardUserDefaults] boolForKey:LogScalePrefKey];
-		
-		self.type = TemperatureTypeTranslator.instance;
-		UIFont* labelFont = [self.titleLabel.font fontWithSize:10.0];
-		self.xAxis =[[[TimeOfDayAxis alloc]initWithFont:labelFont]autorelease];
-		self.xAxis.allowPanningOutOfDefaultRange=self.xAxis.allowPanningOutOfMaxRange=YES;
-		
-		temperatureAxis = [[[SChartNumberAxis alloc] init] autorelease];
-		
-		capAxis = [[SChartNumberAxis alloc] init] ;
-		
-		//capAxis.rangePaddingHigh = @50;
-		
-		/*batteryVoltAxis=[[[SChartNumberAxis alloc] initWithRange:
-		 [[[SChartNumberRange alloc] initWithMinimum:@2.6 andMaximum:@3.1] autorelease]] autorelease];
-		 batteryVoltAxis.style.lineWidth=@0.5;
-		 batteryVoltAxis.axisPosition = SChartAxisPositionReverse;
-		 #ifndef DEBUG
-		 batteryVoltAxis.width=@27;
-		 #endif
-		 batteryVoltAxis.style.majorTickStyle.tickGap=@-6;
-		 batteryVoltAxis.labelFormatString=[BattTypeTranslator.instance labelFormat];
-		 batteryVoltAxis.style.interSeriesPadding=@0;
-		 batteryVoltAxis.style.majorTickStyle.labelFont= labelFont;
-		 
-		 //batteryVoltAxis.style.majorTickStyle.showTicks=YES;
-		 batteryVoltAxis.majorTickFrequency=@0.1;
-		 */
-		
-		temperatureAxis.style.lineWidth=@0.5;
-		temperatureAxis.style.interSeriesSetPadding=@0;
-		temperatureAxis.style.majorTickStyle.labelFont = labelFont;
-		temperatureAxis.style.majorTickStyle.showTicks=YES;
-		temperatureAxis.style.majorTickStyle.labelColor=[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:1];
-		//temperatureAxis.style.minorTickStyle.showTicks=YES;
-		//temperatureAxis.style.majorTickStyle.lineWidth=@1;
-		//temperatureAxis.style.majorTickStyle.lineLength=@0;
-		//temperatureAxis.style.majorGridLineStyle.showMajorGridLines=YES;
-		//temperatureAxis.style.majorTickStyle.showTicks=YES;
-		//#ifndef DEBUG
-		//temperatureAxis.width=@25;
-		//#endif
-		temperatureAxis.style.majorTickStyle.tickGap=@-2;
-		temperatureAxis.enableGesturePanning=YES;
-		temperatureAxis.enableGestureZooming=YES;
-		//temperatureAxis.style.interSeriesSetPadding=@0;
-		
-		capAxis.style.lineWidth=@0;
-		capAxis.style.interSeriesSetPadding=@0;
-		capAxis.style.majorTickStyle.labelFont= labelFont;
-		capAxis.style.majorTickStyle.showTicks=YES;
-//		capAxis.style.majorTickStyle.lineWidth=@1;
-//		capAxis.style.majorTickStyle.lineLength=@50;
-//		capAxis.style.minorTickStyle.showTicks=YES;
-		capAxis.style.majorTickStyle.labelColor=[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:1];
-		capAxis.axisPosition = SChartAxisPositionReverse;
-		//capAxis.style.majorGridLineStyle.showMajorGridLines=YES;
-		//capAxis.style.majorGridLineStyle.dashedMajorGridLines=YES;
-		
-//		capAxis.allowPanningOutOfMaxRange=YES;
-//		capAxis.allowPanningOutOfDefaultRange=YES;
-		
-//		capAxis.defaultRange =
-//		[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:0.1] andMaximum:[NSNumber numberWithFloat:99.9]] autorelease];
-		capAxis.enableGesturePanning=YES;
-		capAxis.enableGestureZooming=YES;
-		//#ifndef DEBUG
-		//capAxis.width=@30;
-		//#endif
-		capAxis.style.majorTickStyle.tickGap=@-3;
-		
-		//capAxis.style.interSeriesSetPadding=@0;
-		
-		self.yAxis = temperatureAxis;
-
-		//if(!self.dewPointMode)
-		//	[self addYAxis:capAxis];
-		
-		self.datasource=self;
-		
-		tempSeries=[[NSMutableArray alloc]init];
-		capSeries=[[NSMutableArray alloc]init];
-		//battSeries=[[NSMutableArray alloc]init];
-		rawTempSeries=[[NSMutableArray alloc]init];
-		rawCapSeries=[[NSMutableArray alloc]init];
-		bandCapSeries=[[NSMutableArray alloc]init];
-		bandTempSeries = [[NSMutableArray alloc] init];
-		
-		self.date2DLI=[[[NSMutableDictionary alloc]init] autorelease];
+		forTrend=NO;
+		[self setup];
 	}
-	NSLog(@"SingleTagChart::init");
 	return self;
 }
 -(void)setHasALS:(BOOL)hasALS
 {
-	if(hasALS && !_hasALS){
-		
-		logAxis = [[SChartLogarithmicAxis alloc]init];
-		logAxis.axisPosition = SChartAxisPositionReverse;
-		//		logAxis.labelFormatString = [LuxTypeTranslator.instance labelFormat];
-		logAxis.style.lineWidth=@0;
-		logAxis.style.majorTickStyle.tickGap=@-3;
-		logAxis.style.interSeriesSetPadding=@0;
-		logAxis.style.majorTickStyle.labelFont= [self.titleLabel.font fontWithSize:10.0];
-		logAxis.style.majorTickStyle.labelColor=[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:1];
-		logAxis.enableGesturePanning=YES;
-		logAxis.enableGestureZooming=YES;
-		//logAxis.width=@30;
+	if(hasALS && luxAxis==nil){
 
-		logAxis.labelFormatter = [LuxTickFormatter instance];
-//		logAxis.axisLabelsAreFixed=YES;
-		logAxis.width=@30;
-		if(self.allYAxes.count==1){
-			[self addYAxis:_useLogScaleForLight?logAxis:capAxis];
+		luxAxis =[[SChartNumberAxis alloc] init] ;
+		logAxis = [[SChartLogarithmicAxis alloc]init];
+
+		for(SChartAxis *axis in @[luxAxis, logAxis]){
+			axis.axisPosition = SChartAxisPositionReverse;
+			SChartAxisStyle *as = axis.style;
+			as.lineWidth=@0;
+			as.majorTickStyle.tickGap=@-3;
+			as.interSeriesSetPadding=@0;
+			as.majorTickStyle.labelFont= [UIFont systemFontOfSize:11.0]; //[self.titleLabel.font fontWithSize:10.0];
+			as.majorTickStyle.labelColor=LUXCOLOR; //[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:1];
+//			as.majorGridLineStyle.showMajorGridLines=YES;
+			
+			axis.enableGesturePanning=!forTrend;
+			
+			axis.enableGestureZooming=YES;
+			//axis.labelFormatString = @"%.0f";
+			axis.labelFormatter = LuxTickFormatter.instance;
+			
+			//		logAxis.axisLabelsAreFixed=YES;
+			//axis.width=@22;
 		}
-		capAxis.style.majorGridLineStyle.showMajorGridLines=YES;
-		logAxis.style.majorGridLineStyle.showMajorGridLines=YES;
+		
 	}
-	
-	_hasALS=hasALS;
-	if(hasALS){
-		capAxis.labelFormatter = [LuxTickFormatter instance];
-//		capAxis.axisLabelsAreFixed=YES;
-		capAxis.width=@30;
-	}else{
-		capAxis.majorTickFrequency=@20;
-		capAxis.labelFormatString =[CapTypeTranslator.instance labelFormat];
-		temperatureAxis.style.majorGridLineStyle.showMajorGridLines=YES;
+	if(hasALS && !_hasALS){
+		SChartNumberAxis* yaxis =_useLogScaleForLight?logAxis:luxAxis;
+		if(![self.allYAxes containsObject:yaxis]){
+			[self addYAxis:yaxis];
+			NSLog(@"added luxAxis %@", luxAxis);
+		}
+		_hasALS=hasALS;
 	}
+	if(!hasALS && _hasALS){		
+		_hasALS=hasALS;
+		NSLog(@"removing luxAxis %@", luxAxis);
+		SChartNumberAxis* yaxis =_useLogScaleForLight?logAxis:luxAxis;
+		if([self.allYAxes containsObject:yaxis])
+			[self removeYAxis:yaxis];
+	}
+
 	if(hasALS && luxSeries==nil){
 
 		luxSeries = [[NSMutableArray alloc]init];
@@ -171,6 +181,7 @@
 	NSLog(@"SingleTagChart::dealloc");
 	[capAxis release]; capAxis=nil;
 	[logAxis release]; logAxis=nil;
+	[luxAxis release]; luxAxis=nil;
 	[tempSeries release]; tempSeries=nil;
 	[capSeries release]; capSeries =nil;
 	//[battSeries release]; battSeries=nil;
@@ -183,6 +194,7 @@
 	[bandLuxSeries release]; bandLuxSeries=nil;
 	self.date2DLI=nil;
 	[super dealloc];
+	NSLog(@"SingleTagChart::dealloc completes");
 }
 
 -(void)resetNormalData{
@@ -194,29 +206,27 @@
 	[bandLuxSeries removeAllObjects];
 	//[battSeries removeAllObjects];
 }
--(void)initSecondaryAxisMinMax{
-	id<StatTypeTranslator> secondaryAxisT;
-	if(_hasALS){
-		secondaryAxisT = LuxTypeTranslator.instance;
-	}else{
-		secondaryAxisT = CapTypeTranslator.instance;
-	}
-	secondaryAxisMax = [secondaryAxisT ymaxInit];
-	secondaryAxisMin = [secondaryAxisT yminInit];
+-(void)initLuxAxisMinMax{
+	luxAxisMax= LuxTypeTranslator.instance.ymaxInit;
+	luxAxisMin = LuxTypeTranslator.instance.yminInit;
 }
--(void)finishSecondaryAxisMinMax{
-	id<StatTypeTranslator> secondaryAxisT;
-	if(_hasALS){
-		secondaryAxisT = LuxTypeTranslator.instance;
-	}else{
-		secondaryAxisT = CapTypeTranslator.instance;
-	}
-	secondaryAxisMax = [secondaryAxisT ymaxPost:secondaryAxisMax];
-	secondaryAxisMin = [secondaryAxisT yminPost:secondaryAxisMin];
+-(void)initCapAxisMinMax{
+	capAxisMax= CapTypeTranslator.instance.ymaxInit;
+	capAxisMin = CapTypeTranslator.instance.yminInit;
+}
+-(void)finishCapAxisMinMax{
+	capAxisMax = [CapTypeTranslator.instance ymaxPost:capAxisMax];
+	capAxisMin = [CapTypeTranslator.instance yminPost:capAxisMin];
 	
 	capAxis.defaultRange =
-	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:secondaryAxisMin] andMaximum:[NSNumber numberWithFloat:secondaryAxisMax]] autorelease];
-	if(self.hasALS)logAxis.defaultRange= capAxis.defaultRange;
+	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:capAxisMin] andMaximum:[NSNumber numberWithFloat:capAxisMax]] autorelease];
+}
+-(void)finishLuxAxisMinMax{
+	luxAxisMax = [LuxTypeTranslator.instance ymaxPost:luxAxisMax];
+	luxAxisMin = [LuxTypeTranslator.instance yminPost:luxAxisMin];
+	
+	logAxis.defaultRange = luxAxis.defaultRange =
+	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:luxAxisMin] andMaximum:[NSNumber numberWithFloat:luxAxisMax]] autorelease];
 }
 -(void)setRawDataMultipleDays: (NSArray*) dataDays{
 	
@@ -227,26 +237,37 @@
 	TemperatureTypeTranslator* tempT =TemperatureTypeTranslator.instance;
 	ymax2=[tempT ymaxInit];
 	ymin2=[tempT yminInit];
-	[self initSecondaryAxisMinMax];
+	[self initCapAxisMinMax];
+	if(self.hasALS)[self initLuxAxisMinMax];
 	
 	for(NSDictionary* day in dataDays){
 		NSLog(@"processOneDay(%@)", [day objectForKey:@"date"]);
 		[self processOneDay:day baseDate:[MultiDayAxis dateFromString:[day objectForKey:@"date"]] title:nil];
 	}
 
-	if(!self.hasALS){
+//	if(!self.dewPointMode && capSeries.count>0 && ![self.allYAxes containsObject:capAxis])[self addYAxis:capAxis];
+	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
+		if(![self.allYAxes containsObject:capAxis])
+			[self addYAxis:capAxis];
+	}
+	else 	if([self.allYAxes containsObject:capAxis])
+		[self removeYAxis:capAxis];
+
+
+	/*if(!self.hasALS){
 		if(!self.dewPointMode && rawCapSeries.count>0 && self.allYAxes.count==1){
 			[self addYAxis:capAxis];
 		}else if((self.dewPointMode || rawCapSeries.count==0) && self.allYAxes.count==2){
 			[self removeYAxis:capAxis];
 		}
-	}
+	}*/
 
 	ymin2 =[tempT yminPost:ymin2]; ymax2=[tempT ymaxPost:ymax2];
 	temperatureAxis.defaultRange =
 	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:ymin2] andMaximum:[NSNumber numberWithFloat:ymax2]] autorelease];
 
-	[self finishSecondaryAxisMinMax];
+	[self finishCapAxisMinMax];
+	if(self.hasALS)[self finishLuxAxisMinMax];
 	
 	[self reloadData];
 	[self redrawChartIncludePlotArea:YES];
@@ -264,7 +285,9 @@
 	TemperatureTypeTranslator* tempT =TemperatureTypeTranslator.instance;
 	ymax2=[tempT ymaxInit];
 	ymin2=[tempT yminInit];
-	[self initSecondaryAxisMinMax];
+	
+	[self initCapAxisMinMax];
+	if(self.hasALS)[self initLuxAxisMinMax];
 	
 	//NSArray* dataDays =[data objectForKey:@"temps"];
 	
@@ -279,19 +302,31 @@
 		[self processOneDay:day baseDate:baseDate title:nil];
 	}
 	
-	if(!self.hasALS){
+//	if(!self.dewPointMode && capSeries.count>0 && ![self.allYAxes containsObject:capAxis])[self addYAxis:capAxis];
+	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
+		if(![self.allYAxes containsObject:capAxis])
+			[self addYAxis:capAxis];
+	}
+	else 	if([self.allYAxes containsObject:capAxis])
+		[self removeYAxis:capAxis];
+
+	
+	/*if(!self.hasALS){
 		if( !self.dewPointMode && capSeries.count>0 && self.allYAxes.count==1){
 			[self addYAxis:capAxis];
 		}else if( (self.dewPointMode|| capSeries.count==0) && self.allYAxes.count==2){
 			[self removeYAxis:capAxis];
 		}
-	}
+	}*/
+	
 	ymin2 =[tempT yminPost:ymin2]; ymax2=[tempT ymaxPost:ymax2];
 	//temperatureAxis.majorTickFrequency=[NSNumber numberWithFloat:(ymax2-ymin2)/10];
 	temperatureAxis.defaultRange =
 	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:ymin2] andMaximum:[NSNumber numberWithFloat:ymax2]] autorelease];
-	[self finishSecondaryAxisMinMax];
-	
+
+	[self finishCapAxisMinMax];
+	if(self.hasALS)[self finishLuxAxisMinMax];
+
 	if(range!=nil)nDays = [range.maximumAsDate timeIntervalSinceDate:range.minimumAsDate]/3600.0/24.0;
 	
 	if(nDays>24)
@@ -331,6 +366,173 @@
 	}
 	return i;
 }
+
+-(void)showRecentTrendFileTimes:(NSArray*)filetimes Temperatures:(NSArray*)temps Caps:(NSArray*)caps Lux:(NSArray*)lux tempRange:(NSArray*)tempRange capRange:(NSArray*)capRange luxRange:(NSArray*)luxRange dateRange:(NSArray*)dateRangeFiletime eventsToAnnotate:(NSArray*)events{
+	
+	noDynamicLoading=YES;
+	_zoomLevel=ChartZoomLevelRaw;
+	
+	self.earliestDate =nsdateFromFileTime([dateRangeFiletime.firstObject longLongValue]);
+	self.latestDate = nsdateFromFileTime([dateRangeFiletime.lastObject longLongValue]);
+										
+	[self.xAxis setRangeWithMinimum:self.earliestDate	 andMaximum:self.latestDate];
+	
+	//self.xAxis.majorTickFrequency = [SChartDateFrequency dateFrequencyWithMinute:fmaxf(10, floorf([maxDate timeIntervalSinceDate:minDate]/60/4 / 10+0.5)*10.0)];
+
+	[self removeAllAnnotations];
+	[rawTempSeries removeAllObjects];
+	[rawCapSeries removeAllObjects];
+	[rawLuxSeries removeAllObjects];
+	
+	TemperatureTypeTranslator* tempT =TemperatureTypeTranslator.instance;
+	NSMutableArray* annotations = [[NSMutableArray alloc]initWithCapacity:6];
+	if(tempRange){
+		NSNumber* th_low = [TemperatureTypeTranslator.instance preProcess:[tempRange objectAtIndex:0]];
+		NSNumber* th_high = [TemperatureTypeTranslator.instance preProcess:[tempRange objectAtIndex:1]];
+		
+		ymin2 = [th_low floatValue];
+		ymax2 = [th_high floatValue];
+		SChartAnnotationZooming* la = 		[SChartAnnotationZooming horizontalBandAtPosition:th_low andMaxY:@-200 withXAxis:self.xAxis andYAxis:temperatureAxis withColor:[TEMPCOLOR colorWithAlphaComponent:0.05] ];
+		[annotations addObject:la];
+		SChartAnnotationZooming* ha = 		[SChartAnnotationZooming horizontalBandAtPosition:th_high andMaxY:@1000 withXAxis:self.xAxis andYAxis:temperatureAxis withColor:[TEMPCOLOR colorWithAlphaComponent:0.05] ];
+		[annotations addObject:ha];
+	}else{
+		ymax2=[tempT ymaxInit];
+		ymin2=[tempT yminInit];
+	}
+	
+	if(capRange){
+		NSNumber* th_low = [capRange objectAtIndex:0];
+		NSNumber* th_high = [capRange objectAtIndex:1];
+		
+		capAxisMin = [th_low floatValue];
+		capAxisMax = [th_high floatValue];
+		SChartAnnotationZooming* la = 		[SChartAnnotationZooming horizontalBandAtPosition:th_low andMaxY:@0 withXAxis:self.xAxis andYAxis:capAxis withColor:[CAPCOLOR colorWithAlphaComponent:0.05] ];
+		[annotations addObject:la];
+		SChartAnnotationZooming* ha = 		[SChartAnnotationZooming horizontalBandAtPosition:th_high andMaxY:@120 withXAxis:self.xAxis andYAxis:capAxis withColor:[CAPCOLOR colorWithAlphaComponent:0.05] ];
+		[annotations addObject:ha];
+
+	}else{
+		[self initCapAxisMinMax];
+	}
+	if(self.hasALS){
+		
+		if(luxRange){
+			NSNumber* th_low = [luxRange objectAtIndex:0];
+			NSNumber* th_high = [luxRange objectAtIndex:1];
+			
+			luxAxisMin = [th_low floatValue];
+			luxAxisMax = [th_high floatValue];
+			SChartNumberAxis* yaxis = _useLogScaleForLight?logAxis:luxAxis;
+			SChartAnnotationZooming* la = 		[SChartAnnotationZooming horizontalBandAtPosition:th_low andMaxY:@0 withXAxis:self.xAxis andYAxis:yaxis withColor:[LUXCOLOR colorWithAlphaComponent:0.05] ];
+			[annotations addObject:la];
+			SChartAnnotationZooming* ha = 		[SChartAnnotationZooming horizontalBandAtPosition:th_high andMaxY:@1000000 withXAxis:self.xAxis andYAxis:yaxis withColor:[LUXCOLOR colorWithAlphaComponent:0.05] ];
+			[annotations addObject:ha];
+			
+		}else{
+			[self initLuxAxisMinMax];
+		}
+	}
+	
+	for(int i=0;i<filetimes.count;i++){
+		NSNumber* val = [CapTypeTranslator.instance preProcess:[caps objectAtIndex:i]];
+		NSDate* time =nsdateFromFileTime([[filetimes objectAtIndex:i] longLongValue]);
+		if(val){
+			capAxisMax=fmax(capAxisMax, [val floatValue]);
+			capAxisMin=fmin(capAxisMin, [val floatValue]);
+			
+			SChartDataPoint* dataPoint = [[SChartDataPoint new] autorelease];
+			dataPoint.xValue = time;
+			dataPoint.yValue = val;
+			[rawCapSeries addObject:dataPoint];
+		}
+		if(self.hasALS){
+			val = [LuxTypeTranslator.instance preProcess:[lux objectAtIndex:i]];
+			if(val){
+				SChartDataPoint* dataPoint = [[SChartDataPoint new] autorelease];
+				dataPoint.xValue = time;
+				dataPoint.yValue = val;
+				
+				luxAxisMax=fmax(luxAxisMax, [val floatValue]);
+				luxAxisMin=fmin(luxAxisMin, [val floatValue]);
+				
+				[rawLuxSeries addObject:dataPoint];
+			}
+		}
+		val = [TemperatureTypeTranslator.instance preProcess:[temps objectAtIndex:i]];
+		if(val){
+			SChartDataPoint* dataPoint = [[SChartDataPoint new] autorelease];
+			dataPoint.xValue = time;
+			dataPoint.yValue = val;
+			if([self.latestDate timeIntervalSinceDate:dataPoint.xValue]<0)
+				self.latestDate = dataPoint.xValue;
+			
+			ymax2=fmax(ymax2, [val floatValue]);
+			ymin2=fmin(ymin2, [val floatValue]);
+			[rawTempSeries addObject:dataPoint];
+		}
+	}
+	
+	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
+		if(![self.allYAxes containsObject:capAxis])
+			[self addYAxis:capAxis];
+	}
+	else 	if([self.allYAxes containsObject:capAxis])
+		[self removeYAxis:capAxis];
+
+	/*if(!self.hasALS){
+		if(!self.dewPointMode && rawCapSeries.count>0 && self.allYAxes.count==1){
+			[self addYAxis:capAxis];
+		}else if((self.dewPointMode || rawCapSeries.count==0) && self.allYAxes.count==2){
+			[self removeYAxis:capAxis];
+		}
+	}*/
+	
+	ymin2 = floorf(ymin2 / 2 - 0.5) * 2;
+	ymax2 = ceilf(ymax2/2+0.5)*2;
+	temperatureAxis.majorTickFrequency = [NSNumber numberWithFloat:fmax(1.0, (ymax2-ymin2)/4)];
+	temperatureAxis.defaultRange =
+	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:ymin2] andMaximum:[NSNumber numberWithFloat:ymax2]] autorelease];
+	
+	capAxisMin = floorf(capAxisMin / 2 - 0.5) * 2;
+	capAxisMax = ceilf(capAxisMax/2+0.5)*2;
+	capAxis.majorTickFrequency = [NSNumber numberWithFloat:fmax(1.0, (capAxisMax-capAxisMin)/4)];
+	capAxis.defaultRange =
+	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:capAxisMin] andMaximum:[NSNumber numberWithFloat:capAxisMax]] autorelease];
+
+	
+	if(self.hasALS)[self finishLuxAxisMinMax];
+
+	[self reloadData];
+	
+	for(SChartAnnotation* annotation in annotations)
+		[self addAnnotation:annotation];
+	
+	CGAffineTransform rotationTransform = CGAffineTransformRotate(CGAffineTransformIdentity, -M_PI/2);
+	for(NSArray* e in events){
+		NSDate* date =nsdateFromFileTime([[e objectAtIndex:0] longLongValue]);
+/*		SChartAnnotation *line = [SChartAnnotation verticalLineAtPosition:date withXAxis:self.xAxis andYAxis:temperatureAxis withWidth:2.f
+																			 withColor:[UIColor colorWithWhite:0.7 alpha:1.0]];
+		line.position = SChartAnnotationAboveData;
+		[self addAnnotation:line];
+*/
+		SChartAnnotation *eventText = [SChartAnnotation annotationWithText:[e objectAtIndex:1] andFont:[UIFont systemFontOfSize:11.f]
+																	withXAxis:self.xAxis andYAxis:temperatureAxis
+																  atXPosition:date  andYPosition:[NSNumber numberWithFloat:(ymax2+ymin2)/2]
+																withTextColor:[UIColor blackColor]
+														  withBackgroundColor:self.plotAreaBackgroundColor];
+		
+		// rotate the text by 90 degrees
+		eventText.transform = rotationTransform;
+		eventText.position = SChartAnnotationAboveData;
+		[self addAnnotation:eventText];
+	}
+	
+	[annotations release];
+	
+	[self redrawChartIncludePlotArea:YES];
+	//[self redrawChart];
+}
 // must be called from earliest date
 -(float)processOneDay:(NSDictionary *)day baseDate:(NSDate*)baseDate title:(NSMutableString*)title
 {
@@ -356,7 +558,8 @@
 		
 		NSNumber* val = [CapTypeTranslator.instance preProcess:[caps objectAtIndex:i]];
 		if(val){
-			if(self.dewPointMode || self.hasALS){
+//			if(self.dewPointMode || self.hasALS){
+			if(self.dewPointMode){
 				if(self.capIsChipTemperatureMode)
 					val = [TemperatureTypeTranslator.instance preProcess:val];
 				else
@@ -365,17 +568,17 @@
 				ymax2=fmax(ymax2, [val floatValue]);
 				ymin2=fmin(ymin2, [val floatValue]);
 			}else{
-				secondaryAxisMax=fmax(secondaryAxisMax, [val floatValue]);
-				secondaryAxisMin=fmin(secondaryAxisMin, [val floatValue]);
+				capAxisMax=fmax(capAxisMax, [val floatValue]);
+				capAxisMin=fmin(capAxisMin, [val floatValue]);
 			}
 			SChartDataPoint* dataPoint = [[SChartDataPoint new] autorelease];
 			dataPoint.xValue = [NSDate dateWithTimeInterval:(tods? [tods[i] intValue]:3600*i) sinceDate:baseDate];
 			dataPoint.yValue = val;
-			if(tods)
-				[rawCapSeries addObject:dataPoint];
-			else{
+			if(tods){
+				[rawCapSeries addDataPoint:dataPoint];
+			}else{
 				capMax = fmax(capMax, [val floatValue]); capMin=fmin(capMin, [val floatValue]);
-				[capSeries addObject:dataPoint];
+				[capSeries addDataPoint:dataPoint];
 			}
 		}
 		
@@ -387,11 +590,11 @@
 				dataPoint.yValue = val;
 
 				
-				secondaryAxisMax=fmax(secondaryAxisMax, [val floatValue]);
-				secondaryAxisMin=fmin(secondaryAxisMin, [val floatValue]);
+				luxAxisMax=fmax(luxAxisMax, [val floatValue]);
+				luxAxisMin=fmin(luxAxisMin, [val floatValue]);
 
 				if(tods){
-					[rawLuxSeries addObject:dataPoint];
+					[rawLuxSeries addDataPoint:dataPoint];
 					if(i>0){
 						int durationSec =[tods[i] intValue]-[tods[i-1] intValue];
 						float avg_lux = ([[lux objectAtIndex:i] floatValue]+[[lux objectAtIndex:i-1] floatValue])/2.0f;
@@ -399,7 +602,7 @@
 					}
 				}else{
 					luxMax = fmax(luxMax, [val floatValue]); luxMin=fmin(luxMin, [val floatValue]);
-					[luxSeries addObject:dataPoint];
+					[luxSeries addDataPoint:dataPoint];
 					avg+=[val floatValue]*3600*0.0185/1e6;
 				}
 			}
@@ -419,11 +622,11 @@
 			ymin2=fmin(ymin2, [val floatValue]);
 			
 			if(tods){
-				[rawTempSeries addObject:dataPoint];
+				[rawTempSeries addDataPoint:dataPoint];
 				//NSLog(@"added %@", dataPoint.xValue);
 			}else{
 				tempMax = fmax(tempMax, [val floatValue]); tempMin=fmin(tempMin, [val floatValue]);
-				[tempSeries addObject:dataPoint];
+				[tempSeries addDataPoint:dataPoint];
 			}
 		}
 		
@@ -449,20 +652,20 @@
 			capBand.xValue = [baseDate dateByAddingTimeInterval:3600*12];
 			capBand.yValues = [NSMutableDictionary dictionaryWithDictionary:@{SChartBandKeyHigh: [NSNumber numberWithFloat:capMax], SChartBandKeyLow: [NSNumber numberWithFloat:capMin]}];
 //			[bandCapSeries insertObject:capBand atIndex:bandi];
-			[bandCapSeries addObject:capBand];
+			[bandCapSeries addDailyDataPoint:capBand];
 		}
 		if(luxSeries.count>1){
 			SChartMultiYDataPoint* luxBand = [[SChartMultiYDataPoint new] autorelease];
 			luxBand.xValue = [baseDate dateByAddingTimeInterval:3600*12];
 			luxBand.yValues = [NSMutableDictionary dictionaryWithDictionary:@{SChartBandKeyHigh: [NSNumber numberWithFloat:luxMax], SChartBandKeyLow: [NSNumber numberWithFloat:luxMin]}];
 //			[bandLuxSeries insertObject:luxBand atIndex:bandi];
-			[bandLuxSeries addObject:luxBand];
+			[bandLuxSeries addDailyDataPoint:luxBand];
 		}
 		SChartMultiYDataPoint* tempBand = [[SChartMultiYDataPoint new] autorelease];
 		tempBand.xValue = [baseDate dateByAddingTimeInterval:3600*12];
 		tempBand.yValues = [NSMutableDictionary dictionaryWithDictionary:@{SChartBandKeyHigh: [NSNumber numberWithFloat:tempMax], SChartBandKeyLow: [NSNumber numberWithFloat:tempMin]}];
 		//[bandTempSeries insertObject:tempBand atIndex:bandi ];
-		[bandTempSeries addObject:tempBand];
+		[bandTempSeries addDailyDataPoint:tempBand];
 	}
 	return avg;
 }
@@ -478,7 +681,9 @@
 	
 	TemperatureTypeTranslator* tempT =TemperatureTypeTranslator.instance;
 	ymax2=[tempT ymaxInit]; ymin2=[tempT yminInit];
-	[self initSecondaryAxisMinMax];
+	[self initCapAxisMinMax];
+	if(self.hasALS)[self initLuxAxisMinMax];
+
 	
 	float avg = [self processOneDay:statsEachHour baseDate:[TimeOfDayAxis baseDate] title:nil];
 	
@@ -489,19 +694,30 @@
 	}else
 		self.title = [[statsEachHour objectForKey:@"date"] stringByAppendingFormat:@" (Average %.1f°%@)", avg, temp_unit?@"F":@"C" ];
 	
-	if(!self.hasALS){
+	//[self removeYAxis:capAxis];
+	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
+		if(![self.allYAxes containsObject:capAxis])
+			[self addYAxis:capAxis];
+	}
+	else 	if([self.allYAxes containsObject:capAxis])
+			[self removeYAxis:capAxis];
+
+	/*if(!self.hasALS){
 		if(!self.dewPointMode && capSeries.count>0 && self.allYAxes.count==1){
 			[self addYAxis:capAxis];
 		}else if((self.dewPointMode || capSeries.count==0) && self.allYAxes.count==2){
 			[self removeYAxis:capAxis];
 		}
-	}
+	}*/
+	
 	ymin2 =[tempT yminPost:ymin2]; ymax2=[tempT ymaxPost:ymax2];
 	//temperatureAxis.majorTickFrequency=[NSNumber numberWithFloat:(ymax2-ymin2)/10];
 	temperatureAxis.defaultRange =
 	[[[SChartNumberRange alloc] initWithMinimum:[NSNumber numberWithFloat:ymin2] andMaximum:[NSNumber numberWithFloat:ymax2]] autorelease];
-	[self finishSecondaryAxisMinMax];
-	
+
+	[self finishCapAxisMinMax];
+	if(self.hasALS)[self finishLuxAxisMinMax];
+
 	[self reloadData];
 }
 -(void)justShownCompleteDay:(NSDate *)date{
@@ -519,14 +735,24 @@
 }
 - (SChartAxis *)sChart:(ShinobiChart *)chart yAxisForSeriesAtIndex:(NSInteger)index {
 	
-	if(self.hasALS){
+	if(index==0)return temperatureAxis;
+	else if(index==1){
+		if(self.dewPointMode)return temperatureAxis;
+		else return capAxis;
+	}
+	else if(index==2 && _hasALS){
+		return _useLogScaleForLight?logAxis:luxAxis;
+	}else
+		return nil;
+	
+	/*if(self.hasALS){
 		// always has cap.
 		if(index==0 || index==1)return temperatureAxis;
 		else return _useLogScaleForLight?logAxis:capAxis;
 	}else{
 		if(index==0 || self.dewPointMode)return temperatureAxis;
 		else return capAxis;
-	}
+	}*/
 }
 
 - (NSInteger)numberOfSeriesInSChart:(ShinobiChart *)chart {
@@ -559,9 +785,11 @@
 	}else{
 		SChartLineSeries* lineSeries = [[[SChartLineSeries alloc] init] autorelease];
 		lineSeries.style.lineWidth=@2;
-		lineSeries.style.pointStyle.radius=@4;
-		lineSeries.style.pointStyle.innerRadius=@0.5;
 
+		if(!forTrend){
+			lineSeries.style.pointStyle.radius=@4;
+			lineSeries.style.pointStyle.innerRadius=@0.5;
+		}
 		//lineSeries.style.selectedPointStyle.radius=@8;
 		//lineSeries.style.selectedPointStyle.innerRadius=@4;
 
@@ -569,21 +797,21 @@
 		//lineSeries.style.pointStyle.showPoints=YES;
 		if(index==0){
 			lineSeries.title=[TemperatureTypeTranslator.instance name];
-			lineSeries.style.pointStyle.showPoints=(_zoomLevel<ChartZoomLevelNormal);
+			lineSeries.style.pointStyle.showPoints=(!forTrend && _zoomLevel<ChartZoomLevelNormal);
 			
-			lineSeries.style.pointStyle.color= lineSeries.style.lineColor = [UIColor redColor];
+			lineSeries.style.pointStyle.color= lineSeries.style.lineColor = TEMPCOLOR;
 			/*	}else if(index==1){
 			 lineSeries.title=[BattTypeTranslator.instance name];
 			 lineSeries.style.lineColor = [UIColor blueColor];
 			 */	}
 		else if(index==1){
 			lineSeries.title = self.capIsChipTemperatureMode?@"Chip Temperature": [CapTypeTranslator.instance name];
-			lineSeries.style.pointStyle.showPoints=(_zoomLevel<ChartZoomLevelNormal);
-			lineSeries.style.pointStyle.color= lineSeries.style.lineColor = [UIColor colorWithRed:0 green:0.5 blue:0 alpha:1];
+			lineSeries.style.pointStyle.showPoints=(!forTrend && _zoomLevel<ChartZoomLevelNormal);
+			lineSeries.style.pointStyle.color= lineSeries.style.lineColor = CAPCOLOR;
 		}else{
 			lineSeries.title = [LuxTypeTranslator.instance name];
-			lineSeries.style.pointStyle.showPoints=(_zoomLevel<ChartZoomLevelNormal);
-			lineSeries.style.pointStyle.color= lineSeries.style.lineColor =[UIColor colorWithRed:(float)0x60/255.0 green:(float)0xa0/255.0 blue:(float)0xdf/255.0 alpha:1];
+			lineSeries.style.pointStyle.showPoints=(!forTrend && _zoomLevel<ChartZoomLevelNormal);
+			lineSeries.style.pointStyle.color= lineSeries.style.lineColor =LUXCOLOR;
 		}
 		//lineSeries.crosshairEnabled=YES;
 		return lineSeries;

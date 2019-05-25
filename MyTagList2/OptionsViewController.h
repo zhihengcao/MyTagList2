@@ -44,6 +44,7 @@ static NSString* rnc_timespan_choices[]= {@"Just once", @"Every 10 minute",@"Eve
 @property (nonatomic) BOOL beep_pc_loop;
 @property (nonatomic) BOOL beep_pc_oor;
 @property (nonatomic) BOOL beep_pc_tts;
+@property (nonatomic) BOOL notify_normal;
 @property (nonatomic) BOOL beep_pc_tts_oor;
 @property (nonatomic) BOOL beep_pc_vibrate;
 @property (nonatomic) BOOL beep_pc_vibrate_oor;
@@ -59,6 +60,7 @@ static NSString* rnc_timespan_choices[]= {@"Just once", @"Every 10 minute",@"Eve
 @property (nonatomic, retain) NSString *email;
 @property (nonatomic, retain) NSString *email_oor;
 @property (nonatomic) int interval; // 1,2,3,4,5
+@property (nonatomic) int th_monitor_interval;
 @property (nonatomic) int intervalSec;
 
 @property (nonatomic, retain) NSArray *mobile_notifications; //: [{uuid:ffffffff-fdec-c798-ffff-ffffca2cbb0c, name:LG-P350a, disabled:false}]

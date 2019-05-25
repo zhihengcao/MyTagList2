@@ -103,8 +103,8 @@
 	NSUInteger i = light_scale.range_index;
 	light_range.slider.maximumValue = max_range_values[i];
 	light_range.slider.minimumValue = min_range_values[i];
-	light_range.slider.minimumRange =(max_range_values[i]-min_range_values[i])/200;
-	light_range.slider.stepSize = (max_range_values[i]-min_range_values[i])/2000;
+	light_range.slider.minimumRange =(max_range_values[i])/200;
+	light_range.slider.stepSize = (max_range_values[i])/2000;
 
 	[light_range sliderValueChanged:nil];
 	
@@ -131,11 +131,13 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 	self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemSave
 																						   target:self action:@selector(navbarSave)] autorelease];
 	
+	light_range.slider.forceInRange=NO;
 	light_range.slider.selectedMaximumValue =c.lux_th_high;
 	light_range.slider.selectedMinimumValue=c.lux_th_low;
-
+	light_range.slider.currentValue = tag.lux;
+	
 	for(int i=0;i<sizeof(min_range_values)/sizeof(float);i++){
-		if(min_range_values[i]<=c.lux_th_low && max_range_values[i]>c.lux_th_high){
+		if(min_range_values[i]<=c.lux_th_low && max_range_values[i]>c.lux_th_low){
 			light_scale.range_index = i;
 			[self updateLightRangeSlider];
 			break;
@@ -153,7 +155,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 		
 	int selected=1;
 	for(int i=0;i<sizeof(monitor_interval_choices)/sizeof(int);i++)
-		if(monitor_interval_choices[i]== c.interval){
+		if(monitor_interval_choices[i]== c.th_monitor_interval){
 			selected=i; break;
 		}
 	interval.textField.text =[[self monitor_interval_labels] objectAtIndex:selected];
@@ -375,14 +377,14 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 			
 			int selected=1;
 			for(int i=0;i<sizeof(monitor_interval_choices)/sizeof(int);i++)
-				if(monitor_interval_choices[i]== self.config.interval){
+				if(monitor_interval_choices[i]== self.config.th_monitor_interval){
 					selected=i; break;
 				}
 			picker = [[[OptionPicker alloc]initWithOptions:[self monitor_interval_labels]
 												  Selected:selected
 													  Done:^(NSInteger selected_new, BOOL now){
 														  interval.textField.text =[[self monitor_interval_labels] objectAtIndex:selected_new];
-														  self.config.interval = monitor_interval_choices[selected_new];
+														  self.config.th_monitor_interval = monitor_interval_choices[selected_new];
 														  enhanced_monitoring_option_changed=(selected_new!=selected);
 													  } helpText:NSLocalizedString(@"Choose a shorter value to sample brightness more frequently, with a slightly reduced battery life. Measurement are not transmitted (which costs battery life) until after crossing a threshold boundary (for the specified number of times).",nil)] autorelease];
 			

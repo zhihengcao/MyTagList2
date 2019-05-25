@@ -21,7 +21,7 @@
 typedef void (^categoryPickerDoneBlock_t)(NSInteger selected, NSString* name, SnippetCategoryCell* sender);
 
 @interface SnippetCategoryCollectionViewController : UICollectionViewController<UICollectionViewDelegateFlowLayout>
-@property (nonatomic, retain) NSArray* categoryIcons, *titleTexts;
+@property (nonatomic, retain) NSArray* categoryIcons, *titleTexts, *categoryIds;
 @property(nonatomic,copy)categoryPickerDoneBlock_t done;
 
 - (id)initWithDoneBlock:(categoryPickerDoneBlock_t) done;

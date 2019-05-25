@@ -13,7 +13,10 @@
 
 @synthesize disclosureIndicatorImageView=_disclosureIndicatorImageView, expansionStyle=_expansionStyle;
 
-
+-(void)dealloc{
+	self.disclosureIndicatorImageView=nil;
+	[super dealloc];
+}
 + (GHCollapsingAndSpinningTableViewCell*)newWithStyle:(UIExpansionStyle)style {
 	GHCollapsingAndSpinningTableViewCell* cell =  [[GHCollapsingAndSpinningTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"GHCollapsingAndSpinningTableViewCell"];
 	[cell setExpansionStyle:style animated:NO];

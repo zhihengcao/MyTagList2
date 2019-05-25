@@ -1,5 +1,5 @@
 #import "EventsViewController.h"
-#import "NSTimer+Blocks.h"
+
 
 extern int64_t getfiletime(void);
 
@@ -23,27 +23,21 @@ int64_t getfiletime(void)
 @end
 @implementation TopPagingViewController
 @synthesize mvc=_mvc,evc=_evc, pcDots=_pcDots;
-@synthesize mvc_left, mvc_right, evc_left, evc_right, tvc_left, tvc_right;
+@synthesize mvc_left, mvc_right, evc_left, evc_right;
 
--(id)initWithMvc:(MasterViewController*)mvc andEvc:(EventsViewController*)evc andTvc:(TrendTableViewController *)tvc{
+-(id)initWithMvc:(MasterViewController*)mvc andEvc:(EventsViewController*)evc{
 	self= [super initWithTransitionStyle:UIPageViewControllerTransitionStyleScroll navigationOrientation:UIPageViewControllerNavigationOrientationHorizontal
 								 options:nil];
 	if(self){
 		self.mvc = mvc;
-		self.evc_left= mvc.navigationItem.leftBarButtonItem;   // logout
-		self.tvc_right = tvc.navigationItem.rightBarButtonItem;  // rearrange
-		self.mvc_right= [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Trends",nil) style:UIBarButtonItemStylePlain
-														 target:self action:@selector(openTvc:)] autorelease];
+		self.evc_left=mvc.navigationItem.leftBarButtonItem;
+		self.mvc_right=mvc.navigationItem.rightBarButtonItem;
 		self.evc_right  = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Tags",nil) style:UIBarButtonItemStylePlain
 																	   target:self action:@selector(openMvc:)] autorelease];
-		self.tvc_left  = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Tags",nil) style:UIBarButtonItemStylePlain
-														   target:self action:@selector(openMvcLeft:)] autorelease];
 		self.mvc_left =[[[UIBarButtonItem alloc] initWithTitle: NSLocalizedString(@"Events",nil) style:UIBarButtonItemStylePlain
 												  target:self action:@selector(openEvc:)] autorelease];
 		mvc.topPVC = self;
-		tvc.topPVC = self;
 		self.evc=evc;
-		self.tvc = tvc;
 		evc.topPVC = self;
 		self.dataSource = self;
 		self.delegate=self;
@@ -60,21 +54,15 @@ int64_t getfiletime(void)
 -(void)dealloc{
 	self.mvc=nil;
 	self.evc=nil;
-	self.tvc=nil;
 	self.evc_right=nil;
 	self.evc_left=nil;
 	self.mvc_right=nil;
 	self.mvc_left=nil;
-	self.tvc_left=nil;
-	self.tvc_right=nil;
 	self.pcDots=nil;
 	[super dealloc];
 }
 -(BOOL)isTagManagerChoiceVisible{
-	return self.navigationController.topViewController==self && (_pcDots.currentPage>=1);
-}
--(BOOL)isMVCVisible{
-	return self.navigationController.topViewController==self && (_pcDots.currentPage==1);
+	return self.navigationController.topViewController==self && _pcDots.currentPage>=1;
 }
 -(UINavigationItem*)navigationItem{
 	return _mvc.navigationItem;
@@ -86,10 +74,10 @@ int64_t getfiletime(void)
 	return _mvc.toolbarItems;
 }*/
 
-/*-(void)openMvcNoAnimation{
+-(void)openMvcNoAnimation{
 	[self setViewControllers:@[_mvc] direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:nil];
 	[self setMvcBar];
-}*/
+}
 /*-(void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration{
     CGSize navBarSize = self.navigationController.navigationBar.bounds.size;
 	CGRect f = self.pcDots.frame;
@@ -104,12 +92,10 @@ int64_t getfiletime(void)
 -(void)viewDidLoad{
 	[super viewDidLoad];
 
-	
 	//self.automaticallyAdjustsScrollViewInsets = false;
 	//[[self view] setFrame:CGRectMake(0, 0, [[self view] bounds].size.width, [[self view] bounds].size.height + 37)];
-	//[self openMvcNoAnimation];
-	[self setViewControllers:@[_mvc] direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:nil];
-
+	[self openMvcNoAnimation];
+	
 	UINavigationController *navController = self.navigationController;
     CGSize navBarSize = navController.navigationBar.bounds.size;
     CGPoint origin = CGPointMake( navBarSize.width/2, navBarSize.height*5.0/6.0 );
@@ -119,68 +105,23 @@ int64_t getfiletime(void)
 	//[UIPageControl appearance].currentPageIndicatorTintColor =[UIColor colorWithRed:1.0 green:(float)0x6b/(float)0xff blue:(float)0x5f/(float)0xff alpha:1];
 	[UIPageControl appearance].pageIndicatorTintColor = [UIColor colorWithRed:0.6 green:0.6 blue:0.6 alpha:0.25];
 	[UIPageControl appearance].currentPageIndicatorTintColor =[UIColor colorWithRed:0.6 green:0.6 blue:0.6 alpha:1];
-    [_pcDots setNumberOfPages:3];
-
+    [_pcDots setNumberOfPages:2];
+	[_pcDots setCurrentPage:1];
     [navController.navigationBar addSubview:_pcDots];
 }
--(void)restorePreviousPage{
-	id topPage = [[NSUserDefaults standardUserDefaults] objectForKey:@"TopPage"];
-	NSLog(@"Loading previously selected topPage=%@", topPage);
-	
-	if(topPage!=nil && [topPage integerValue]==2){
-		[self setViewControllers:@[_tvc] direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:^(BOOL finished){
-			if(finished)	[self setTvcBar];
-		}];
-		
-	}else if(topPage!=nil && [topPage integerValue]==0){
-		[self setViewControllers:@[_evc] direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:^(BOOL finished){
-			if(finished)[self setEvcBar];
-		}];
-		
-	}else{
-		[self setViewControllers:@[_mvc] direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:^(BOOL finished){
-			if(finished){
-				[self setMvcBar];
-			}
-		}];
-	}
-
-}
 -(void)openEvc:(id)sender{
+	
 	[self setViewControllers:@[_evc] direction:UIPageViewControllerNavigationDirectionReverse animated:YES completion:^(BOOL finished){
-		if(finished)[self setEvcBar];
 	}];
+	[self setEvcBar];
 }
 -(void)openMvc:(id)sender{
 	[self setViewControllers:@[_mvc] direction:UIPageViewControllerNavigationDirectionForward animated:YES completion:^(BOOL finished){
-		if(finished)[self setMvcBar];
 	}];
+	[self setMvcBar];
 }
--(void)openMvcLeft:(id)sender{
-	[self setViewControllers:@[_mvc] direction:UIPageViewControllerNavigationDirectionReverse animated:YES completion:^(BOOL finished){
-		if(finished)[self setMvcBar];
-	}];
-}
--(void)openTvc:(id)sender{
-	[self setViewControllers:@[_tvc] direction:UIPageViewControllerNavigationDirectionForward animated:YES completion:^(BOOL finished){
-		if(finished)	[self setTvcBar];
-	}];
-}
--(void)setTvcBar{
 
-	[_pcDots setCurrentPage:2];
-	[self.navigationController setToolbarHidden:YES animated:NO];
-	
-	self.navigationItem.title=_tvc.title;
-	
-	self.navigationItem.leftBarButtonItem = tvc_left;
-	self.navigationItem.rightBarButtonItem = tvc_right;
-
-	[[NSUserDefaults standardUserDefaults]setInteger:2 forKey:@"TopPage"];
-}
 -(void)setEvcBar{
-
-	
 	[_pcDots setCurrentPage:0];
 	[self.navigationController setToolbarHidden:YES animated:NO];
 	
@@ -193,24 +134,12 @@ int64_t getfiletime(void)
 																				blue:(float)0x5f/(float)0xff alpha:1];
 		[self.navigationController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor]];
 		self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
-	} completion:nil];
-	
-	[[NSUserDefaults standardUserDefaults]setInteger:0 forKey:@"TopPage"];
-
+	} completion:^(BOOL finished) {
+	}];
 	
 //	self.navigationItem.leftBarButtonItem =
 }
 -(void)setMvcBar{
-
-	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
-		UISplitViewController* svc = (UISplitViewController*)self.navigationController.parentViewController;
-		[NSTimer scheduledTimerWithTimeInterval:0.5 block:^{
-			
-			[UIView animateWithDuration:0.25f animations:^{
-				svc.preferredPrimaryColumnWidthFraction=0.4f;
-			}];
-		} repeats:NO];
-	}
 	[_pcDots setCurrentPage:1];
 	
 	[self.navigationController setToolbarHidden:NO animated:NO];
@@ -226,42 +155,31 @@ int64_t getfiletime(void)
 	} completion:^(BOOL finished) {
 	}];
 
-	[[NSUserDefaults standardUserDefaults]setInteger:1 forKey:@"TopPage"];
-
 }
 - (void)pageViewController:(UIPageViewController *)pageViewController didFinishAnimating:(BOOL)finished previousViewControllers:(NSArray *)previousViewControllers transitionCompleted:(BOOL)completed{
 
 	if(!completed)return;
 	if([previousViewControllers objectAtIndex:0]==_mvc){
-		if(swipingToTVC)
-			[self setTvcBar];
-		else
-			[self setEvcBar];
+		[self setEvcBar];
 	}else{
 		[self setMvcBar];
 	}
 }
--(void)pageViewController:(UIPageViewController *)pageViewController willTransitionToViewControllers:(NSArray<UIViewController *> *)pendingViewControllers{
-	if([pendingViewControllers objectAtIndex:0]==_tvc)swipingToTVC=YES;
-	else swipingToTVC=NO;
-}
+
 - (UIViewController *)pageViewController:(UIPageViewController *)pageViewController viewControllerBeforeViewController:(UIViewController *)viewController {
     if(viewController==_mvc){
 		return _evc;
 	}
-	else if(viewController==_tvc){
-		return _mvc;
-	}else
+	else{
 		return nil;
+	}
 }
 
 - (UIViewController *)pageViewController:(UIPageViewController *)pageViewController viewControllerAfterViewController:(UIViewController *)viewController {
 	if(viewController==_evc){
 		return _mvc;
 	}
-	else if(viewController==_mvc){
-		return _tvc;
-	}else{
+	else{
 		return nil;
 	}
 }
@@ -280,42 +198,20 @@ int64_t getfiletime(void)
 		self.title=@"Event History";
 		_dates=[NSMutableArray new];
 		_events=[NSMutableArray new];
-		_uuid2events = [NSMutableDictionary new];
 		_filteredEvents=[NSMutableArray new];
 		olderThan = getfiletime();
 	}
 	return self;
 }
--(void)reloadFromServer{
+-(void)reload{
 	[_events removeAllObjects];
-	[_uuid2events removeAllObjects];
 	[_filteredEvents removeAllObjects];
 	[_dates removeAllObjects];
 	[self.tableView reloadData];
 	if(searchWasActive)
 		[self.searchDisplayController.searchResultsTableView reloadData];
-
 	olderThan = getfiletime();
 	_loader(self, olderThan,32);
-}
--(void)reload{
-	if(self.isVisible)
-		[self reloadFromServer];
-	else{
-		[_events removeAllObjects];
-		[_uuid2events removeAllObjects];
-	}
-}
--(void)removeEvents{
-	[_events removeAllObjects];
-	[_uuid2events removeAllObjects];
-	[_filteredEvents removeAllObjects];
-	[_dates removeAllObjects];
-}
--(void)viewWillAppear:(BOOL)animated{
-	if(_events.count==0)
-		[self reloadFromServer];
-	[super viewWillAppear:animated];
 }
 - (void)scrollViewDidScroll:(UIScrollView *)aScrollView {
 	if(!runLoader)return;
@@ -349,8 +245,6 @@ int64_t getfiletime(void)
 //	[self.tableView beginUpdates];
 	
 	for(NSMutableDictionary* entry in events1D) {
-
-		[self addToMotionEventTable:entry];
 
 		NSDate* timestamp = [NSDate dateWithTimeIntervalSince1970:((
 																	[[entry objectForKey:@"filetime"]longLongValue] / 10000000) - EPOCH_DIFF)];
@@ -392,20 +286,6 @@ int64_t getfiletime(void)
 	if(searchWasActive)[self.searchDisplayController.searchResultsTableView reloadData];
 	
 }
--(void)addToMotionEventTable:(NSMutableDictionary*)entry
-{
-	if([[entry objectForKey:@"sensorType"] intValue]==0){  // Motion events
-		NSString* uuid = entry.uuidFromEventEntry;
-		if(uuid){
-			NSMutableArray* motionEvents = [_uuid2events objectForKey:uuid];
-			if(!motionEvents){
-				motionEvents=[[NSMutableArray new]autorelease];
-				[_uuid2events setObject:motionEvents forKey:uuid];
-			}
-			[motionEvents addObject:@[[entry objectForKey:@"filetime"], [entry objectForKey:@"eventText"]]];
-		}
-	}
-}
 -(void)appendEvents:(NSArray *)events1D{
 	
 	if(self.refreshControl.refreshing)
@@ -415,8 +295,6 @@ int64_t getfiletime(void)
 	[self.tableView beginUpdates];
 	
 	for(NSMutableDictionary* entry in events1D) {
-		[self addToMotionEventTable:entry];
-		
 		olderThan =[[entry objectForKey:@"filetime"] longLongValue];
 		NSDate* timestamp = [NSDate dateWithTimeIntervalSince1970:((
 																	olderThan / 10000000) - 11644473600)];
@@ -485,12 +363,21 @@ int64_t getfiletime(void)
     // create a filtered list that will contain products for the search results table.
 	_filteredEvents = [[NSMutableArray arrayWithCapacity:[_events count]] retain];
 	
-	if (self.savedSearchTerm)
+	
+	self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+	self.searchController.searchResultsUpdater = self;
+	self.searchController.dimsBackgroundDuringPresentation = NO;
+	self.searchController.searchBar.delegate = self;
+	self.tableView.tableHeaderView = self.searchController.searchBar;
+	self.definesPresentationContext = YES;
+	[self.searchController.searchBar sizeToFit];
+	
+/*	if (self.savedSearchTerm)
 	{
         [self.searchDisplayController setActive:searchWasActive];
         [self.searchDisplayController.searchBar setText:self.savedSearchTerm];
     }
-	
+	*/
 //	[self.tableView reloadData];
 	
 }
@@ -501,7 +388,6 @@ int64_t getfiletime(void)
 	self.savedSearchTerm=nil;
 	self.loader=nil;
 	self.newLoader=nil;
-	self.uuid2events=nil;
 	[super dealloc];
 }
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -521,25 +407,29 @@ int64_t getfiletime(void)
 
 #pragma mark - Table view data source
 
+-(void)updateSearchResultsForSearchController:(UISearchController *)searchController{
+	NSString *searchString = self.searchController.searchBar.text;
+	
+	[self filterListBySearchText:searchString];
+	searchWasActive=YES;
+
+	
+	[self.tableView reloadData];
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	if (tableView == self.searchDisplayController.searchResultsTableView)
-	{
+	if(self.searchController.active){
         return [_filteredEvents count];
     }
 	else
 		return [_events count];
 }
--(NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
-	return [_dates objectAtIndex:section];
-}
 
 - (NSInteger)tableView:(UITableView *)tableView  numberOfRowsInSection:(NSInteger)section
 {
-	if (tableView == self.searchDisplayController.searchResultsTableView)
-	{
+	if(self.searchController.active)
         return [[_filteredEvents objectAtIndex:section] count];
-    }
 	else
 		return [[_events objectAtIndex:section ] count];
 }
@@ -560,17 +450,11 @@ int64_t getfiletime(void)
     }
 	
 	NSDictionary *event;
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if(self.searchController.active)
 	{
-		if(indexPath.section >= _filteredEvents.count)return cell;
-		NSArray* s = [_filteredEvents objectAtIndex:indexPath.section];
-		if(indexPath.row >= s.count)return cell;
-        event = [s objectAtIndex:indexPath.row];
+        event = [[_filteredEvents objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     }else{
-		if(indexPath.section >= _events.count)return cell;
-		NSArray* s =[_events objectAtIndex:indexPath.section];
-		if(indexPath.row >= s.count)return cell;
-		event = [s objectAtIndex:indexPath.row];
+		event = [[_events objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
 	}
 	[cell setEventEntry:event];
     return cell;
@@ -591,6 +475,7 @@ int64_t getfiletime(void)
 	return 56.0;
 	
 }
+/*
 -(BOOL)shouldAddToFilteredList:(NSDictionary*) event{
 	NSString *tagName = [event objectForKey:@"tagName"];
 	NSString *eventName = [event objectForKey:@"eventText"];
@@ -605,12 +490,14 @@ int64_t getfiletime(void)
 	}
 	return NO;
 }
+ */
 #pragma mark UISearchDisplayController Delegate Methods
 - (void)filterListBySearchText:(NSString*)searchText
 {
+
+	
 	[_filteredEvents removeAllObjects]; // First clear the filtered array.
 	self.savedSearchTerm=searchText;
-	
 	for (int i=0;i<_events.count;i++)
 	{
 		NSArray* eventsDay = [_events objectAtIndex:i];

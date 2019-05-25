@@ -85,7 +85,7 @@ static const char kBundleKey = 0;
 @synthesize splitViewController = _splitViewController;
 @synthesize mvc = _mvc;
 @synthesize dvc = _dvc;
-@synthesize evc=_evc;
+@synthesize evc=_evc, tvc=_tvc;
 @synthesize opv_popov=_opv_popov, associate_popov=_associate_popov;
 @synthesize updateOption_popov=_updateOption_popov;
 @synthesize loginConn = _loginConn, loginEmail=_loginEmail;
@@ -233,6 +233,7 @@ static const char kBundleKey = 0;
 	self.mvc=nil;
 	self.dvc=nil;
 	self.evc=nil;
+	self.tvc=nil;
 	self.freqTols=nil;
 	[_splitViewController release];
 	[_opv_popov release];
@@ -290,6 +291,27 @@ static const char kBundleKey = 0;
 - (void)stopBeepAllBtnPressed:(id)sender
 {
 	[self all_tag_action:@"StopBeepAll" withArgs:@"autoRetry: true" btn:sender];	
+}
+-(void)helpBtnPressed:(id)sender
+{
+	ActionSheet_Blocks *sheet = [[ActionSheet_Blocks alloc] init];
+	[sheet addButtonWithTitle:NSLocalizedString(@"Support Portal",nil) block:^(NSInteger index){
+		[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"https://mytaglist.com/eth/tickets.html#getHelpPage" ]];
+	}];
+	[sheet addButtonWithTitle:NSLocalizedString(@"Tutorial",nil) block:^(NSInteger index){
+		[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"http://mytaglist.com/iosapp.html" ]];
+	}];
+	[sheet addButtonWithTitle:NSLocalizedString(@"FAQ",nil) block:^(NSInteger index){
+		[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"http://store.wirelesstag.net/pages/support" ]];
+	}];
+	[sheet addButtonWithTitle:NSLocalizedString(@"Forum",nil) block:^(NSInteger index){
+		[[UIApplication sharedApplication] openURL: [NSURL URLWithString: @"https://groups.google.com/forum/?fromgroups#!forum/wireless-sensor-tags" ]];
+	}];
+	[sheet addCancelButtonWithTitle:NSLocalizedString(@"Cancel",nil)];
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) [sheet showFromBarButtonItem:sender viewToBlur:_splitViewController.view];
+	else [sheet showInView:[self window]];
+	[sheet release];
+
 }
 - (void)armAllBtnPressed:(id)sender
 {
@@ -398,8 +420,11 @@ static const char kBundleKey = 0;
 
 -(void)doLogout:(id)sender{
 	[_mvc showLoadingBarItem:sender];
+	
 	[AsyncURLConnection request:[WSROOT stringByAppendingString:@"ethClient.asmx/SignOut"]
 					 jsonString:nil completeBlock:^(NSDictionary* retval){
+						 [_evc removeEvents];
+						 [_tvc removeData];
 						 [_mvc revertLoadingBarItem:sender];
 						 [self stopComet];
 						 [updateTimer invalidate];
@@ -523,11 +548,11 @@ static const char kBundleKey = 0;
 		[self enqueueNotificationJSForTag:tag];
 	
 	[_mvc setTagList:list];
-	if(list.count==0){
+	if(list.count==0 && _mvc.topPVC.isMVCVisible){
 		if(tutorialView==nil){
 			tutorialView = [[UIView alloc]initWithFrame:self.window.bounds];
 			UIImageView* iv = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tutorial.png"]] autorelease];
-			iv.frame=CGRectMake(_mvc.view.frame.size.width-iv.frame.size.width, [UIApplication sharedApplication].statusBarFrame.size.height, iv.frame.size.width, iv.frame.size.height);
+			iv.frame=CGRectMake(_mvc.view.frame.size.width-iv.frame.size.width-25, [UIApplication sharedApplication].statusBarFrame.size.height+THUMB_HEIGHT, iv.frame.size.width, iv.frame.size.height);
 			tutorialView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
 			[tutorialView addSubview:iv];
 			[tutorialView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tutorialViewTapped)] autorelease]];
@@ -725,8 +750,11 @@ static const char kBundleKey = 0;
 	
 	[wv loadRequest:req WithCompletion:^{
 		[btncell revertLoading];
-		if(_opv_popov) {
-			[(UINavigationController*)_opv_popov.contentViewController pushViewController2:wv];
+		if(_optnav) {
+			[_optnav pushViewController2:wv];
+			if([_optnav respondsToSelector:@selector(setPreferredContentSize:)])
+				_optnav.preferredContentSize= CGSizeMake(760, 700);
+
 		}else{
 			[(UINavigationController*)self.window.rootViewController pushViewController2:wv];
 		}
@@ -745,8 +773,11 @@ static const char kBundleKey = 0;
 	
 	[wv loadRequest:req WithCompletion:^{
 		[btncell revertLoading];
-		if(_opv_popov) {
-			[(UINavigationController*)_opv_popov.contentViewController pushViewController2:wv];
+		if(_optnav) {
+			[_optnav pushViewController2:wv];
+			if([_optnav respondsToSelector:@selector(setPreferredContentSize:)])
+				_optnav.preferredContentSize= CGSizeMake(720, 700);
+
 		}else{
 			[(UINavigationController*)self.window.rootViewController pushViewController2:wv];
 		}
@@ -768,8 +799,8 @@ static const char kBundleKey = 0;
 					
 					  WebViewController* wv = [[[WebViewController alloc]initWithTitle:NSLocalizedString(@"Twitter Login",nil)] autorelease];
 					  
-					  if(_opv_popov) {
-						  [(UINavigationController*)_opv_popov.contentViewController pushViewController2:wv];
+					  if(_optnav) {
+						  [_optnav pushViewController2:wv];
 					  }else{
 						  //[_dvc.navigationController pushViewController:wv animated:YES];
 						  [(UINavigationController*)self.window.rootViewController pushViewController2:wv];
@@ -964,24 +995,24 @@ static const char kBundleKey = 0;
 -(void) open_opv:(UITableViewController*)opv BarItem:(id)sender{
 	
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-		UINavigationController *optnav = [[[UINavigationController alloc] initWithRootViewController:opv] autorelease];
+		_optnav = [[[UINavigationController alloc] initWithRootViewController:opv] autorelease];
 		if(isOS8){
-			optnav.modalPresentationStyle=UIModalPresentationPopover;
+			_optnav.modalPresentationStyle=UIModalPresentationPopover;
 			if([sender isKindOfClass:[UITableViewCell class]]){
-				optnav.popoverPresentationController.sourceView=sender;
-				optnav.popoverPresentationController.sourceRect=CGRectMake( ((UITableViewCell*)sender).bounds.size.width/2, ((UITableViewCell*)sender).bounds.size.height-8, 0,0);
+				_optnav.popoverPresentationController.sourceView=sender;
+				_optnav.popoverPresentationController.sourceRect=CGRectMake( ((UITableViewCell*)sender).bounds.size.width/2, ((UITableViewCell*)sender).bounds.size.height-8, 0,0);
 			}else
-				optnav.popoverPresentationController.barButtonItem=sender;
-            [iToast.topMostController presentViewController:optnav animated:YES completion:nil];
+				_optnav.popoverPresentationController.barButtonItem=sender;
+            [iToast.topMostController presentViewController:_optnav animated:YES completion:nil];
 		}else{
 			if(!_opv_popov || isOS8) {
-				self.opv_popov = [[[UIPopoverController alloc] initWithContentViewController:optnav] autorelease];
+				self.opv_popov = [[[UIPopoverController alloc] initWithContentViewController:_optnav] autorelease];
 				_opv_popov.delegate=self;
 				//			opv.popoverContainer = _opv_popov;
 				//			_opv_popov.popoverContentSize = CGSizeMake(480, 800);
 			}else{
 				//			opv.popoverContainer = _opv_popov;
-				_opv_popov.contentViewController = optnav;
+				_opv_popov.contentViewController = _optnav;
 			}
 			_opv_popov.popoverContentSize = CGSizeMake(480, 800); //opv.contentSizeForViewInPopover;
 			[self blurView:_splitViewController.view];
@@ -1200,15 +1231,16 @@ static const char kBundleKey = 0;
 					  return YES;
 				  } setMac:_dvc.xSetMac];
 }
--(void) tempStatsBtnPressed:(id)sender{
+-(void) tempStatsBtnPressed:(id)sender withLux:(BOOL)withLux{
 
 //	[_dvc showLoadingBarItem:sender];
+	if(_dvc.tag==nil)return;
 	
 	syncLoadRawData_t loader =^NSArray*(NSString* start, NSString* end){
 		NSLog(@"GetStatsRaw(%@ - %@)", start,end);
 		NSError* error;
 		NSDictionary* ret = [AsyncURLConnection syncRequest:
-							 [WSROOT stringByAppendingString:_dvc.tag.hasALS?@"ethLogs.asmx/GetStatsLuxRaw":@"ethLogs.asmx/GetStatsRaw"]
+							 [WSROOT stringByAppendingString:withLux?@"ethLogs.asmx/GetStatsLuxRaw":@"ethLogs.asmx/GetStatsRaw"]
 													jsonObj:@{@"id": [_dvc.tag objectForKey:@"slaveId"],
 															  @"fromDate":start, @"toDate":end }
 													  error:&error setMac:_dvc.xSetMac];
@@ -1216,7 +1248,7 @@ static const char kBundleKey = 0;
 	};
 	
 	shareHandler_t shareHandler = ^(GraphViewController* vc1, UIBarButtonItem* sender_vc, UIImage* snapshot, NSDate* fromDate, NSDate* toDate){
-		ShareTextDescription* text = [[[ShareTextDescription alloc]initWithUUID:@[_dvc.tag.uuid] andName:_dvc.tag.name
+		ShareTextDescription* text = [[[ShareTextDescription alloc]initWithUUID:@[_dvc.tag.uuid==nil?[NSNull null]:_dvc.tag.uuid] andName:_dvc.tag.name
 																		andType:@"temperature" fromDate:fromDate toDate:toDate] autorelease];
 		
 		
@@ -1283,7 +1315,7 @@ static const char kBundleKey = 0;
 																				if(self.spinner==nil)
 																					self.spinner = [SpinnerView loadSpinnerIntoView:self.window];
 																				[AsyncURLConnection
-																				 request:[WSROOT stringByAppendingString:_dvc.tag.hasALS?@"ethLogs.asmx/GetTemperatureLuxStats3":@"ethLogs.asmx/GetTemperatureStats3"]
+																				 request:[WSROOT stringByAppendingString:withLux?@"ethLogs.asmx/GetTemperatureLuxStats3":@"ethLogs.asmx/GetTemperatureStats3"]
 																									jsonObj:[NSDictionary dictionaryWithObjectsAndKeys:
 																											 [_dvc.tag objectForKey:@"slaveId"],@"id",
 																											 @NO, @"withMinMax", @NO, @"sinceLastCalibration", nil]
@@ -1301,9 +1333,9 @@ static const char kBundleKey = 0;
 																			}andType:nil andDataLoader:loader ] autorelease];
 
 	SingleTagChart* chart =((LandscapeGraphViewController*)vc).chart;
-	chart.dewPointMode = _dvc.tag.hasThermocouple|| _dvc.tag.hasALS || (_dvc.tag.has13bit&&dewPointMode);
+	chart.dewPointMode = _dvc.tag.hasThermocouple|| withLux || (_dvc.tag.has13bit&&dewPointMode);
 	chart.capIsChipTemperatureMode=_dvc.tag.hasThermocouple;
-	chart.hasALS = _dvc.tag.hasALS;
+	chart.hasALS = withLux;
 	
 	vc.shareHandler = shareHandler;
 	vc.logDownloader = ^(GraphViewController* vc1, UIBarButtonItem* sender_vc, NSString* fromDate, NSString* toDate){
@@ -1454,17 +1486,18 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 					  
 					  _postbackInterval = [[retval objectForKey:@"d"] intValue];
 
-					  [selectedTags release];
-					  selectedTags = [[NSMutableSet alloc] init];
-
 					  currentTagManagerIndex=index;
-					  _mvc.title = [tagManagerNameList objectAtIndex:currentTagManagerIndex];
+					  _tvc.title=_mvc.title = [tagManagerNameList objectAtIndex:currentTagManagerIndex];
+					
+					  [selectedTags release];
+					  selectedTags =  [[NSMutableSet setWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:
+																   [@"mss_" stringByAppendingString:[tagManagerNameList objectAtIndex:currentTagManagerIndex]]]] retain]; //[[NSMutableSet alloc] init];
 
 					  [self stopComet];
 					  [self reloadTagListWithCompletion:^(){
 						  [self getNextUpdate];			// restart getting comet using the new mac (all).
 					  }];
-					  [_evc reload];
+					  [_evc reload]; [_tvc reload];
 					  
 				  }errorBlock:^(NSError* e, id* showFrom){
 					  
@@ -1473,7 +1506,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				  }setMac:nil];	
 }
 -(void) tagManagerDropdownPressed:(id)sender{
-	if(_isLimited)return;
+//	if(_isLimited)return;
 	
 	NSMutableArray* nameList = [[tagManagerNameList mutableCopy] autorelease];
 	[nameList addObject:NSLocalizedString(@"All Tag Managers",nil)];
@@ -1520,14 +1553,14 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 														   if(selectedIndex==nameList.count-1)  // all tag managers
 														   {
 															   [[NSUserDefaults standardUserDefaults] setBool:YES forKey:TagManagerChooseAllPrefKey];
-															   _mvc.title = [nameList objectAtIndex:selectedIndex];
+															   _tvc.title=_mvc.title = [nameList objectAtIndex:selectedIndex];
 															   
 															   self.spinner = [SpinnerView loadSpinnerIntoView:self.window];
 															   [self stopComet];
 															   [self reloadTagListWithCompletion:^(){
 																   [self getNextUpdate];			// restart getting comet using the new mac (all).
 															   }];
-															   [_evc reload];
+															   [_evc reload]; [_tvc reload];
 															   
 														   }
 														   else if(selectedIndex!=currentTagManagerIndex){
@@ -1536,12 +1569,12 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 														   else{
 															   [[NSUserDefaults standardUserDefaults] setBool:NO forKey:TagManagerChooseAllPrefKey];
 															   
-															   _mvc.title = [tagManagerNameList objectAtIndex:currentTagManagerIndex];
+															   _tvc.title=_mvc.title = [tagManagerNameList objectAtIndex:currentTagManagerIndex];
 															   [self stopComet];
 															   [self reloadTagListWithCompletion:^(){
 																   [self getNextUpdate];			// restart getting comet using the new mac (all).
 															   }];
-															   [_evc reload];
+															   [_evc reload]; [_tvc reload];
 														   }
 													   }];
 	
@@ -1900,7 +1933,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 	[_dvc.navigationController pushViewController2:categoryPicker ];
 	
 }
-- (NSDictionary*)findTagFromUuid:(NSString*)uuid{
+- (NSMutableDictionary*)findTagFromUuid:(NSString*)uuid{
 	return [tagDictionary objectForKey:uuid];
 }
 
@@ -2144,10 +2177,10 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 // TODO: Tag and Tag2 structure must include "postBackInterval" if different from MAC postback interval.
 -(void) unifiedUpdateBtnAction:(id)sender applyAll:(BOOL)applyAll{
 
-	NSArray* choices = [NSArray arrayWithObjects:NSLocalizedString(@"Update every 30 seconds",nil),NSLocalizedString(@"Update every 1 minute",nil),
-						NSLocalizedString(@"Update every 2 minutes",nil),NSLocalizedString(@"Update every 5 minutes",nil),
-						NSLocalizedString(@"Update every 10 minutes",nil) ,NSLocalizedString(@"Update every 30 minutes",nil),
-						NSLocalizedString(@"Update every 1 hour",nil),NSLocalizedString(@"Update every 4 hour",nil) , NSLocalizedString(@"If Out Of Range...",nil), NSLocalizedString(@"Notifications...",nil), nil];
+	NSArray* choices = [NSArray arrayWithObjects:NSLocalizedString(@"Record every 30 seconds",nil),NSLocalizedString(@"Record every 1 minute",nil),
+						NSLocalizedString(@"Record every 2 minutes",nil),NSLocalizedString(@"Record every 5 minutes",nil),
+						NSLocalizedString(@"Record every 10 minutes",nil) ,NSLocalizedString(@"Record every 30 minutes",nil),
+						NSLocalizedString(@"Record every 1 hour",nil),NSLocalizedString(@"Record every 4 hour",nil) , NSLocalizedString(@"If Out Of Range...",nil), NSLocalizedString(@"Notifications...",nil), nil];
 	
 	int selected_index=[self postback_interval_index];
 	if(!applyAll){
@@ -2243,7 +2276,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 																	   [self open_opv_oor:_dvc.tag BarItem:sender];
 																   }
 															   }
-                                                        } helpText:NSLocalizedString(@"Configure auto-update interval to allow tag transmit temperature and other data periodically in order to capture graphs and detect out-of-range/back-in-range events.",nil)];
+														} helpText:/*NSLocalizedString(@"Configure auto-update interval to allow tag transmit temperature and other data periodically in order to capture graphs and detect out-of-range/back-in-range events.",nil)*/@"	Configure how often to record temperature and other data for building graphs and out-of-range detection. Tag may send a single data point, 9, 13 or 26 data points (depending on 'transmit multiple data point' option and tag type) in one update (transmission)."];
 	[self showUpdateOptionPicker:picker From:sender];
 	[picker release];
 
@@ -2396,6 +2429,9 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 	OptionPicker* picker = [[OptionPicker alloc]initWithOptions:tagNames
 												  selectedMulti:selectedTags doneMulti:^(NSSet* selected, OptionPicker* sender){
 													  
+													  [[NSUserDefaults standardUserDefaults] setObject:selectedTags.allObjects forKey:
+													   [@"mss_" stringByAppendingString:[tagManagerNameList objectAtIndex:currentTagManagerIndex]]];
+													  
 													  NSArray* ids =[num2IdMapping objectsForKeys:[selected allObjects] notFoundMarker:[NSNull null]];
 													  NSArray* uuids = [num2UUIDMapping objectsForKeys:[selected allObjects] notFoundMarker:[NSNull null]];
 													  [self showMultiStatsForIds:ids Uuids:uuids Type:type];
@@ -2541,7 +2577,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 					  
 					  NSMutableDictionary* config = [retval objectForKey:@"d"];
 					  
-					  _opv_lb.title = [NSLocalizedString(@"Low Battery Alerts for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name==nil?@"":tag.name)];
+					  _opv_lb.title = [NSLocalizedString(@"Low Battery Alerts for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name==nil?@"":tag.name)];
 					  _opv_lb.loginEmail = self.loginEmail;
 					  [self open_opv:_opv_lb BarItem:sender];
 					  _opv_lb.config=config;
@@ -2600,14 +2636,14 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 					  _opv_ms.isPir8F =NO;
 					  
 					  if(tag.has3DCompass){
-						  _opv_ms.title = [NSLocalizedString(@"Motion Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+						  _opv_ms.title = [NSLocalizedString(@"Motion Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 						  _opv_ms.isReedPir=_opv_ms.isPir=NO;
 						  _opv_ms.isHmcTimeout = (tag.rev>=0xE) && !(tag.rev==0xF && tag.tagType==MotionSensor);
 						  _opv_ms.isAccel = (tag.rev & 0xF)==0xA;
 						  _opv_ms.isALS=NO;
 					  }
 					  else if(type==PIR){
-						  _opv_ms.title = [NSLocalizedString(@"Infra-Red Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+						  _opv_ms.title = [NSLocalizedString(@"Infra-Red Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 						  _opv_ms.isReedPir=_opv_ms.isPir=YES;
 						  _opv_ms.isAccel=NO;
 						  _opv_ms.isPir8F = tag.rev>=0x8F;
@@ -2615,14 +2651,14 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 						  _opv_ms.isALS=NO;
 					  }
 					  else if(tag.hasALS){
-						  _opv_ms.title = [NSLocalizedString(@"Motion Light Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+						  _opv_ms.title = [NSLocalizedString(@"Motion Light Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 						  _opv_ms.isReedPir=_opv_ms.isPir=NO;
 						  _opv_ms.isHmcTimeout =YES;
 						  _opv_ms.isALS=YES;
 						  _opv_ms.isAccel=NO;
 					  }
 					  else{
-						  _opv_ms.title = [NSLocalizedString(@"Reed Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+						  _opv_ms.title = [NSLocalizedString(@"Reed Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 						  _opv_ms.isReedPir=YES;
 						  _opv_ms.isPir=NO;
 						  _opv_ms.isHmcTimeout =NO;
@@ -2658,7 +2694,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				  completeBlock:^(NSDictionary* retval){
 					  [opv_apply_all?_mvc:_dvc revertLoadingBarItem:sender];
 					  NSMutableDictionary* config = [retval objectForKey:@"d"];
-					  _opv_oor.title = [NSLocalizedString(@"Out of Range Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+					  _opv_oor.title = [NSLocalizedString(@"Out of Range Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 					  _opv_oor.loginEmail = self.loginEmail;
 					  [self open_opv:_opv_oor BarItem:sender];
 					  _opv_oor.config = config;
@@ -2683,7 +2719,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				  completeBlock:^(NSDictionary* retval){
 					  [opv_apply_all?_mvc:_dvc revertLoadingBarItem:sender];
 					  NSMutableDictionary* config = [retval objectForKey:@"d"];
-					  _opv_phone.title = [NSLocalizedString(@"Phone Notification Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+					  _opv_phone.title = [NSLocalizedString(@"Phone Notification Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 					  [self open_opv:_opv_phone BarItem:sender];
 					  _opv_phone.config = config;
 					  //[_opv_popov setPopoverContentSize:_opv_phone.contentSizeForViewInPopover animated:YES];
@@ -2871,7 +2907,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				  completeBlock:^(NSDictionary* retval){
 					  [_dvc revertLoadingBarItem:sender];
 					  NSMutableDictionary* config = [retval objectForKey:@"d"];
-					  _opv_light.title = [NSLocalizedString(@"Light Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+					  _opv_light.title = [NSLocalizedString(@"Light Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 					  _opv_light.loginEmail = self.loginEmail;
 					  [_opv_light setConfig:config andTag:tag];
 					  [self open_opv:_opv_light BarItem:sender];
@@ -2896,7 +2932,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				  completeBlock:^(NSDictionary* retval){
 					  [_dvc revertLoadingBarItem:sender];
 					  NSMutableDictionary* config = [retval objectForKey:@"d"];
-					  _opv_cap.title = [NSLocalizedString(@"Humidity/Moisture Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+					  _opv_cap.title = [NSLocalizedString(@"Humidity/Moisture Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 					  _opv_cap.loginEmail = self.loginEmail;
 					  [_opv_cap setConfig:config andTag:tag];
 					  [self open_opv:_opv_cap BarItem:sender];
@@ -3003,7 +3039,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				  completeBlock:^(NSDictionary* retval){
 					  [_dvc revertLoadingBarItem:sender];
 					  NSMutableDictionary* config = [retval objectForKey:@"d"];
-					  _opv_temp.title = [NSLocalizedString(@"Temp Sensor Options for ",nil) stringByAppendingString:(opv_apply_all?NSLocalizedString(@"All Tags",nil) : tag.name)];
+					  _opv_temp.title = [NSLocalizedString(@"Temp Sensor Options for ",nil) stringByAppendingString:(opv_apply_all? @"All Tags" : tag.name)];
 					  _opv_temp.loginEmail = self.loginEmail;
 
 					  [self open_opv:_opv_temp BarItem:sender];
@@ -3046,7 +3082,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 					  [config removeObjectForKey:@"managers"];	// does not yet support multi manager config.
 					  [self open_opv:_opv_ac BarItem:sender];
 					  _opv_ac.config=config;
-					  //[_opv_popov setPopoverContentSize:_opv_ac.contentSizeForViewInPopover animated:YES];
+					  
 				  }errorBlock:^(NSError* err, id* showFrom){
 					  *showFrom = sender;
 					  [_mvc revertLoadingBarItem:sender];
@@ -3374,16 +3410,16 @@ static char* getWiFiAddress() {
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
 		[_mvc.navigationController pushViewController2:avc ];
 	}else{
-		UINavigationController* nc = [[[UINavigationController alloc]initWithRootViewController:avc] autorelease];
 		if(!_associate_popov || isOS8){
-			self.associate_popov=[[[UIPopoverController alloc]initWithContentViewController:nc] autorelease];
+			self.associate_popov=[[[UIPopoverController alloc]initWithContentViewController:avc] autorelease];
 			self.associate_popov.delegate=self;
 		}else
-			_associate_popov.contentViewController = nc;
+			_associate_popov.contentViewController = avc;
 		
 		[self blurView:_splitViewController.view];
 		_associate_popov.popoverContentSize = CGSizeMake(480, 600);
-		[_associate_popov presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+		//[_associate_popov presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+		[_associate_popov presentPopoverFromAnything:sender];
 	}
 }
 
@@ -3424,7 +3460,7 @@ static char* getWiFiAddress() {
 		}
 	}
 }
--(void) tagPictureRequest:(NSMutableDictionary *)tag fromCell:(UITableViewCell *)cell{
+-(void) tagPictureRequest:(NSString *)uuid fromCell:(UITableViewCell *)cell{
 
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
 		if (!_dvc) {
@@ -3432,9 +3468,9 @@ static char* getWiFiAddress() {
 		}
 		[_dvc view];
 		[((UINavigationController*)self.window.rootViewController) pushViewController2:_dvc ];
-		[_dvc setTag:tag];
+		[_dvc setTag:[self findTagFromUuid:uuid]];
 	}else{
-		[_dvc setTag:tag];
+		[_dvc setTag:[self findTagFromUuid:uuid]];
 		[[_dvc.navigationController topViewController]dismissViewControllerAnimated:NO completion:nil];
 		[_dvc.navigationController popToRootViewControllerAnimated:NO];
 	}
@@ -3443,10 +3479,11 @@ static char* getWiFiAddress() {
 //	[self loadScriptsInBackgroundIfNeeded];
 }
 
--(void) tagSelected: (NSMutableDictionary*) tag fromCell:(UITableViewCell*) cell{
+-(void) tagSelected: (NSString*) uuid fromCell:(UITableViewCell*) cell{
 
+	NSMutableDictionary* tag = [self findTagFromUuid:uuid];
 	slaveIdToDisplay  = tag.slaveId;
-	NSString* uuid = tag.uuid;
+	//NSString* uuid = tag.uuid;
 	
 	OptionPicker *picker=nil;
 	if(tag.mirrors!=nil && [tag.mirrors count]>0){
@@ -3537,14 +3574,14 @@ static char* getWiFiAddress() {
 		}
 	}
 }
--(void)swapOrderOf:(NSDictionary *)tag1 between:(NSDictionary *)tag_prev and:(NSDictionary*)tag_next{
+-(void)swapOrderOf:(NSString *)tag1 between:(NSString *)tag_prev and:(NSString*)tag_next{
 //	NSLog(@"%@, %@", tag1.name, tag2.name);
 	[AsyncURLConnection request:[WSROOT stringByAppendingString:
 								 @"ethClient.asmx/ReorderTag2"]
 						jsonObj:[NSDictionary dictionaryWithObjectsAndKeys:
-								 tag1.uuid,@"uuid1",
-								 tag_prev==nil?[NSNull null] : tag_prev.uuid,@"uuid_prev",
-								 tag_next==nil?[NSNull null]: tag_next.uuid,@"uuid_next", nil]
+								 tag1,@"uuid1",
+								 tag_prev==nil?[NSNull null] : tag_prev,@"uuid_prev",
+								 tag_next==nil?[NSNull null]: tag_next,@"uuid_next", nil]
 				  completeBlock:^(NSDictionary* retval){
 				  }errorBlock:^(NSError* err, id* showFrom){
 					  return YES;
@@ -3603,12 +3640,14 @@ static char* getWiFiAddress() {
 				  }setMac:_dvc.xSetMac];
 }
 -(void)stopComet{
+	should_run_comet=NO;
 	if(comets!=nil){
 		for(AsyncSoapURLConnection* conn in comets)[conn cancel];
 	}
 	[comets release]; comets=nil;
 }
 -(void)getNextUpdate{
+	should_run_comet=YES;
 	if(comets!=nil)return;
 	comets=[[NSMutableArray alloc]initWithCapacity:2];
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:TagManagerChooseAllPrefKey]) {
@@ -3639,7 +3678,7 @@ static char* getWiFiAddress() {
 							for(NSMutableDictionary* tag in (NSArray*)retval){
 								[self updateTag:tag];
 							}
-							if(comets!=nil)		// not aborted
+							if(should_run_comet && comets!=nil)		// not aborted
 							{
 								NSUInteger index = [comets indexOfObject:weakSelf];
 								if(index!=NSNotFound)
@@ -3647,6 +3686,10 @@ static char* getWiFiAddress() {
 							}
 						}errorBlock:^(NSError* e, id* showFrom){
 							[comets release]; comets=nil;
+							if(should_run_comet)
+								[NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+									[self getNextUpdate];
+								} repeats:NO];
 							return NO;
 						}] retain];
 	return weakSelf;
@@ -3671,9 +3714,9 @@ static char* getWiFiAddress() {
 								 if([[entry objectForKey:@"selected"] boolValue])currentTagManagerIndex=i;
 							 }
 							 if([[NSUserDefaults standardUserDefaults] boolForKey:TagManagerChooseAllPrefKey])
-								 _mvc.title = NSLocalizedString(@"All Tag Managers",nil);
+								 _tvc.title=_mvc.title =  NSLocalizedString(@"All Tag Managers",nil);
 							 else{
-								 _mvc.title = [tagManagerNameList objectAtIndex:currentTagManagerIndex];
+								 _tvc.title=_mvc.title = [tagManagerNameList objectAtIndex:currentTagManagerIndex];
 								 
 								 if(list.count>1 && ![[NSUserDefaults standardUserDefaults] boolForKey:@"DisplayedTutorialTm0"] ){
 									 
@@ -3696,6 +3739,12 @@ static char* getWiFiAddress() {
 							 currentTagManagerIndex=0;
 						 }
 						 
+						 [_mvc.topPVC restorePreviousPage];
+
+						 [selectedTags release];
+						 selectedTags =  [[NSMutableSet setWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:
+																	  [@"mss_" stringByAppendingString:[tagManagerNameList objectAtIndex:currentTagManagerIndex]]]] retain]; //[[NSMutableSet alloc] init];
+
 					 }
 					 errorBlock:nil setMac:nil];
 }
@@ -3755,7 +3804,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 						 [self getNextUpdate];
 						 
 						 
-						 [_evc reload];
+						 //[_evc reload]; [_tvc reload];
 
 					 }errorBlock:^(NSError* err, id* showFrom){
 						 [self.spinner removeSpinner]; self.spinner=nil;
@@ -3886,7 +3935,6 @@ NSString * const NotificationActionDisarm = @"DISARM";
 	logged_in=YES;
 	[[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 
-	[_mvc.topPVC openMvcNoAnimation];
 	
 //	"{"type":"apns","phoneName":"cao’s iPhone","uuid":"da18e615eb1a31fa1b38725d1e0b4ad38629a453","newToken":"DA6519F997DFD1C4D4FFE4C1230B40E650DEFEFE7687691A991639456878E618","oldToken":""}"
 
@@ -4466,6 +4514,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 			}else{
 				[self getNextUpdate];
 			}
+			[_tvc reload];
 		}
 	}
 }
@@ -4509,9 +4558,9 @@ NSString * const NotificationActionDisarm = @"DISARM";
 	}
 	
 	_isLimited= [[serverOpt objectForKey:@"limited"] boolValue];
-	if(_isLimited){
+	/*if(_isLimited){
 		_mvc.title = self.loginEmail;
-	}
+	}*/
 }
 
 //#define SYSTEM_VERSION_GRATERTHAN_OR_EQUALTO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
@@ -4623,6 +4672,8 @@ NSString * const NotificationActionDisarm = @"DISARM";
 					  completeBlock:^(NSDictionary* data){
 						  [UIApplication sharedApplication].networkActivityIndicatorVisible=NO;
 						  [ui appendEvents:[data objectForKey:@"d"]];
+						  _tvc.uuid2events = _evc.uuid2events;
+						  
 					  }errorBlock:^(NSError* err, id* showFrom){
 						  [UIApplication sharedApplication].networkActivityIndicatorVisible=NO;
 						  return YES;
@@ -4640,6 +4691,8 @@ NSString * const NotificationActionDisarm = @"DISARM";
 					  completeBlock:^(NSDictionary* data){
 						  [UIApplication sharedApplication].networkActivityIndicatorVisible=NO;
 						  [ui prependEvents:[data objectForKey:@"d"]];
+						  _tvc.uuid2events = _evc.uuid2events;
+
 					  }errorBlock:^(NSError* err, id* showFrom){
 						  [UIApplication sharedApplication].networkActivityIndicatorVisible=NO;
 						  return YES;
@@ -4692,10 +4745,12 @@ NSString * const NotificationActionDisarm = @"DISARM";
 	return YES;
 }
 -(void)reloadRootViewController{
+	NSLog(@"reloadRootViewController");
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
 	{
 		_mvc = [[MasterViewController alloc] initWithNibName:@"MasterViewController_iPhone" bundle:nil delegate:self];
-		TopPagingViewController* pvc = [[[TopPagingViewController alloc] initWithMvc:_mvc andEvc:_evc] autorelease];
+		_tvc =[[TrendTableViewController alloc] initWithNibName:@"SearchTableView_iPhone" bundle:nil delegate:self];
+		TopPagingViewController* pvc = [[[TopPagingViewController alloc] initWithMvc:_mvc andEvc:_evc andTvc:_tvc] autorelease];
 		UINavigationController *main_nc = [[[UINavigationController alloc] initWithRootViewController:pvc] autorelease];
 		main_nc.navigationBar.translucent = NO;
 		main_nc.toolbar.translucent=NO;
@@ -4705,7 +4760,9 @@ NSString * const NotificationActionDisarm = @"DISARM";
 	}
 	else {
 		_mvc = [[MasterViewController alloc] initWithNibName:@"MasterViewController_iPad" bundle:nil delegate:self];
-		TopPagingViewController* pvc = [[[TopPagingViewController alloc] initWithMvc:_mvc andEvc:_evc] autorelease];
+		_tvc =[[TrendTableViewController alloc] initWithNibName:@"SearchTableView_iPhone" bundle:nil delegate:self];
+		
+		TopPagingViewController* pvc = [[[TopPagingViewController alloc] initWithMvc:_mvc andEvc:_evc andTvc:_tvc] autorelease];
 		UINavigationController *left_nc = [[[UINavigationController alloc] initWithRootViewController:pvc] autorelease];
 		left_nc.navigationBar.translucent = NO;
 		left_nc.toolbar.translucent=NO;
@@ -4719,8 +4776,9 @@ NSString * const NotificationActionDisarm = @"DISARM";
 		self.splitViewController = [[[UISplitViewController alloc] init] autorelease];
 		_splitViewController.presentsWithGesture = NO;
 		if (isOS8){
-//			_splitViewController.preferredPrimaryColumnWidthFraction = 0.48;
-//			_splitViewController.maximumPrimaryColumnWidth = _splitViewController.view.bounds.size.width;
+			_splitViewController.preferredPrimaryColumnWidthFraction = 0.4;
+			_splitViewController.maximumPrimaryColumnWidth = MIN( _splitViewController.view.bounds.size.width, _splitViewController.view.bounds.size.height);
+			_splitViewController.minimumPrimaryColumnWidth = 180;
 		}
 		
 		_splitViewController.delegate = _dvc;
@@ -4752,6 +4810,8 @@ NSString * const NotificationActionDisarm = @"DISARM";
 							 [self getNextUpdate];			// restart getting comet using the new mac (all).
 						 }];
 
+						 [_tvc reload]; [_evc reload];
+						 
 						 [self updateServerOpt:serverOpt];
 						 [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 						 
@@ -5065,7 +5125,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
 	[[NSUserDefaults standardUserDefaults]synchronize];
-	
+	[self stopComet];
 	//self.locationManager=nil;
 	/*
 	 Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
@@ -5076,6 +5136,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
 	[[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
+	
 	/*
 	 Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
 	 */
@@ -5083,6 +5144,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
+	[self stopComet];
 	[_launchOptions release];
 	/*
 	 Called when the application is about to terminate.

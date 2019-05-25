@@ -56,7 +56,7 @@
 -(void) resetStatesBtnPressed:(id)sender;
 -(void) resetEventBtnPressed:(id)sender;
 -(void) doorStatsBtnPressed:(id)sender;
--(void) tempStatsBtnPressed:(id)sender;
+-(void) tempStatsBtnPressed:(id)sender withLux:(BOOL) withLux;
 -(void)lightOnBtnPressed:(id)sender;
 -(void)lightOffBtnPressed:(id)sender;
 -(void) tagUpdated;
@@ -101,7 +101,7 @@ UIImagePickerControllerDelegate,UINavigationControllerDelegate, UIPopoverControl
 	IASKPSTextFieldSpecifierViewCell* camDetailCell;
 	
 	TableLoadingButtonCell* resetStatesCell, *specialOptionsCell, *unassociateCell, *doorStatsCell, *resetEventCell; //, *armBtnCell, *disarmBtnCell;
-	TableLoadingButtonCell* lightOnCell, *lightOffCell, *tempStatsCell, *calibrateRadioCell, *addScriptCell;
+	TableLoadingButtonCell* lightOnCell, *lightOffCell, *tempStatsCell, *tempALSStatsCell, *calibrateRadioCell, *addScriptCell;
 
 	IASKPSSliderSpecifierViewCell *dimCell;
 

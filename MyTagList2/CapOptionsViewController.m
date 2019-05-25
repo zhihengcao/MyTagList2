@@ -212,6 +212,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	}
 
 	responsiveness.textField.text = [responsiveness_choices objectAtIndex:[self responsiveness_index_from_interval:c.interval]];
+	cap_range.slider.currentValue = tag.cap;
 	cap_range.slider.selectedMaximumValue = c.th_high;
 	cap_range.slider.selectedMinimumValue=c.th_low;
 	[cap_range sliderValueChanged:nil];
@@ -244,7 +245,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	responsiveness = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Response:",nil)];
 	
 	cap_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:0 Max:100 Unit:@"%" numberFormat:@"%.1f" delegate:self];
-	cap_cal = [IASKPSSliderSpecifierViewCell newWithTitle:_tag.needCapCal? NSLocalizedString(@"Current Moisture/Water Level:",nil):NSLocalizedString(@"Current Humidity:",nil) Min:0 Max:100 Step: 1 Unit:@"%" delegate:self];
+	cap_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate To:",nil) Min:0 Max:100 Step: 1 Unit:@"%" delegate:self];
 
 	cap_cal_btn = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Calibrate",nil) Progress:NSLocalizedString(@"Saving...",nil)];
 	cap_uncal_btn = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Remove Calibration",nil) Progress:NSLocalizedString(@"Saving...",nil)];
@@ -314,9 +315,9 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	else if(section==1)
 		return NSLocalizedString(@"Monitor Moisture:",nil);
 	else if(_tag.needCapCal)
-		return NSLocalizedString(@"Calibrate Current Water-Level/Soil-Moisture:",nil);
+		return [NSLocalizedString(@"Water-Level/Moisture Calibration",nil) stringByAppendingFormat:@" (Raw Reading: %.1f%%)", ((1.0/_tag.capRaw - 1.0/240.0) * (-100) / (1.0 / 240.0 - 1.0 / 8.0))];
 	else
-		return NSLocalizedString(@"Calibrate Current Humidity:",nil);
+		return [NSLocalizedString(@"Humidity Calibration",nil) stringByAppendingFormat:@" (Raw Reading: %.1f%%)", _tag.cap-_tag.capCalOffset];
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {

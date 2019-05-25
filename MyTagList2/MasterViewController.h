@@ -18,6 +18,7 @@
 @required
 @property (nonatomic, readonly)BOOL useDegF;
 //- (void)stopBeepAllBtnPressed:(id)sender;
+- (void)helpBtnPressed:(id)sender;
 - (void)armAllBtnPressed:(id)sender;
 -(void) logoutBtnPressed:(id)sender;
 -(void) tagManagerDropdownPressed:(id)sender;
@@ -25,11 +26,11 @@
 -(void) multiStatsBtnPressed:(id)sender;
 -(void) wirelessConfigBtnPressed:(id)sender;
 -(void) associateTagBtnPressed:(id)sender;
--(void) tagSelected: (NSDictionary*) tag fromCell:(UITableViewCell*) cell;
--(void) tagPictureRequest:(NSMutableDictionary *)tag fromCell:(UITableViewCell *)cell;
+-(void) tagSelected: (NSString*) uuid fromCell:(UITableViewCell*) cell;
+-(void) tagPictureRequest:(NSString *)uuid fromCell:(UITableViewCell *)cell;
 
 //-(void) swapOrderOf: (NSDictionary*)tag1 and:(NSDictionary*)tag2;
--(void)swapOrderOf:(NSDictionary *)tag1 between:(NSDictionary *)tag_prev and:(NSDictionary*)tag_next;
+-(void)swapOrderOf:(NSString *)tag1 between:(NSString *)tag_prev and:(NSString*)tag_next;
 
 @end
 @interface UILabel(EllipsisFix)
@@ -72,10 +73,13 @@ typedef NS_ENUM(NSInteger, TagCellDisplayMode) {
 @property (nonatomic, retain) NSMutableArray *tagList;
 //@property (retain, nonatomic) IBOutlet UIBarButtonItem *stopBeepAllBtn;
 @property (retain, nonatomic) IBOutlet UIBarButtonItem *armAllBtn;
+@property (retain, nonatomic) IBOutlet UIBarButtonItem *helpBtn;
 @property (retain, nonatomic) IBOutlet UIBarButtonItem *updateAllBtn;
 @property (retain, nonatomic) IBOutlet UIBarButtonItem *multiStatsBtn;
 @property (retain, nonatomic) IBOutlet UIBarButtonItem *wirelessConfigBtn;
-@property (retain, nonatomic) IBOutlet UIBarButtonItem *associateTagBtn;
+//@property (retain, nonatomic) IBOutlet UIBarButtonItem *associateTagBtn;
+@property (retain, nonatomic) IBOutlet UIBarButtonItem *reorderDoneReplacingBtn;
+@property(retain, nonatomic) UITableViewCell* associateBtnCell;
 
 -(void) updateTag:(NSMutableDictionary*)tag loadImage:(BOOL)loadimage;
 -(void) deleteTagWithUuid:(NSString*)uuid;
@@ -115,4 +119,8 @@ typedef NS_ENUM(NSInteger, TagCellDisplayMode) {
 //@property(nonatomic, retain) UITextField* commentField;
 //@property(nonatomic, assign) BOOL showComment;
 
+@end
+
+@interface UIViewController (Additions)
+- (BOOL)isVisible;
 @end

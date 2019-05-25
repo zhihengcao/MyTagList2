@@ -120,9 +120,9 @@
 "Brightness Triggers" = "Triggerizza la luminosità";
 "Choose which tags to display..." = "Scegli i tag da visualizzare";
 "Calibrate" = "Calibrare";
-"Calibrate Current Humidity:" = "Calibra l'umidità corrente:";
-"Calibrate Current Temperature:" = "Calibrazione della temperatura corrente:";
-"Calibrate Current Water-Level/Soil-Moisture:" = "Calibire l'attuale livello dell'acqua / umidità del suolo:";
+"Humidity Calibration" = "Calibra l'umidità";
+"Temperature Calibration" = "Calibrazione della temperatura";
+"Water-Level/Moisture Calibration" = "Calibire l'attuale umidità del suolo:";
 "Calibrate Radio" = "Calibrare la radio";
 "Calibrating..." = "Calibrazione ...";
 "Camera" = "macchina fotografica";
@@ -363,7 +363,7 @@
 "Post Tweet" = "Post Tweet";
 "Quit" = "Smettere";
 "Range:" = "Gamma:";
-"Rate Us 5 Starts!" = "Vota noi 5 inizia!";
+"Rate Us 5 Stars!" = "Vota noi 5 estrella!";
 "Rate Wireless Tag" = "Rate wireless tag";
 "Re-arrange Tag Order" = "Riordina l'Ordine Tag";
 "Receive push notifications on iOS/Android devices chosen at 'Phone Options' when the tag is out of range and when it is back in range." = "Ricevi le notifiche push sui dispositivi iOS / Android scelti in 'Opzioni telefono' quando il tag è fuori gamma e quando è tornato nell'intervallo.";

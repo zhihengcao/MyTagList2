@@ -15,6 +15,8 @@ extern NSString * const LogScalePrefKey;
 @interface LandscapeGraphViewController : GraphViewController <UISplitViewControllerDelegate>
 {
 	UIImage* bgImage, *shadowImage;
+	float originalSplitViewRatio;
+	
 	//	id<UISplitViewControllerDelegate> org_spv_delegate;
 }
 // if type is nil, it is single tag chart.

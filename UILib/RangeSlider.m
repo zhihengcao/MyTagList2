@@ -16,22 +16,31 @@
 
 @implementation RangeSlider
 
-@synthesize minimumValue=_minimumValue, maximumValue=_maximumValue, minimumRange=_minimumRange, selectedMinimumValue=_selectedMinimumValue, selectedMaximumValue=_selectedMaximumValue;
+@synthesize minimumValue=_minimumValue, maximumValue=_maximumValue, minimumRange=_minimumRange, selectedMinimumValue=_selectedMinimumValue, selectedMaximumValue=_selectedMaximumValue, currentValue=_currentValue, forceInRange=_forceInRange;
 @synthesize stepSize;
 
 -(void)setMaximumValue:(float)v{
 	_maximumValue = v;
-	if(_selectedMaximumValue>_maximumValue)_selectedMaximumValue=_maximumValue;
-	if(_selectedMinimumValue>_maximumValue)_selectedMinimumValue=_maximumValue;
-	if(_selectedMaximumValue<_minimumValue)_selectedMaximumValue=_minimumValue;
-	if(_selectedMinimumValue<_minimumValue)_selectedMinimumValue=_minimumValue;
+	if(_forceInRange){
+		if(_selectedMaximumValue>_maximumValue)_selectedMaximumValue=_maximumValue;
+		if(_selectedMinimumValue>_maximumValue)_selectedMinimumValue=_maximumValue;
+		if(_selectedMaximumValue<_minimumValue)_selectedMaximumValue=_minimumValue;
+		if(_selectedMinimumValue<_minimumValue)_selectedMinimumValue=_minimumValue;
+	}
 }
+// do not allow user to select values outside of_minimumValue and_maximumValue
 -(void)setMinimumValue:(float)v{
 	_minimumValue=v;
-	if(_selectedMaximumValue>_maximumValue)_selectedMaximumValue=_maximumValue;
-	if(_selectedMinimumValue>_maximumValue)_selectedMinimumValue=_maximumValue;
-	if(_selectedMaximumValue<_minimumValue)_selectedMaximumValue=_minimumValue;
-	if(_selectedMinimumValue<_minimumValue)_selectedMinimumValue=_minimumValue;
+	if(_forceInRange){
+		if(_selectedMaximumValue>_maximumValue)_selectedMaximumValue=_maximumValue;
+		if(_selectedMinimumValue>_maximumValue)_selectedMinimumValue=_maximumValue;
+		if(_selectedMaximumValue<_minimumValue)_selectedMaximumValue=_minimumValue;
+		if(_selectedMinimumValue<_minimumValue)_selectedMinimumValue=_minimumValue;
+	}
+}
+-(void)setCurrentValue:(float)currentValue{
+	_currentValue = currentValue;
+	[self updateTrackHighlight];
 }
 -(void)setMinimumRange:(float)minimumRange{
 	_minimumRange=minimumRange;
@@ -42,19 +51,28 @@
 			_selectedMaximumValue=_selectedMinimumValue+_minimumRange;
 	}
 }
+-(float)findValueMatchingStepSizeFor:(float)rawValue{
+	return round((rawValue-_minimumValue)/stepSize)*stepSize+_minimumValue;
+}
 -(void)setSelectedMaximumValue:(float)rawValue{
 	
-	_selectedMaximumValue = round((rawValue-_minimumValue)/stepSize)*stepSize+_minimumValue;
-	if(_selectedMinimumValue>_selectedMaximumValue-_minimumRange)_selectedMaximumValue=_selectedMinimumValue+_minimumRange;
-
+	if(_forceInRange){
+		_selectedMaximumValue = [self findValueMatchingStepSizeFor:rawValue];
+		if(_selectedMinimumValue>_selectedMaximumValue-_minimumRange)_selectedMaximumValue=_selectedMinimumValue+_minimumRange;
+	}else{
+		_selectedMaximumValue = rawValue;
+	}
 }
 -(void)setSelectedMinimumValue:(float)rawValue{
 	
-	_selectedMinimumValue = round((rawValue-_minimumValue)/stepSize)*stepSize+_minimumValue;
-	if(_selectedMinimumValue>_selectedMaximumValue-_minimumRange)_selectedMinimumValue=_selectedMaximumValue-_minimumRange;
-	
+	if(_forceInRange){
+		_selectedMinimumValue =  [self findValueMatchingStepSizeFor:rawValue];
+		if(_selectedMinimumValue>_selectedMaximumValue-_minimumRange)_selectedMinimumValue=_selectedMaximumValue-_minimumRange;
+	}else
+		_selectedMinimumValue = rawValue;
 }
 -(void)customInit{
+	_forceInRange=YES;
 	_minThumbOn = false;
 	_maxThumbOn = false;
 	_padding = 16;
@@ -65,7 +83,7 @@
 	_trackBackground.autoresizingMask=UIViewAutoresizingFlexibleWidth;
 	
 	_track = [[[UIImageView alloc] initWithImage:
-			   [UIImage imageNamed:@"bar-highlight.png"]] autorelease];
+			   [[UIImage imageNamed:@"bar-highlight.png"]stretchableImageWithLeftCapWidth:40 topCapHeight:11]] autorelease];
 	[self addSubview:_track];
 	
 	_minThumb = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"handle_left.png"] /*highlightedImage:[UIImage imageNamed:@"handle-hover.png"]*/] autorelease];
@@ -124,7 +142,10 @@
 }
 
 -(float)xForValue:(float)value{
-    return (_trackBackground.bounds.size.width-(_padding*2))*((value - _minimumValue) / (_maximumValue - _minimumValue))+_padding+_trackBackground.frame.origin.x;
+    float ret= (_trackBackground.bounds.size.width-(_padding*2))*((value - _minimumValue) / (_maximumValue - _minimumValue))+_padding+_trackBackground.frame.origin.x;
+	if(ret<_padding+_trackBackground.frame.origin.x)return _padding+_trackBackground.frame.origin.x;
+	if(ret>_trackBackground.bounds.size.width-_padding+_trackBackground.frame.origin.x) return _trackBackground.bounds.size.width-_padding+_trackBackground.frame.origin.x;
+	return ret;
 }
 
 -(float) valueForX:(float)x{
@@ -153,19 +174,19 @@
     CGPoint touchPoint = [touch locationInView:self];
     if(_minThumbOn){
 		double rawValue =[self valueForX:MAX([self xForValue:_minimumValue], touchPoint.x - distanceFromCenter)];
-		self.selectedMinimumValue=rawValue;
+		self.selectedMinimumValue= [self findValueMatchingStepSizeFor:rawValue]; //rawValue;
 		_minThumb.center = CGPointMake([self xForValue:_selectedMinimumValue]-_minThumb.bounds.size.width/2.9, _minThumb.center.y);
         
     }
     if(_maxThumbOn){
 
 		double rawValue =[self valueForX:MIN([self xForValue:_maximumValue], touchPoint.x - distanceFromCenter)];
-		self.selectedMaximumValue = rawValue;
+		self.selectedMaximumValue =  [self findValueMatchingStepSizeFor:rawValue]; //rawValue;
 		_maxThumb.center = CGPointMake([self xForValue:_selectedMaximumValue]+_maxThumb.bounds.size.width/2.9, _maxThumb.center.y);
 
     }
 //    [self updateTrackHighlight];
-    [self setNeedsLayout];
+//    [self setNeedsLayout];
     
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     return YES;
@@ -199,9 +220,9 @@
 
 -(void)updateTrackHighlight{
 	_track.frame = CGRectMake(
-                              _minThumb.center.x,
+                              0, //_minThumb.center.x,
                               _track.center.y - (_track.frame.size.height/2),
-                              _maxThumb.center.x - _minThumb.center.x,
+							[self xForValue:_currentValue], //_maxThumb.center.x - _minThumb.center.x,
                               _track.frame.size.height
                               );
 }

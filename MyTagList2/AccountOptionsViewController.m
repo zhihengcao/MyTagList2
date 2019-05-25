@@ -94,7 +94,7 @@
 	pwd.textField.autocorrectionType=UITextAutocorrectionTypeNo;
 
 	twitterLogin = [TableLoadingButtonCell newWithTitle:@"Twitter Login..." Progress:@"Redirecting..."];
-	webappAccount = [TableLoadingButtonCell newWithTitle:@"Add/Remove Tag Managers..." Progress:@"Loading..."];
+	webappAccount = [TableLoadingButtonCell newWithTitle:@"Add/Edit Tag Managers..." Progress:@"Loading..."];
 	referralProgramLink = [TableLoadingButtonCell newWithTitle:@"Earn Referral Fee" Progress:@"Loading..."];
 
 /*

@@ -12,6 +12,12 @@
 
 NSString * const graphTIPrefix = @"GraphTI";
 
+#define EPOCH_DIFF 11644473600LL
+
+NSDate* nsdateFromFileTime(int64_t filetime){
+	return [NSDate dateWithTimeIntervalSince1970:((filetime / 10000000) - EPOCH_DIFF)];
+}
+
 
 @implementation MultiDayAxis
 
@@ -78,9 +84,10 @@ NSString * const graphTIPrefix = @"GraphTI";
 		self.enableGestureZooming=YES;
 		self.enableMomentumPanning=YES;
 		
-		//self.allowPanningOutOfDefaultRange=YES;
+		self.allowPanningOutOfDefaultRange=YES;
 		
 		[self.labelFormatter.dateFormatter setLocale:[NSLocale currentLocale]];
+		//[self.labelFormatter.dateFormatter setTimeStyle:NSDateFormatterShortStyle];
 		// default is last 2 weeks.
 		/*		self.defaultRange = [[[SChartDateRange alloc]
 		 initWithDateMinimum:[min laterDate:[NSDate dateWithTimeInterval:-3600*24*14 sinceDate:max]]
@@ -105,27 +112,51 @@ NSString * const graphTIPrefix = @"GraphTI";
 -(NSString*)formatStringForFrequency:(NSDateComponents *)frequency{
 	return @"HH:mm";
 }
--(id)initWithFont:(UIFont*)font{
+-(id)initWithFont:(UIFont*)font forTrend:(BOOL)forTrend{
 	self=[super initWithRange:[[[SChartDateRange alloc] initWithDateMinimum:TimeOfDayAxis.baseDate
 															 andDateMaximum:[NSDate dateWithTimeInterval:3600*24 sinceDate:TimeOfDayAxis.baseDate]] autorelease]];
 	if(self){
+		
 		self.style.lineWidth=@1;
 		self.style.majorTickStyle.labelFont = font;
+		self.style.majorTickStyle.labelColor=[UIColor colorWithRed:0.1 green:0.1 blue:0.1 alpha:1];
+		self.style.majorTickStyle.tickGap=@-5;
+		
+		//self.style.lineWidth=@0;
+		self.style.majorTickStyle.labelFont = font;
 		self.style.majorTickStyle.showTicks=YES;
-		self.tickLabelClippingModeHigh =SChartTickLabelClippingModeNeitherPersist;
+		self.tickLabelClippingModeLow = self.tickLabelClippingModeHigh =  SChartTickLabelClippingModeNeitherPersist;
+		
 		//self.style.gridStripeStyle.showGridStripes=YES;
 		//self.style.gridStripeStyle.stripeColor = [self.style.gridStripeStyle.stripeColor colorWithAlphaComponent:0.05];
 		
-		self.style.majorTickStyle.tickGap=@-2;
-		self.enableGesturePanning=YES;
-		self.enableGestureZooming=YES;
-		self.enableMomentumPanning=YES;
+//		self.style.majorTickStyle.tickGap=@-2;
+		if(!forTrend){
+			self.style.gridStripeStyle.showGridStripes=YES;
+			self.style.gridStripeStyle.stripeColor = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:0.2];
+			self.enableGesturePanning=YES;
+			self.enableGestureZooming=YES;
+			self.enableMomentumPanning=YES;
+		}else{
+			self.style.majorGridLineStyle.showMajorGridLines=YES;
+		}
 	}
 	return self;
 }
 @end
 
+@implementation RecentTrendTimeTickFormatter
+-(NSString *)stringForObjectValue:(id)obj onAxis:(SChartAxis *)axis{
+	return @".";
+}
++ (RecentTrendTimeTickFormatter*)instance {
+	static RecentTrendTimeTickFormatter* inst = nil;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{ inst = [[self alloc] init]; });
+	return inst;
+}
 
+@end
 @implementation LuxTickFormatter
 -(NSString *)stringForObjectValue:(id)obj onAxis:(SChartAxis *)axis{
 	float val = [obj floatValue];
@@ -353,7 +384,8 @@ BOOL temp_unit;
 }
 -(float)ymaxInit{return temp_unit == 1 ? -28 : -40;}
 -(float)ymaxPost:(float)ymax{
-	float ret =ceilf( fmin(temp_unit ? 220 : 125, ymax) / 5 + 0.5) * 5;
+//	float ret =ceilf( fmin(temp_unit ? 220 : 125, ymax) / 5 + 0.5) * 5;
+	float ret = ceilf(ymax / 5 + 0.5) * 5;
 	//	NSLog(@"ymaxPost(%f)=%f",ymax, ret);
 	return ret;
 }
@@ -467,8 +499,9 @@ id<StatTypeTranslator> findTranslator(NSString* type){
 /*-(void)setXAxisFor:(NSArray*)dataDays{
 	self.xAxis = [[[MultiDayAxis alloc]initWithDataDays:dataDays andFont:[self.titleLabel.font fontWithSize:9]] autorelease];
 }*/
+
 -(void)setMultiDayXAxis{
-	self.xAxis = [[[MultiDayAxis alloc]initWithEarliest:self.earliestDate andLastest:self.latestDate andFont:[self.titleLabel.font fontWithSize:10]] autorelease];
+	self.xAxis = [[[MultiDayAxis alloc]initWithEarliest:self.earliestDate andLastest:self.latestDate andFont:[UIFont systemFontOfSize:11.0]] autorelease];
 	self.askForReview = [self.latestDate timeIntervalSinceDate:self.earliestDate]>10*3600*24;
 }
 
@@ -489,15 +522,15 @@ id<StatTypeTranslator> findTranslator(NSString* type){
 			bs.areaColorNormal  = bs.areaColorInverted = [color colorWithAlphaComponent:0.65];
 		} */
 
-
-		theme.legendStyle.font = [self.legend.style.font fontWithSize:9.0]; //[UIFont systemFontOfSize:7.0];
-		theme.legendStyle.marginWidth=@4;
-		theme.legendStyle.textAlignment = NSTextAlignmentRight;
-		theme.legendStyle.horizontalPadding=@1;
-		theme.legendStyle.verticalPadding=@2;
-		theme.legendStyle.borderWidth=@0;
-		theme.legendStyle.areaColor=[UIColor colorWithWhite:1 alpha:0];
-		theme.legendStyle.orientation =SChartLegendOrientationHorizontal;
+		SChartLegendStyle* tl = theme.legendStyle;
+		tl.font = [self.legend.style.font fontWithSize:9.0]; //[UIFont systemFontOfSize:7.0];
+		tl.marginWidth=@4;
+		tl.textAlignment = NSTextAlignmentRight;
+		tl.horizontalPadding=@1;
+		tl.verticalPadding=@2;
+		tl.borderWidth=@0;
+		tl.areaColor=[UIColor colorWithWhite:1 alpha:0];
+		tl.orientation =SChartLegendOrientationHorizontal;
 
 
 /*		theme.legendStyle.font = [self.legend.style.font fontWithSize:18.0]; //[UIFont systemFontOfSize:7.0];
@@ -535,31 +568,33 @@ id<StatTypeTranslator> findTranslator(NSString* type){
 	return self;
 }
 -(void)setupYAxis:(SChartAxis*)axis{
-	UIFont* labelFont = [self.titleLabel.font fontWithSize:10.0];
-	axis.style.majorTickStyle.labelFont = labelFont;
-	axis.style.majorTickStyle.labelColor=[UIColor blackColor];
+	UIFont* labelFont = [UIFont systemFontOfSize:11.0]; //[self.titleLabel.font fontWithSize:10.0];
+	SChartAxisStyle *as = axis.style;
+	as.majorTickStyle.labelFont = labelFont;
+	as.majorTickStyle.labelColor=[UIColor blackColor];
 /*	if([axis isKindOfClass:[SChartLogarithmicAxis class]]){
 		axis.width=@45;
 	}else{
 		axis.width=@25;
 	}*/
-	axis.style.majorTickStyle.tickGap=@-2;
-	axis.style.lineWidth=@0.5;
-	axis.style.interSeriesSetPadding=@0;
+	as.majorTickStyle.tickGap=@-2;
+	as.lineWidth=@0.5;
+	as.interSeriesSetPadding=@0;
 	axis.enableGesturePanning=YES;
 	axis.enableGestureZooming=YES;
-	axis.style.majorGridLineStyle.showMajorGridLines=YES;
-	axis.style.majorTickStyle.showTicks=YES;
+	as.majorGridLineStyle.showMajorGridLines=YES;
+	as.majorTickStyle.showTicks=YES;
 }
 
 -(void)sChart:(ShinobiChart *)chart alterTickMark:(SChartTickMark *)tickMark beforeAddingToAxis:(SChartAxis *)axis
 {
 	if(![axis isXAxis]){
-		if(tickMark.tickLabel.text.length>3){
-			tickMark.tickLabel.lineBreakMode=NSLineBreakByCharWrapping;
-			tickMark.tickLabel.numberOfLines=0;
+		UILabel *label =tickMark.tickLabel;
+		if(label.text.length>3){
+			label.lineBreakMode=NSLineBreakByCharWrapping;
+			label.numberOfLines=0;
 			//tickMark.tickLabel.transform=CGAffineTransformTranslate(CGAffineTransformMakeRotation(-M_PI_2), tickMark.tickLabel.bounds.size.width, tickMark.tickLabel.bounds.size.height);
-			[tickMark.tickLabel sizeToFit];
+			[label sizeToFit];
 		}
 	}
 }
@@ -597,13 +632,13 @@ id<StatTypeTranslator> findTranslator(NSString* type){
 	dispatch_async(queue, ^{
 		NSArray* days = _dataLoader([MultiDayAxis stringFromDate: [oldEndDate dateByAddingTimeInterval:3600*24]],[MultiDayAxis stringFromDate:_pendingEndDate]);
 		[oldEndDate release];
-		if(days==nil)return;
-		
-		@synchronized(rawDataDates){
-			for(int i=0;i<days.count;i++){
-				NSDictionary* day =days[i];
-				[rawData addObject:day];
-				[rawDataDates addObject:[MultiDayAxis dateFromString:[day objectForKey:@"date"]]];
+		if(days!=nil){
+			@synchronized(rawDataDates){
+				for(int i=0;i<days.count;i++){
+					NSDictionary* day =days[i];
+					[rawData addObject:day];
+					[rawDataDates addObject:[MultiDayAxis dateFromString:[day objectForKey:@"date"]]];
+				}
 			}
 		}
 		translatedEnd=-1; translatedStart=-1;
@@ -633,13 +668,13 @@ id<StatTypeTranslator> findTranslator(NSString* type){
 		NSArray* days = _dataLoader([MultiDayAxis stringFromDate:_pendingStartDate],
 									[MultiDayAxis stringFromDate:[oldStartDate dateByAddingTimeInterval:-3600*24]]);
 		[oldStartDate release];
-		if(days==nil)return;
-		
-		@synchronized(rawDataDates){
-			for(int i=0;i<days.count;i++){
-				NSDictionary* day =days[days.count-i-1];
-				[rawData insertObject:day atIndex:0];
-				[rawDataDates insertObject:[MultiDayAxis dateFromString:[day objectForKey:@"date"]] atIndex:0];
+		if(days!=nil){
+			@synchronized(rawDataDates){
+				for(int i=0;i<days.count;i++){
+					NSDictionary* day =days[days.count-i-1];
+					[rawData insertObject:day atIndex:0];
+					[rawDataDates insertObject:[MultiDayAxis dateFromString:[day objectForKey:@"date"]] atIndex:0];
+				}
 			}
 		}
 		translatedEnd=-1; translatedStart=-1;
@@ -759,16 +794,13 @@ id<StatTypeTranslator> findTranslator(NSString* type){
 	}
 }
 int ZoomLevelFromTI(NSTimeInterval ti){
-	if(ti < 3600*18){
+	if(ti<3600*24){
 		return ChartZoomLevelRaw;
 	}
-	else if(ti<3600*36){
+	else if(ti<3600*24*4){
 		return ChartZoomLevelRaw2;
 	}
-	else if(ti<3600*72){
-		return ChartZoomLevelRaw3;
-	}
-	else if(ti<3600*24*30){
+	else if(ti<3600*24*32){
 		return ChartZoomLevelNormal;
 	}else{
 		return ChartZoomLevelBand;
@@ -796,6 +828,8 @@ int ZoomLevelFromTI(NSTimeInterval ti){
 //	SChartDateRange* range =(SChartDateRange*)self.xAxis.axisRange;
 	//	SChartDateRange* range = [[[SChartDateRange alloc]initWithDateMinimum:[range1.minimumAsDate dateByAddingTimeInterval:3600*48]
 	//        andDateMaximum:[range1.maximumAsDate dateByAddingTimeInterval:-3600*48]] autorelease];
+	
+	if(noDynamicLoading)return;
 	
 	int oldZoomLevel = _zoomLevel;
 	
@@ -862,4 +896,45 @@ int ZoomLevelFromTI(NSTimeInterval ti){
 	}
 	[self updateCompleteDay:range];
 }
+@end
+
+@implementation NSMutableArray (ChartSeries)
+-(void)addDataPoint:(SChartDataPoint*)dataPoint{
+	if(self.count>0){
+		if(  [(NSDate*)dataPoint.xValue timeIntervalSinceDate:[self.lastObject xValue]] > 3600 * 5.0 ){
+			SChartDataPoint* nullPoint = [[SChartDataPoint new] autorelease];
+			nullPoint.xValue = [(NSDate*)[self.lastObject xValue] dateByAddingTimeInterval:1];
+			nullPoint.yValue = nil;
+			[self addObject:nullPoint];
+			SChartDataPoint* nullPoint2 = [[SChartDataPoint new] autorelease];
+			nullPoint2.xValue = [(NSDate*)[self.lastObject xValue] dateByAddingTimeInterval:2];
+			nullPoint2.yValue = nil;
+			[self addObject:nullPoint];
+		}
+	}
+	[self addObject:dataPoint];
+}
+-(void)addDailyDataPoint:(SChartMultiYDataPoint*)dataPoint{
+	if(self.count>0){
+		if(  [(NSDate*)dataPoint.xValue timeIntervalSinceDate:[self.lastObject xValue]] > 3600 * 25.0 ){
+
+			NSDictionary* lastY = [self.lastObject yValues];
+			double midpoint = ([[lastY objectForKey:SChartBandKeyLow]doubleValue] + [[lastY objectForKey:SChartBandKeyHigh]doubleValue])/2.0;
+			NSMutableDictionary* nullY =[NSMutableDictionary dictionaryWithDictionary:@{SChartBandKeyHigh: [NSNumber numberWithDouble:midpoint],
+																						SChartBandKeyLow:[NSNumber numberWithDouble:midpoint]}];
+
+			SChartMultiYDataPoint* nullPoint0 = [[SChartMultiYDataPoint new] autorelease];
+			nullPoint0.xValue = [(NSDate*)[self.lastObject xValue] dateByAddingTimeInterval:3600];
+			nullPoint0.yValues = nullY;
+			[self addObject:nullPoint0];
+
+			SChartMultiYDataPoint* nullPoint = [[SChartMultiYDataPoint new] autorelease];
+			nullPoint.xValue = [(NSDate*)[dataPoint xValue] dateByAddingTimeInterval:-3600];
+			nullPoint.yValues = nullY;
+			[self addObject:nullPoint];
+		}
+	}
+	[self addObject:dataPoint];
+}
+
 @end
