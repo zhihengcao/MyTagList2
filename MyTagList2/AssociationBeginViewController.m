@@ -969,7 +969,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 							 fractionOfDistanceBetweenInsertionPoints:NULL];
 	//NSLog(@"characterIndex=%uld",characterIndex);
 	if(characterIndex> textLabel.text.length-8){
-		[[[iToast makeText:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life (because it is more efficient to send more data in one transmission), and can add more tags at a shorter logging interval to a single tag manager. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes. "] setDuration:iToastDurationLong] showFrom:_cachePostbackCell];
+		[[[iToast makeText:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life (because it is more efficient to send more data in one transmission), and can add more tags at a shorter logging interval to a single tag manager. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes. "] setDuration:iToastDurationLong] showFrom:self.cachePostbackCell];
 		recognizer.cancelsTouchesInView=YES;
 	}else
 		recognizer.cancelsTouchesInView=NO;
@@ -1104,7 +1104,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 		}
 		else{
 			_cachePostbackCell.accessoryType = UITableViewCellAccessoryCheckmark;
-			if(![[NSUserDefaults standardUserDefaults] boolForKey:@"DisplayedMultipleTransmitWarning"] ){
+			if(![[NSUserDefaults standardUserDefaults] boolForKey:@"DisplayedMultipleTransmitWarning1"] ){
 				
 				UIAlertView *alert = [[UIAlertView alloc] init];
 				[alert setTitle:@"Please read below to understand what to expect when this option is ON"];
@@ -1114,9 +1114,11 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 				[alert show];
 				[alert release];
 
-				[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"DisplayedMultipleTransmitWarning"];
+				[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"DisplayedMultipleTransmitWarning1"];
 			}
 		}
+	}else{
+		[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	}
 
 }

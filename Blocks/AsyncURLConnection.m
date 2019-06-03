@@ -83,17 +83,17 @@ NSString *const TagListGroupName = @"group.com.mytaglist";
 #ifndef TARGET_IS_EXTENSION
 	NSString* json_msg = [error.userInfo objectForKey:@"Message"];
 #ifdef DEBUG
-	NSString* stackTrace = [error.userInfo objectForKey:@"StackTrace"];
+//	NSString* stackTrace = [error.userInfo objectForKey:@"StackTrace"];
 #endif
 
 	if([[UIApplication sharedApplication] applicationState]==UIApplicationStateActive){
 
 		if(json_msg){
-#ifdef DEBUG
+/*#ifdef DEBUG
 			iToast* t =[[iToast makeText:json_msg andDetail:stackTrace] setDuration:iToastDurationNormal];
-#else
+#else*/
 			iToast* t =[[iToast makeText:json_msg] setDuration:iToastDurationNormal];
-#endif
+//#endif
 			[t showFrom:sender];
 			
 			//[alert setTitle:[error localizedDescription]];

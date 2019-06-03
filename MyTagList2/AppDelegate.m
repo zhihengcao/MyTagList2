@@ -3410,11 +3410,13 @@ static char* getWiFiAddress() {
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
 		[_mvc.navigationController pushViewController2:avc ];
 	}else{
+		UINavigationController* nav = [[[UINavigationController alloc] initWithRootViewController:avc] autorelease];
+		
 		if(!_associate_popov || isOS8){
-			self.associate_popov=[[[UIPopoverController alloc]initWithContentViewController:avc] autorelease];
+			self.associate_popov=[[[UIPopoverController alloc]initWithContentViewController:nav] autorelease];
 			self.associate_popov.delegate=self;
 		}else
-			_associate_popov.contentViewController = avc;
+			_associate_popov.contentViewController = nav;
 		
 		[self blurView:_splitViewController.view];
 		_associate_popov.popoverContentSize = CGSizeMake(480, 600);
