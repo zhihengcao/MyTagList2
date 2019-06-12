@@ -67,7 +67,7 @@
 	_cachePostbackCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
 	_cachePostbackCell.textLabel.lineBreakMode = NSLineBreakByWordWrapping; //UILineBreakModeWordWrap;
 	_cachePostbackCell.textLabel.numberOfLines = 0;
-	_cachePostbackCell.textLabel.text = [NSLocalizedString(@"Transmit multiple temperature data points at a time to conserve battery and to allow shorter logging interval",nil) stringByAppendingString:@" ℹ️"];
+	_cachePostbackCell.textLabel.text = [NSLocalizedString(@"Buffer multiple temperature/humidity data points locally before updating",nil) stringByAppendingString:@" ℹ️"];
 	_cachePostbackCell.accessoryType = (v2flag&8)!=0? UITableViewCellAccessoryCheckmark: UITableViewCellAccessoryNone;
 	UITapGestureRecognizer* recog =[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapTooltip:)] autorelease];
 	[_cachePostbackCell addGestureRecognizer:recog];
@@ -99,7 +99,7 @@
 	//NSLog(@"characterIndex=%uld",characterIndex);
 	if(characterIndex> textLabel.text.length-8){
 
-		[[[iToast makeText:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life (because it is more efficient to send more data in one transmission), and can add more tags at a shorter logging interval to a single tag manager. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes. "] setDuration:iToastDurationLong] show];
+		[[[iToast makeText:@"For example, if you set recording interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. As a result temperature you see on screen can be up to 130 minute old unless you manually update, but you will get approx. 10% longer battery life (because it is more efficient to send in bulk) and can add more tags at a shorter logging interval to a single tag manager.  "] setDuration:iToastDurationLong] show];
 		recognizer.cancelsTouchesInView=YES;
 	}else{
 		recognizer.cancelsTouchesInView=NO;
@@ -116,7 +116,7 @@
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	return (_tag.version1>=2?(_tag.rev>=15?((_tag.version1>=4||_tag.rev>=0x90||(_tag.rev>=0x22 && _tag.tagType==CapSensor))?3:2):1):0);
+	return (_tag.version1>=2?(_tag.rev>=15?((_tag.version1>=4||_tag.rev>=0xB0||(_tag.rev>=0x90 && _tag.tagType!=ALS8k)||(_tag.rev>=0x22 && _tag.tagType==CapSensor))?3:2):1):0);
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)ip
@@ -163,7 +163,7 @@
 				
 				UIAlertView *alert = [[UIAlertView alloc] init];
 				[alert setTitle:@"Please read below to understand what to expect when this option is ON"];
-				[alert setMessage:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life because it is more efficient to send more data in one transmission. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes."];
+				[alert setMessage:@"For example, if you set recording interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. As a result temperature you see on screen can be up to 130 minute old unless you manually update, but you will get approx. 10% longer battery life (because it is more efficient to send in bulk) and can add more tags at a shorter logging interval to a single tag manager. "];
 				[alert addButtonWithTitle:NSLocalizedString(@"Continue",nil)];
 				[alert setCancelButtonIndex:0];
 				[alert show];

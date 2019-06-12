@@ -168,7 +168,7 @@
 "Current Humidity:" = "Umidità relativa:";
 "Current Moisture/Water Level:" = "Umidità corrente / acqua:";
 "Current Temperature at Tag" = "Temperatura attuale a Tag";
-"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unassociate all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "L'impostazione wireless corrente del Tag Manager è compatibile con i tag vecchi (versione 1). Sebbene funziona ancora con questo nuovo tag (versione 2), non è possibile ottenere la massima gamma del tag. Ti consigliamo di dissociare tutti i tag di versione 1 prima di associare questo tag versione 2 per sfruttarlo appieno.";
+"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unpair all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "L'impostazione wireless corrente del Tag Manager è compatibile con i tag vecchi (versione 1). Sebbene funziona ancora con questo nuovo tag (versione 2), non è possibile ottenere la massima gamma del tag. Ti consigliamo di dissociare tutti i tag di versione 1 prima di associare questo tag versione 2 per sfruttarlo appieno.";
 "Current wireless setting of your Tag Manager is not compatible with old (version 1) tags. Before you can associate this old (version 1) tag, you must migrate to a wireless setting (using the web interface) that is compatible with version 1 tags, such as 20.3kbps/140kHz." = "L'impostazione wireless corrente del Tag Manager non è compatibile con i tag vecchi (versione 1). Prima di associare questo tag vecchio (versione 1), è necessario eseguire la migrazione a un'impostazione wireless (utilizzando l'interfaccia web) compatibile con i tag di versione 1, ad esempio 20.3kbps / 140kHz.";
 "Daily Graphs" = "Grafici quotidiani";
 "Day" = "Giorno";
@@ -359,7 +359,7 @@
 "Please add at least one tag first" = "Aggiungi almeno un tag in primo luogo";
 "Please disable and re-enable 'Background App Refresh' from the 'Settings' app." = "Disattiva e riattiva nuovamente 'Aggiorna applicazione di sfondo' nell'applicazione 'Impostazioni'.";
 "Please go to home screen, open the 'Settings' app and then 'General' then 'Background app refresh' and disable and re-enable the toggle switch next to this 'WirelessTag' app. For iOS 8, please completely quit the app and re-launch it. (kCLErrorDomain error 4)" = "Vai alla schermata iniziale, apri l'app 'Impostazioni' e poi 'Generale' poi 'Aggiorna applicazione di sfondo' e disabilita e riattiva l'interruttore a discesa accanto a questa applicazione 'WirelessTag'. Per iOS 8, interrompere completamente l'applicazione e riavviarlo. (Errore kCLErrorDomain 4)";
-"Please remove battery insulating tape or insert battery into an unassociated Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "Si prega di rimuovere il nastro isolante della batteria o inserire la batteria in un tag senza fili associato. Se il tag non è già associato a un gestore di tag, sulla tag deve lampeggiare una luce.";
+"Please remove battery insulating tape or insert battery into an unpaired Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "Si prega di rimuovere il nastro isolante della batteria o inserire la batteria in un tag senza fili associato. Se il tag non è già associato a un gestore di tag, sulla tag deve lampeggiare una luce.";
 "Post Tweet" = "Post Tweet";
 "Quit" = "Smettere";
 "Range:" = "Gamma:";
@@ -520,9 +520,8 @@
 "Unable to Authenticate" = "Impossibile autenticarsi";
 "Unable to authenticate. Make sure your email and password are correct." = "Impossibile autenticarsi. Assicurati che la tua email e password siano corretti.";
 "Unable to determine if current location is near %@ or not. KumoApp not triggered." = "Impossibile determinare se la posizione corrente è vicina a %@ o no. KumoApp non viene attivato.";
-"Unassociate Tag" = "Unazionare il tag";
-"Unassociated %@ ago" = "Non associato %@ fa";
-"Unassociating..." = "Unassociating ...";
+"Unpair Tag" = "Unazionare il tag";
+"Unpaired %@ ago" = "Non associato %@ fa";
 "Undelete a Tag" = "Annulla un Tag";
 "Unhandled exception" = "Eccezione non gestita";
 "Unknown" = "Sconosciuto";

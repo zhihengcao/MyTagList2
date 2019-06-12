@@ -166,7 +166,7 @@
 "Current Humidity:" = "Humidité actuelle:";
 "Current Moisture/Water Level:" = "Humidité actuelle / Niveau d'eau:";
 "Current Temperature at Tag" = "Température actuelle à Tag";
-"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unassociate all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "Le réglage sans fil actuel de votre Tag Manager est compatible avec les anciennes étiquettes (version 1). Bien qu'il fonctionne toujours avec cette nouvelle étiquette (version 2), la portée maximale possible de l'étiquette ne peut être atteinte. Nous vous recommandons de ne pas associer toutes les étiquettes de la version 1, avant d'associer cette balise de la version 2 pour en profiter pleinement.";
+"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unpair all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "Le réglage sans fil actuel de votre Tag Manager est compatible avec les anciennes étiquettes (version 1). Bien qu'il fonctionne toujours avec cette nouvelle étiquette (version 2), la portée maximale possible de l'étiquette ne peut être atteinte. Nous vous recommandons de ne pas associer toutes les étiquettes de la version 1, avant d'associer cette balise de la version 2 pour en profiter pleinement.";
 "Current wireless setting of your Tag Manager is not compatible with old (version 1) tags. Before you can associate this old (version 1) tag, you must migrate to a wireless setting (using the web interface) that is compatible with version 1 tags, such as 20.3kbps/140kHz." = "Le réglage sans fil actuel de votre Tag Manager n'est pas compatible avec les anciennes étiquettes (version 1). Avant d'associer cette ancienne étiquette (version 1), vous devez migrer vers un paramètre sans fil (en utilisant l'interface Web) compatible avec les balises de la version 1, telles que 20.3kbps / 140kHz.";
 "Daily Graphs" = "Graphiques quotidiens";
 "Day" = "journée";
@@ -358,7 +358,7 @@
 "Please add at least one tag first" = "Veuillez ajouter au moins une étiquette d'abord";
 "Please disable and re-enable 'Background App Refresh' from the 'Settings' app." = "Désactivez et réactivez 'Background Refresh d'application' dans l'application 'Paramètres'.";
 "Please go to home screen, open the 'Settings' app and then 'General' then 'Background app refresh' and disable and re-enable the toggle switch next to this 'WirelessTag' app. For iOS 8, please completely quit the app and re-launch it. (kCLErrorDomain error 4)" = "Accédez à l'écran d'accueil, ouvrez l'application 'Paramètres', puis 'Général', puis 'Rafraîchissement de l'application en arrière-plan' et désactivez et réactivez le commutateur à bascule à côté de cette application 'WirelessTag'. Pour iOS 8, veuillez quitter complètement l'application et la relancer. (KCLErrorDomain erreur 4)";
-"Please remove battery insulating tape or insert battery into an unassociated Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "Retirez le ruban isolant de la batterie ou insérez la batterie dans une étiquette sans fil non associée. Si la balise n'est pas déjà associée à un gestionnaire de balises, une lumière devrait clignoter sur la balise.";
+"Please remove battery insulating tape or insert battery into an unpaired Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "Retirez le ruban isolant de la batterie ou insérez la batterie dans une étiquette sans fil non associée. Si la balise n'est pas déjà associée à un gestionnaire de balises, une lumière devrait clignoter sur la balise.";
 "Post Tweet" = "Post Tweet";
 "Quit" = "Quitter";
 "Range:" = "Gamme:";
@@ -519,9 +519,7 @@
 "Unable to Authenticate" = "Impossible d'authentifier";
 "Unable to authenticate. Make sure your email and password are correct." = "Impossible d'authentifier. Assurez-vous que votre courrier électronique et votre mot de passe sont corrects.";
 "Unable to determine if current location is near %@ or not. KumoApp not triggered." = "Impossible de déterminer si l'emplacement actuel est proche de %@ ou non. KumoApp n'est pas déclenché.";
-"Unassociate Tag" = "Unassociate Tag";
-"Unassociated %@ ago" = "Non associée il y a %@";
-"Unassociating..." = "Unassociating ...";
+"Unpaired %@ ago" = "Non associée il y a %@";
 "Undelete a Tag" = "Rebranchez une étiquette";
 "Unhandled exception" = "Exception non-gérée";
 "Unknown" = "Inconnu";

@@ -94,7 +94,7 @@
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
 	if(section==0)
-		return NSLocalizedString(@"Please remove battery insulating tape or insert battery into an unassociated Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag.",nil);
+		return NSLocalizedString(@"Please remove battery insulating tape or insert battery into an unpaired Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag.",nil);
 	else if(section==1)
 		return NSLocalizedString(@"Add more tag managers to your account to extend signal coverage and/or to allow adding more tags.",nil);
 	else if(section==2)
@@ -261,7 +261,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 			NSDate* now = [[[NSDate alloc] init] autorelease];
 			NSTimeInterval diff = [now timeIntervalSinceDate:deleted] + serverTime2LocalTime;
 
-			cell.detailTextLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Unassociated %@ ago",nil), [NSDictionary UserFriendlyTimeSpanString:NO ForInterval:diff]];
+			cell.detailTextLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Unpaired %@ ago",nil), [NSDictionary UserFriendlyTimeSpanString:NO ForInterval:diff]];
 			//cell.accessoryType = [[tag objectForKey:@"_checked"]boolValue] ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
 			return cell;
 		}
@@ -416,7 +416,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 							  if(!optimizeForV2Tag && !isTagListEmpty){
 								  UIAlertView *alert = [[UIAlertView alloc] init];
 								  [alert setTitle:NSLocalizedString(@"Compatibility Notice",nil)];
-								  [alert setMessage:NSLocalizedString(@"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unassociate all version 1 tags, before you associate this version 2 tag to take full advantage of it.",nil)];
+								  [alert setMessage:NSLocalizedString(@"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unpair all version 1 tags, before you associate this version 2 tag to take full advantage of it.",nil)];
 								  [alert addButtonWithTitle:NSLocalizedString(@"Continue",nil)];
 								  [alert setCancelButtonIndex:0];
 								  [alert show];
@@ -932,7 +932,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 	_cachePostbackCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
 	_cachePostbackCell.textLabel.lineBreakMode = NSLineBreakByWordWrapping; //UILineBreakModeWordWrap;
 	_cachePostbackCell.textLabel.numberOfLines = 0;
-	_cachePostbackCell.textLabel.text =  [NSLocalizedString(@"Transmit multiple temperature data points at a time to conserve battery and gather more data",nil) stringByAppendingString:@" ℹ️"];
+	_cachePostbackCell.textLabel.text =  [NSLocalizedString(@"Buffer multiple temperature/humidity data points locally before updating",nil) stringByAppendingString:@" ℹ️"];
 	_cachePostbackCell.accessoryType = UITableViewCellAccessoryNone; //UITableViewCellAccessoryCheckmark;
 	UITapGestureRecognizer* recog =[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapTooltip:)] autorelease];
 	recog.cancelsTouchesInView=NO;
@@ -969,7 +969,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 							 fractionOfDistanceBetweenInsertionPoints:NULL];
 	//NSLog(@"characterIndex=%uld",characterIndex);
 	if(characterIndex> textLabel.text.length-8){
-		[[[iToast makeText:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life (because it is more efficient to send more data in one transmission), and can add more tags at a shorter logging interval to a single tag manager. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes. "] setDuration:iToastDurationLong] showFrom:self.cachePostbackCell];
+		[[[iToast makeText:@"For example, if you set recording interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. As a result temperature you see on screen can be up to 130 minute old unless you manually update, but you will get approx. 10% longer battery life (because it is more efficient to send in bulk) and can add more tags at a shorter logging interval to a single tag manager. "] setDuration:iToastDurationLong] showFrom:self.cachePostbackCell];
 		recognizer.cancelsTouchesInView=YES;
 	}else
 		recognizer.cancelsTouchesInView=NO;
@@ -1034,7 +1034,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if(section==1)return 3;
-	else if(section==0) return (_tagInfo.version1>=2?(_tagInfo.version2>=15?((_tagInfo.version1>=4||_tagInfo.version2>=0x90 || (_tagInfo.version2>=0x22 && _tagInfo.tagType1==CapSensor))?5:4):3):2);
+	else if(section==0) return (_tagInfo.version1>=2?(_tagInfo.version2>=15?((_tagInfo.version1>=4||_tagInfo.version2>=0xB0||(_tagInfo.version2>=0x90 && _tagInfo.tagType1!=ALS8k) || (_tagInfo.version2>=0x22 && _tagInfo.tagType1==CapSensor))?5:4):3):2);
 	return 0;
 }
 -(void)setTagInfo:(NSDictionary *)tagInfo{
@@ -1108,7 +1108,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 				
 				UIAlertView *alert = [[UIAlertView alloc] init];
 				[alert setTitle:@"Please read below to understand what to expect when this option is ON"];
-				[alert setMessage:@"For example, if you set 'auto-update' (logging) interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. You will NOT see very recent temperature on screen unless you manually update, but you will get longer battery life because it is more efficient to send more data in one transmission. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes."];
+				[alert setMessage:@"For example, if you set recording interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. As a result temperature you see on screen can be up to 130 minute old unless you manually update, but you will get approx. 10% longer battery life (because it is more efficient to send in bulk) and can add more tags at a shorter logging interval to a single tag manager. "];
 				[alert addButtonWithTitle:NSLocalizedString(@"Continue",nil)];
 				[alert setCancelButtonIndex:0];
 				[alert show];

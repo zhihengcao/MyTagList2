@@ -168,7 +168,7 @@
 "Current Humidity:" = "現在の湿度：";
 "Current Moisture/Water Level:" = "現在の水分/水位：";
 "Current Temperature at Tag" = "タグの現在の温度";
-"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unassociate all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "タグマネージャの現在のワイヤレス設定は、古い（バージョン1）タグと互換性があります。この新しい（バージョン2）タグではまだ動作しますが、タグの最大可能範囲は達成できません。このバージョン2のタグを完全に活用するには、その前にすべてのバージョン1のタグの関連付けを解除することをお勧めします。";
+"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unpair all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "タグマネージャの現在のワイヤレス設定は、古い（バージョン1）タグと互換性があります。この新しい（バージョン2）タグではまだ動作しますが、タグの最大可能範囲は達成できません。このバージョン2のタグを完全に活用するには、その前にすべてのバージョン1のタグの関連付けを解除することをお勧めします。";
 "Current wireless setting of your Tag Manager is not compatible with old (version 1) tags. Before you can associate this old (version 1) tag, you must migrate to a wireless setting (using the web interface) that is compatible with version 1 tags, such as 20.3kbps/140kHz." = "タグマネージャの現在のワイヤレス設定は、古い（バージョン1）タグと互換性がありません。この古い（バージョン1）タグを関連付ける前に、バージョン1タグ（20.3kbps / 140kHzなど）と互換性のあるワイヤレス設定（Webインターフェイスを使用）に移行する必要があります。";
 "Daily Graphs" = "毎日のグラフ";
 "Day" = "日";
@@ -360,7 +360,7 @@
 "Please add at least one tag first" = "最初に少なくとも1つのタグを追加してください";
 "Please disable and re-enable 'Background App Refresh' from the 'Settings' app." = "「設定」アプリから「バックグラウンドアプリの更新」を無効にしてもう一度有効にしてください。";
 "Please go to home screen, open the 'Settings' app and then 'General' then 'Background app refresh' and disable and re-enable the toggle switch next to this 'WirelessTag' app. For iOS 8, please completely quit the app and re-launch it. (kCLErrorDomain error 4)" = "ホーム画面に移動し、「設定」アプリを開き、「一般」、「背景アプリの更新」を開き、この「無線タグ」アプリの横にある切り替えスイッチを無効にして再度有効にしてください。 iOS 8の場合は、アプリを完全に終了してから再起動してください。 （kCLErrorDomainエラー4）";
-"Please remove battery insulating tape or insert battery into an unassociated Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "バッテリー絶縁テープを取り外したり、バッテリーを関連のないワイヤレスタグに挿入してください。タグがまだタグマネージャに関連付けられていない場合は、ライトがタグ上で点滅しているはずです。";
+"Please remove battery insulating tape or insert battery into an unpaired Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "バッテリー絶縁テープを取り外したり、バッテリーをワイヤレスタグに挿入してください。タグがまだタグマネージャに関連付けられていない場合は、ライトがタグ上で点滅しているはずです。";
 "Post Tweet" = "Tweetを投稿";
 "Quit" = "終了する";
 "Range:" = "範囲：";
@@ -521,8 +521,8 @@
 "Unable to Authenticate" = "認証できません";
 "Unable to authenticate. Make sure your email and password are correct." = "認証できません。あなたのメールアドレスとパスワードが正しいことを確認してください。";
 "Unable to determine if current location is near %@ or not. KumoApp not triggered." = "現在の場所が%@に近いかどうかを判断できません。 KumoAppは起動しませんでした。";
-"Unassociate Tag" = "タグの関連付けを解除する";
-"Unassociated %@ ago" = "未対応%@前";
+"Unpair Tag" = "タグの関連付けを解除する";
+"Unpaired %@ ago" = "未対応%@前";
 "Unassociating..." = "関連付けを解除する...";
 "Undelete a Tag" = "解除したタグの元に戻す";
 "Unhandled exception" = "未処理の例外";

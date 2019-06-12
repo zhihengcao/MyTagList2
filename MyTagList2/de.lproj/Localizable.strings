@@ -168,7 +168,7 @@
 "Current Humidity:" = "aktuelle Feuchtigkeit:";
 "Current Moisture/Water Level:" = "Aktuelle Feuchtigkeit / Wasserstand:";
 "Current Temperature at Tag" = "Aktuelle Temperatur am WirelessTag";
-"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unassociate all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "Die aktuelle WLAN-Einstellung Ihres Tag-Managers ist mit der alten (Version 1) Wireless-Tags kompatibel. Obwohl es immer noch mit der neuen (Version 2) Wireless-Tag arbeitet, wenn der maximal mögliche Bereich des Wireless-Tags nicht erreicht werden kann. Empfehlen wirIhnen, alle Versions-1-Tags zu verknüpfen, bevor Sie diese Version 2-Tag verknüpfen, um den Bereich voll auszunutzen.";
+"Current wireless setting of your Tag Manager is compatible with old (version 1) tags. Although it still works with this new (version 2) tag, the tag's maximum possible range cannot be achieved. We recommend that you unpair all version 1 tags, before you associate this version 2 tag to take full advantage of it." = "Die aktuelle WLAN-Einstellung Ihres Tag-Managers ist mit der alten (Version 1) Wireless-Tags kompatibel. Obwohl es immer noch mit der neuen (Version 2) Wireless-Tag arbeitet, wenn der maximal mögliche Bereich des Wireless-Tags nicht erreicht werden kann. Empfehlen wirIhnen, alle Versions-1-Tags zu verknüpfen, bevor Sie diese Version 2-Tag verknüpfen, um den Bereich voll auszunutzen.";
 "Current wireless setting of your Tag Manager is not compatible with old (version 1) tags. Before you can associate this old (version 1) tag, you must migrate to a wireless setting (using the web interface) that is compatible with version 1 tags, such as 20.3kbps/140kHz." = "Die aktuelle drahtlose Einstellung Ihres Tag-Managers ist nicht mit alten (Version 1) -Tags kompatibel. Bevor Sie dieses alte (Version 1) Tag verknüpfen können, müssen Sie auf eine drahtlose Einstellung (über das Webinterface) migrieren, die mit Versions 1-Tags kompatibel ist, z. B. 20.3kbps / 140kHz.";
 "Daily Graphs" = "Tägliche Trendkurven";
 "Day" = "Tag";
@@ -360,7 +360,7 @@
 "Please add at least one tag first" = "Bitte fügen Sie mindestens ein WirelessTag zuerst hinzu";
 "Please disable and re-enable 'Background App Refresh' from the 'Settings' app." = "Bitte deaktivieren und reaktivieren Sie 'Background App Refresh' aus der App 'Settings'.";
 "Please go to home screen, open the 'Settings' app and then 'General' then 'Background app refresh' and disable and re-enable the toggle switch next to this 'WirelessTag' app. For iOS 8, please completely quit the app and re-launch it. (kCLErrorDomain error 4)" = "Gehen Sie bitte auf den Startbildschirm, öffnen Sie die App 'Einstellungen' und dann 'Allgemein' dann 'Hintergrund App aktualisieren' und deaktivieren und aktivieren Sie den Toggle Switch neben dieser 'WirelessTag' App. Für iOS 8 bitte die App komplett beenden und neu starten. (KCLErrorDomain Fehler 4)";
-"Please remove battery insulating tape or insert battery into an unassociated Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "Bitte entfernen Sie das Batterie Isolierband oder legen Sie die Batterie in ein nicht zugeordnetes WirelessTag ein. Wenn das WirelessTag nicht bereits mit einem Tag Manager verknüpft ist, sollte ein Licht auf dem WirelessTag blinken.";
+"Please remove battery insulating tape or insert battery into an unpaired Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag." = "Bitte entfernen Sie das Batterie Isolierband oder legen Sie die Batterie in ein nicht zugeordnetes WirelessTag ein. Wenn das WirelessTag nicht bereits mit einem Tag Manager verknüpft ist, sollte ein Licht auf dem WirelessTag blinken.";
 "Post Tweet" = "Post Tweet";
 "Quit" = "Verlassen";
 "Range:" = "Bereich:";
@@ -523,9 +523,9 @@
 "Unable to Authenticate" = "Kann nicht authentifizieren";
 "Unable to authenticate. Make sure your email and password are correct." = "Kann sich nicht authentifizieren. Stellen Sie sicher, dass Ihre E-Mail und Ihr Passwort korrekt sind.";
 "Unable to determine if current location is near %@ or not. KumoApp not triggered." = "Kann nicht feststellen, ob der aktuelle Standort in der Nähe von %@ liegt oder nicht. KumoApp nicht ausgelöst.";
-"Unassociate Tag" = "Nicht zugeordnete  WirelessTag";
-"Unassociated %@ ago" = "Nicht zugeordnete  %@ vor";
-"Unassociating..." = "Nicht zugeordnete...";
+"Unpair Tag" = "Nicht zugeordnete  WirelessTag";
+"Unpaired %@ ago" = "Nicht zugeordnete  %@ vor";
+"Unpairing..." = "Nicht zugeordnete...";
 "Undelete a Tag" = "ungelöschte WirelessTag";
 "Unhandled exception" = "Unbehandelte Ausnahme";
 "Unknown" = "Unbekannt";

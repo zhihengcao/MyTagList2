@@ -1294,7 +1294,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 
 
 	resetStatesCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Reset States",nil) Progress:NSLocalizedString(@"Resetting...",nil) andIcon:@"icon_reset.png"];
-	unassociateCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Unassociate Tag",nil) Progress:NSLocalizedString(@"Unassociating...",nil) andIcon:@"icon_trash.png"];
+	unassociateCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Unpair Tag",nil) Progress:NSLocalizedString(@"Unpairing...",nil) andIcon:@"icon_trash.png"];
 	doorStatsCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Door Stats",nil) Progress:NSLocalizedString(@"Loading...",nil) andIcon:@"icon_logbook.png"];
 	resetEventCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Reset Moved/Detected",nil) Progress:NSLocalizedString(@"Resetting...",nil)];
 	calibrateRadioCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Calibrate Radio",nil) Progress:NSLocalizedString(@"Calibrating...",nil)];
