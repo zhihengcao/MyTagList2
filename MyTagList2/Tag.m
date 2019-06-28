@@ -352,10 +352,10 @@ NSTimeInterval serverTime2LocalTime = 0.0;
 -(BOOL) hasALS{TagType t=self.tagType; return t==ALS8k; }
 -(BOOL)hasProtimeter{return self.tagType==TCProbe && (self.rev&0xF)==0xE; }
 -(BOOL)hasThermocouple{return self.tagType==TCProbe && (self.rev&0xF)==0xF; }
--(BOOL) has13bit{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==ALS8k || t==TCProbe; }
+-(BOOL) has13bit{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==ALS8k || (t==TCProbe && self.shorted /*using SHT20*/); }
 -(BOOL) hasTemperatureSensor {TagType t=self.tagType; return t!=WeMo && t!=DropCam;}
 -(BOOL) hasCap{TagType t=self.tagType; int rev=self.rev; if(rev>=0x4D && (rev&0xF)==0xD)return false;
-	if(t==TCProbe && (rev&0xF)==0xE)return true;
+	if(t==TCProbe && ((rev&0xF)==0xE || self.shorted))return true;
 	return t==MotionRH || t==ReedSensor ||  t==PIR || t==CapSensor || t==TagPro || t==ALS8k;}
 
 -(BOOL) hasPIR{TagType t=self.tagType; return t==PIR;}

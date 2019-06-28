@@ -1333,8 +1333,8 @@ static const char kBundleKey = 0;
 																			}andType:nil andDataLoader:loader ] autorelease];
 
 	SingleTagChart* chart =((LandscapeGraphViewController*)vc).chart;
-	chart.dewPointMode = _dvc.tag.hasThermocouple|| withLux || (_dvc.tag.has13bit&&dewPointMode);
-	chart.capIsChipTemperatureMode=_dvc.tag.hasThermocouple;
+	chart.dewPointMode = (_dvc.tag.hasThermocouple&&!_dvc.tag.shorted) || withLux || (_dvc.tag.has13bit&&dewPointMode);
+	chart.capIsChipTemperatureMode=(_dvc.tag.hasThermocouple && !_dvc.tag.shorted);
 	chart.hasALS = withLux;
 	
 	vc.shareHandler = shareHandler;
@@ -2972,14 +2972,14 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 					  return YES;
 				  } setMac:tag.xSetMac];
 }
--(void) enableDS18:(id)sender enable:(BOOL)on{
+-(void) enableDS18:(id)sender enable:(BOOL)on useSHT20:(BOOL)sht20 {
 	[_dvc showLoadingBarItem:sender];
 	int slaveId = _dvc.tag.slaveId;
 	NSMutableDictionary* tag = _dvc.tag;
 	[AsyncURLConnection request:[WSROOT
-								 stringByAppendingString:@"ethClient.asmx/DetectExtTempSensor"]
+								 stringByAppendingString:@"ethClient.asmx/DetectExtTempSensor2"]
 						jsonObj:[NSDictionary dictionaryWithObjectsAndKeys:
-								 [NSNumber numberWithInt:slaveId],@"id", [NSNumber numberWithBool:on], @"detect", nil]
+								 [NSNumber numberWithInt:slaveId],@"id", [NSNumber numberWithBool:on], @"detect", [NSNumber numberWithBool:sht20], @"useSHT20",  nil]
 				  completeBlock:^(NSDictionary* retval){
 					  [_dvc revertLoadingBarItem:sender];
 					  if(on){
@@ -2994,7 +2994,10 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 						  [[[iToast makeText:serial andDetail:@""] setDuration:iToastDurationNormal] showFrom:[_mvc cellForTag:tag]];
 					  }
 					  else{
-						  [[[iToast makeText:NSLocalizedString(@"Changed to internal temperature sensor, taking temperature readings...",nil) andDetail:@""] setDuration:iToastDurationNormal] showFrom:[_mvc cellForTag:tag]];
+						  if(_dvc.tag.hasThermocouple && sht20==NO)
+							  [[[iToast makeText:NSLocalizedString(@"Changed to thermocouple, taking temperature readings...",nil) andDetail:@""] setDuration:iToastDurationNormal] showFrom:[_mvc cellForTag:tag]];
+						  else
+							  [[[iToast makeText:NSLocalizedString(@"Changed to temperature/humidity probe, taking initial readings...",nil) andDetail:@""] setDuration:iToastDurationNormal] showFrom:[_mvc cellForTag:tag]];
 					  }
 					  [self reqImmediatePostback:sender];
 					  if(_dvc.tag.tempEventState != TempDisarmed){

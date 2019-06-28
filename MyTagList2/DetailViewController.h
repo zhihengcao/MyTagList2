@@ -75,7 +75,7 @@
 -(void) thermostatDisableLocal:(id)sender disable:(BOOL)on;
 
 -(void)enableKumoApp:(NSMutableDictionary*)script enable:(BOOL)on from:(id)sender;
--(void)enableDS18:(id)sender enable:(BOOL)on;
+-(void)enableDS18:(id)sender enable:(BOOL)on useSHT20:(BOOL)sht20;
 -(void)dimLED:(id)sender dimTo:(float)dimTo speed:(NSInteger)speed;
 
 -(void) showUpdateOptionPicker:(OptionPicker*)picker From:(id)sender;
@@ -105,7 +105,8 @@ UIImagePickerControllerDelegate,UINavigationControllerDelegate, UIPopoverControl
 
 	IASKPSSliderSpecifierViewCell *dimCell;
 
-	IASKPSToggleSwitchSpecifierViewCell* allowLocalCell, *ds18Cell;
+	IASKPSToggleSwitchSpecifierViewCell* allowLocalCell; //, *ds18Cell;
+	IASKPSTextFieldSpecifierViewCell* ds18Cell;
 	
 	GHCollapsingAndSpinningTableViewCell *moreCell1, *moreCell2;
 	IASKPSTextFieldSpecifierViewCell* thermostatChoiceCell;

@@ -117,6 +117,7 @@
 		AD677E2F159245B500F20EA4 /* NSData+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = AD677E2D159245B500F20EA4 /* NSData+MD5.m */; };
 		AD677E361592476200F20EA4 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = AD677E341592476200F20EA4 /* NSData+Base64.m */; };
 		AD6E613D16360F7E00F1D163 /* TempOptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6E613B16360F7E00F1D163 /* TempOptionsViewController.m */; };
+		AD70A25022C5945500E9CA28 /* icon_gear@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD70A24F22C5945500E9CA28 /* icon_gear@2x.png */; };
 		AD7346821CD91FA100B67D6F /* signal0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD73467C1CD91FA100B67D6F /* signal0@2x.png */; };
 		AD7346831CD91FA100B67D6F /* signal1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD73467D1CD91FA100B67D6F /* signal1@2x.png */; };
 		AD7346841CD91FA100B67D6F /* signal2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD73467E1CD91FA100B67D6F /* signal2@2x.png */; };
@@ -496,6 +497,7 @@
 		AD677E351592476200F20EA4 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
 		AD6E613B16360F7E00F1D163 /* TempOptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TempOptionsViewController.m; sourceTree = "<group>"; };
 		AD6E613C16360F7E00F1D163 /* TempOptionsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TempOptionsViewController.h; sourceTree = "<group>"; };
+		AD70A24F22C5945500E9CA28 /* icon_gear@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon_gear@2x.png"; path = "../../../Downloads/wlanpref_0005/icon_gear@2x.png"; sourceTree = "<group>"; };
 		AD73467C1CD91FA100B67D6F /* signal0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "signal0@2x.png"; path = "../../../Pictures/signal0@2x.png"; sourceTree = "<group>"; };
 		AD73467D1CD91FA100B67D6F /* signal1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "signal1@2x.png"; path = "../../../Pictures/signal1@2x.png"; sourceTree = "<group>"; };
 		AD73467E1CD91FA100B67D6F /* signal2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "signal2@2x.png"; path = "../../../Pictures/signal2@2x.png"; sourceTree = "<group>"; };
@@ -1044,6 +1046,7 @@
 		ADE186AC14D7299C001C349E /* images */ = {
 			isa = PBXGroup;
 			children = (
+				AD70A24F22C5945500E9CA28 /* icon_gear@2x.png */,
 				AD5582122243F61D000EB691 /* iOS_addbutton@2x.png */,
 				AD5E38FF22347C970001C86A /* ka_ambientlight.png */,
 				AD5E390022347C970001C86A /* ka_humidity.png */,
@@ -1367,6 +1370,7 @@
 				AD0BB55D18675B9400149D42 /* moof.aiff in Resources */,
 				AD1DB96B215D5C1600ABF356 /* question.png in Resources */,
 				AD7346DE1CD9AD5B00B67D6F /* ph_tag13b@2x.png in Resources */,
+				AD70A25022C5945500E9CA28 /* icon_gear@2x.png in Resources */,
 				ADE185CA14D678DB001C349E /* MasterViewController_iPad.xib in Resources */,
 				AD7346841CD91FA100B67D6F /* signal2@2x.png in Resources */,
 				AD3775301D591E760095BB85 /* IASKPSLuxRangeSpecifierViewCell.xib in Resources */,

@@ -441,7 +441,7 @@
 				capData=[NSString stringWithFormat:@"💦%.0f%% ", tag.cap];
 		}else if(tag.isWeMo){
 			capData = [NSString stringWithFormat:@"💡%.0f%% ", tag.cap];
-		}else if(tag.hasThermocouple){
+		}else if(tag.hasThermocouple && !tag.shorted){
 			capData = [NSString stringWithFormat:@"%.1f°%@ (Chip)",	 _useDegF?tag.cap*9.0/5.0+32.0: tag.cap,	 _useDegF?@"F":@"C"];
 		}else
 			capData=nil;

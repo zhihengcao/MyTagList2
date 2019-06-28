@@ -126,7 +126,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	else
 		batteryCell.textField.textColor = signalCell.textField.textColor;
 	
-	ds18Cell.toggleOn = _tag.ds18;
+//	ds18Cell.toggleOn = _tag.ds18;
 	
 	signalCell.textField.text = _tag.signaldBm>-118? [NSString stringWithFormat:NSLocalizedString(@"%.0fdBm (%.0f%% power)",nil), _tag.signaldBm, _tag.txpwr*100.0f/255.0f]:
 	[NSString stringWithFormat:NSLocalizedString(@"No signal at %@",nil), _tag.managerName];
@@ -176,10 +176,26 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	else{
 		motionCell.label.text=NSLocalizedString(@"Reed Sensor",nil);
 	}
+	if(_tag.tagType==TCProbe){
+		if(_tag.shorted)
+			capCell.label.text=NSLocalizedString(@"Humidity",nil);
+		else
+			capCell.label.text= _tag.hasThermocouple?NSLocalizedString(@"Chip Temperature",nil): NSLocalizedString(@"Wood Moisture Equivalent",nil);
+
+		if(_tag.hasThermocouple && !_tag.shorted){
+			capCell.iconImage.image = [UIImage imageNamed:@"icon_chip"];
+			capCell.accessoryType = UITableViewCellAccessoryNone;
+			capCell.userInteractionEnabled=NO;
+		}else{
+			capCell.iconImage.image = [UIImage imageNamed:@"icon_humidity"];
+			capCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+			capCell.userInteractionEnabled=YES;
+		}
+	}
 	if(_tag.cap!=0)
 	{
 		NSString *capCellText;
-		if(_tag.has13bit && _tag.tagType!=TCProbe){
+		if(_tag.has13bit ){
 			float dp = dewPoint(_tag.cap, _tag.temperatureDegC);
 			capCellText = [NSString stringWithFormat:@"%.0f%%/%.0f°%@", _tag.cap, temp_unit==1?dp*9.0/5.0+32.0:dp,temp_unit==1?@"F":@"C"];
 		}
@@ -209,6 +225,8 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		
 		[lightCell addSwatch:_tag.lightEventStateSwatch animated:animated];
 	}
+	
+	ds18Cell.textField.text = _tag.ds18?@"DS18B20":(_tag.hasThermocouple&&!_tag.shorted? @"k-Type Thermocouple": @"SHT20");
 	
 	NSString *tempCellText = [NSString stringWithFormat:@"%.0f°C/%.0f°F", _tag.temperatureDegC, _tag.temperatureDegC*9.0/5.0+32.0];	
 	if(_tag.tempEventState==TooLow)
@@ -417,7 +435,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 			break;
 		case TCProbe:
 			self.staticToolBarItems = [NSArray arrayWithObjects:_pictureBtn, spacerItem, _pingBtn, spacerItem, _optionsBtn, nil];
-			capCell.label.text= _tag.hasThermocouple?NSLocalizedString(@"Chip Temperature",nil): NSLocalizedString(@"Wood Moisture Equivalent",nil);
+			
 			break;
 
 		case WeMo:
@@ -428,15 +446,6 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 			self.staticToolBarItems = [NSArray arrayWithObjects:_pictureBtn, spacerItem,_pingBtn, spacerItem, _optionsBtn, nil];
 			break;
 			
-	}
-	if(_tag.hasThermocouple){
-		capCell.iconImage.image = [UIImage imageNamed:@"icon_chip"];
-		capCell.accessoryType = UITableViewCellAccessoryNone;
-		capCell.userInteractionEnabled=NO;
-	}else{
-		capCell.iconImage.image = [UIImage imageNamed:@"icon_humidity"];
-		capCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-		capCell.userInteractionEnabled=YES;
 	}
 	if(_tag.hasProtimeter){
 		temperatureCell.label.text = NSLocalizedString(@"Chip Temperature",nil);
@@ -856,6 +865,26 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	else if(btn==camDetailCell){
 		[self openCamDetailView];
 	}
+	else if(btn==ds18Cell){
+		NSArray* probes;
+		if(_tag.hasThermocouple){
+			if(_tag.rev > 0x80){
+				probes=@[@"DS18B20", @"k-Type Thermocouple", @"SHT20"];
+			}else{
+				probes=@[@"DS18B20", @"k-Type Thermocouple"];
+			}
+		}else{
+			probes=@[@"DS18B20", @"SHT20"];
+		}
+		OptionPicker *picker = [[OptionPicker alloc]initWithOptions:probes
+														   Selected: _tag.ds18?0:(_tag.shorted?2:1)
+															   Done:^(NSInteger selected, BOOL now){
+																   [_delegate enableDS18:btn enable:selected==0 useSHT20:selected==2];
+															   }  ];
+		picker.nowOptions=@[@0,@1,@2];
+		[_delegate showUpdateOptionPicker:picker From:btn];
+		[picker release];
+	}
 	else if(btn==addScriptCell){
 
 		if(!tableView.isEditing){
@@ -1247,9 +1276,9 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		[_delegate thermostatDisableLocal:cell disable:allowLocalCell.toggle.on];
 		
 	}
-	else if(cell==ds18Cell){
+/*	else if(cell==ds18Cell){
 		[_delegate enableDS18:cell enable:ds18Cell.toggle.on];
-	}
+	}*/
 	else if([cell isKindOfClass:[IASKPSToggleSwitchSpecifierViewCell class]]){
 		IASKPSToggleSwitchSpecifierViewCell* c = (IASKPSToggleSwitchSpecifierViewCell*)cell;
 		[_delegate enableKumoApp:c.script enable:c.toggle.on from:c];
@@ -1312,9 +1341,10 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	
 	allowLocalCell =[IASKPSToggleSwitchSpecifierViewCell  newLoadingWithTitle:NSLocalizedString(@"Turn Off Instead of Away",nil) Progress:NSLocalizedString(@"Configuring...",nil) helpText:NSLocalizedString(@"When enabled, the home/away switch will turn off thermostat completely instead of just setting to 'Away'",nil)
 																	 delegate:self];
-	ds18Cell = [IASKPSToggleSwitchSpecifierViewCell
+	ds18Cell =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Probe type",nil) andIcon:@"icon_gear.png"];
+	/*[IASKPSToggleSwitchSpecifierViewCell
 				newLoadingWithTitle:NSLocalizedString(@"  Use DS18B20 Probe",nil) Progress:NSLocalizedString(@"  Configuring...",nil) helpText:NSLocalizedString(@"After connecting DS18B20 series external water proof probe, use this to switch to it. ",nil)
-				delegate:self];
+				delegate:self];*/
 	
 	moreCell1 = [GHCollapsingAndSpinningTableViewCell newWithStyle:UIExpansionStyleCollapsed];
 	moreCell2 = [GHCollapsingAndSpinningTableViewCell newWithStyle:UIExpansionStyleCollapsed];
