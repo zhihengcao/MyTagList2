@@ -100,6 +100,8 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 		case CapSensor: return @"ph_water.png";
 
 		case TCProbe: return @"ph_probe.png";
+		case Usb: return @"ph_usb.png";
+		case UsbALS: return @"ph_usb.png";
 		default: return @"PlaceHolder.png";
 	}
 	

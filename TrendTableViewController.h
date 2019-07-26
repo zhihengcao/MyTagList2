@@ -10,8 +10,9 @@
 #import "TrendTableViewCell.h"
 #import "Tag.h"
 #import "AsyncURLConnection.h"
+#import "MultiSelectSegmentedControl.h"
 
-@interface TrendTableViewController : UITableViewController <UISearchDisplayDelegate, UISearchBarDelegate>
+@interface TrendTableViewController : UITableViewController <UISearchDisplayDelegate, UISearchBarDelegate, MultiSelectSegmentedControlDelegate>
 {
 	BOOL 		reloadPending;
 	BOOL			searchWasActive;
@@ -19,7 +20,7 @@
 	BOOL   useDegF;
 	AsyncSoapURLConnection* comet;
 	BOOL should_run_comet;
-	
+	MultiSelectSegmentedControl *segmentedControl;
 //	int nCellLaied
 }
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil delegate: (id<MasterViewControllerDelegate>) delegate;

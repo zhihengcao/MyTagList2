@@ -205,6 +205,7 @@
 	[luxSeries removeAllObjects];
 	[bandLuxSeries removeAllObjects];
 	//[battSeries removeAllObjects];
+	[_date2DLI removeAllObjects];
 }
 -(void)initLuxAxisMinMax{
 	luxAxisMax= LuxTypeTranslator.instance.ymaxInit;
@@ -246,13 +247,18 @@
 	}
 
 //	if(!self.dewPointMode && capSeries.count>0 && ![self.allYAxes containsObject:capAxis])[self addYAxis:capAxis];
-	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
-		if(![self.allYAxes containsObject:capAxis])
+	self.hasCap =(capSeries.count>0 || rawCapSeries.count>0);
+	if(!self.dewPointMode && _hasCap){
+		
+		if(![self.allYAxes containsObject:capAxis]){
 			[self addYAxis:capAxis];
+			NSLog(@"added capAxis %@", capAxis);
+		}
 	}
-	else 	if([self.allYAxes containsObject:capAxis])
+	else 	if([self.allYAxes containsObject:capAxis]){
 		[self removeYAxis:capAxis];
-
+		NSLog(@"removed capAxis %@", capAxis);
+	}
 
 	/*if(!self.hasALS){
 		if(!self.dewPointMode && rawCapSeries.count>0 && self.allYAxes.count==1){
@@ -303,7 +309,8 @@
 	}
 	
 //	if(!self.dewPointMode && capSeries.count>0 && ![self.allYAxes containsObject:capAxis])[self addYAxis:capAxis];
-	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
+	self.hasCap =(capSeries.count>0 || rawCapSeries.count>0);
+	if(!self.dewPointMode && _hasCap){
 		if(![self.allYAxes containsObject:capAxis])
 			[self addYAxis:capAxis];
 	}
@@ -473,7 +480,8 @@
 		}
 	}
 	
-	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
+	self.hasCap =(capSeries.count>0 || rawCapSeries.count>0);
+	if(!self.dewPointMode && _hasCap){
 		if(![self.allYAxes containsObject:capAxis])
 			[self addYAxis:capAxis];
 	}
@@ -641,7 +649,7 @@
 		 }
 		 */
 	}
-	if(!self.hasALS)avg/=tempSeries.count;
+	if(!self.hasALS && avg>0)avg/=count;
 	
 	[self.date2DLI setObject:[NSNumber numberWithFloat:avg] forKey:baseDate];
 	
@@ -690,12 +698,13 @@
 	if(self.hasALS){
 		NSDate* baseDate = [MultiDayAxis dateFromString:[statsEachHour objectForKey:@"date"]];
 		NSNumber* dli = [self.date2DLI objectForKey:baseDate];
-		self.title = [[statsEachHour objectForKey:@"date"] stringByAppendingFormat:@" (DLI %.2f mol/m\u00B2/d)", dli!=nil? [dli floatValue] : avg];
+		self.title = [[statsEachHour objectForKey:@"date"] stringByAppendingFormat:@" DLI: %.2f mol/m\u00B2/d", dli!=nil? [dli floatValue] : avg];
 	}else
-		self.title = [[statsEachHour objectForKey:@"date"] stringByAppendingFormat:@" (Average %.1f°%@)", avg, temp_unit?@"F":@"C" ];
+		self.title = [[statsEachHour objectForKey:@"date"] stringByAppendingFormat:@" Average: %.1f°%@", avg, temp_unit?@"F":@"C" ];
 	
 	//[self removeYAxis:capAxis];
-	if(!self.dewPointMode && (capSeries.count>0 || rawCapSeries.count>0)){
+	self.hasCap =(capSeries.count>0 || rawCapSeries.count>0);
+	if(!self.dewPointMode && _hasCap){
 		if(![self.allYAxes containsObject:capAxis])
 			[self addYAxis:capAxis];
 	}
@@ -725,8 +734,17 @@
 	if(self.hasALS){
 		NSNumber* dli =self.date2DLI[date];
 		if(dli!=nil){
-			iToast* toast =[[iToast makeText:[NSString stringWithFormat:@"%@: %.2f mol/m\u00B2", [MultiDayAxis stringFromDate:date],
-											  [dli floatValue]]] setDuration:iToastDurationNormal];
+			iToast* toast =[[iToast makeText:[NSString stringWithFormat:@"%@ DLI: %.2f mol/m\u00B2", [MultiDayAxis stringFromDate:date],
+											  [dli floatValue]]] setDuration:1500];
+			
+			toast.theSettings.toastType=iToastTypeInfo;
+			[toast show];
+		}
+	}else{
+		NSNumber* dli =self.date2DLI[date];
+		if(dli!=nil){
+			iToast* toast =[[iToast makeText:[NSString stringWithFormat:@"%@ Average: %.1f°%@",  [MultiDayAxis stringFromDate:date],
+											  [dli floatValue], temp_unit?@"F":@"C" ]] setDuration:1500];
 			
 			toast.theSettings.toastType=iToastTypeInfo;
 			[toast show];
@@ -736,11 +754,11 @@
 - (SChartAxis *)sChart:(ShinobiChart *)chart yAxisForSeriesAtIndex:(NSInteger)index {
 	
 	if(index==0)return temperatureAxis;
-	else if(index==1){
+	else if(index==1 && _hasCap){
 		if(self.dewPointMode)return temperatureAxis;
 		else return capAxis;
 	}
-	else if(index==2 && _hasALS){
+	else if(_hasALS){
 		return _useLogScaleForLight?logAxis:luxAxis;
 	}else
 		return nil;
@@ -754,12 +772,11 @@
 		else return capAxis;
 	}*/
 }
-
 - (NSInteger)numberOfSeriesInSChart:(ShinobiChart *)chart {
 	if(self.hasALS){
-		return 3;
+		return _hasCap? 3:2;
 	}else{
-		return  (capSeries.count>0 || rawCapSeries.count>0)?2:1;
+		return  _hasCap?2:1;
 	}
 }
 
@@ -772,7 +789,7 @@
 			bandSeries.title=[TemperatureTypeTranslator.instance name];
 			bandSeries.style.lineColorLow = bandSeries.style.lineColorHigh = [UIColor colorWithRed:1 green:0 blue:0 alpha:1];
 			bandSeries.style.areaColorNormal=[UIColor colorWithRed:1 green:0 blue:0 alpha:0.5];
-		}else if(index==1){
+		}else if(index==1 && _hasCap){
 			bandSeries.title = self.capIsChipTemperatureMode?@"Chip Temperature":[CapTypeTranslator.instance name];
 			bandSeries.style.areaColorNormal=[UIColor colorWithRed:0 green:0.5 blue:0 alpha:0.5];
 			bandSeries.style.lineColorHigh =bandSeries.style.lineColorLow =[UIColor colorWithRed:0 green:0.5 blue:0 alpha:1];
@@ -804,7 +821,7 @@
 			 lineSeries.title=[BattTypeTranslator.instance name];
 			 lineSeries.style.lineColor = [UIColor blueColor];
 			 */	}
-		else if(index==1){
+		else if(index==1 && _hasCap){
 			lineSeries.title = self.capIsChipTemperatureMode?@"Chip Temperature": [CapTypeTranslator.instance name];
 			lineSeries.style.pointStyle.showPoints=(!forTrend && _zoomLevel<ChartZoomLevelNormal);
 			lineSeries.style.pointStyle.color= lineSeries.style.lineColor = CAPCOLOR;
@@ -820,27 +837,27 @@
 - (NSInteger)sChart:(ShinobiChart *)chart numberOfDataPointsForSeriesAtIndex:(NSInteger)index {
 	if(_zoomLevel==ChartZoomLevelRaw){
 		if(index==0)return rawTempSeries.count;
-		else if(index==1) return rawCapSeries.count;
+		else if(index==1 && _hasCap) return rawCapSeries.count;
 		else return rawLuxSeries.count;
 	}
 	else if(_zoomLevel==ChartZoomLevelRaw2){
 		if(index==0)return floor(rawTempSeries.count/2.0);
-		else if(index==1) return floor(rawCapSeries.count/2.0);
+		else if(index==1 && _hasCap) return floor(rawCapSeries.count/2.0);
 		else return floor(rawLuxSeries.count/2.0);
 	}
 	else if(_zoomLevel==ChartZoomLevelRaw3){
 		if(index==0)return floor(rawTempSeries.count/4.0);
-		else if(index==1) return floor(rawCapSeries.count/4.0);
+		else if(index==1 && _hasCap) return floor(rawCapSeries.count/4.0);
 		else return floor(rawLuxSeries.count/4.0);
 	}
 	else if(_zoomLevel==ChartZoomLevelNormal){
 		if(index==0)return tempSeries.count;
-		else if(index==1) return capSeries.count;
+		else if(index==1 && _hasCap) return capSeries.count;
 		else return luxSeries.count;
 	}
 	else{
 		if(index==0)return bandTempSeries.count;
-		else if(index==1) return bandCapSeries.count;
+		else if(index==1 && _hasCap) return bandCapSeries.count;
 		else return bandLuxSeries.count;
 	}
 }
@@ -848,26 +865,26 @@
 - (id<SChartData>)sChart:(ShinobiChart *)chart dataPointAtIndex:(NSInteger)dataIndex forSeriesAtIndex:(NSInteger)index {
 	if(_zoomLevel==ChartZoomLevelRaw){
 		if(index==0)return rawTempSeries[dataIndex];
-		else if(index==1) return rawCapSeries[dataIndex];
+		else if(index==1 && _hasCap) return rawCapSeries[dataIndex];
 		else return rawLuxSeries[dataIndex];
 	}
 	else if(_zoomLevel==ChartZoomLevelRaw2){
 		if(index==0)return rawTempSeries[dataIndex*2];
-		else if(index==1) return rawCapSeries[dataIndex*2];
+		else if(index==1 && _hasCap) return rawCapSeries[dataIndex*2];
 		else return rawLuxSeries[dataIndex*2];
 	}
 	else if(_zoomLevel==ChartZoomLevelRaw3){
 		if(index==0)return rawTempSeries[dataIndex*4];
-		else if(index==1) return rawCapSeries[dataIndex*4];
+		else if(index==1 && _hasCap) return rawCapSeries[dataIndex*4];
 		else return rawLuxSeries[dataIndex*4];
 	}
 	else if(_zoomLevel==ChartZoomLevelNormal){
 		if(index==0)return tempSeries[dataIndex];
-		else if(index==1) return capSeries[dataIndex];
+		else if(index==1 && _hasCap) return capSeries[dataIndex];
 		else return luxSeries[dataIndex];
 	}else{
 		if(index==0)return bandTempSeries[dataIndex];
-		else if(index==1) return bandCapSeries[dataIndex];
+		else if(index==1 && _hasCap) return bandCapSeries[dataIndex];
 		else return bandLuxSeries[dataIndex];
 	}
 }

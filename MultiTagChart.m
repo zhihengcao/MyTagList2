@@ -76,6 +76,8 @@
 		
 		self.datasource=self;
 		
+		self.date2DLI=[[[NSMutableDictionary alloc]init] autorelease];
+
 	}
 	NSLog(@"MultiTagChart::init");
 	return self;
@@ -90,16 +92,21 @@
 	[id2RawSeries release]; id2RawSeries=nil;
 	[arrayOfIds release]; arrayOfIds=nil;
 	self.id2nameMapping=nil;
+	self.date2DLI=nil;
 	[super dealloc];
 }
 -(void)resetNormalData{
 	[id2Series removeAllObjects];
 	[id2BandSeries removeAllObjects];
+	[_date2DLI removeAllObjects];
 }
 
 // must be called from earliest date
 -(float)processOneDay:(NSDictionary *)hourlyStatDay baseDate:(NSDate*)baseDate title:(NSMutableString*)title{
 	float avg2=0;
+	NSMutableDictionary* id2DLI=nil;
+	if(![_type isKindOfClass:[MotionTypeTranslator class]])id2DLI = [[NSMutableDictionary new] autorelease];
+
 	NSInteger tagCount = [[hourlyStatDay objectForKey:@"ids"] count];
 	NSArray* values =[hourlyStatDay objectForKey:@"values"], *tods=[hourlyStatDay objectForKey:@"tods"], *ids=[hourlyStatDay objectForKey:@"ids"];
 	for(int tagi=0;tagi<tagCount;tagi++){
@@ -145,17 +152,39 @@
 					if([self.latestDate timeIntervalSinceDate:dataPoint.xValue]<0)
 						self.latestDate = dataPoint.xValue;
 
+					if([_type isKindOfClass:[LuxTypeTranslator class]]){
+						if(j>0){
+							int durationSec =[tod[j] intValue]-[tod[j-1] intValue];
+							float avg_lux = ([[tagv objectAtIndex:j] floatValue]+[[tagv objectAtIndex:j-1] floatValue])/2.0f;
+							avg += (avg_lux*durationSec)*0.0185f/1e6;
+						}
+					}else{
+						/*if(j>0){
+							int durationSec =[tod[j] intValue]-[tod[j-1] intValue];
+							float avg_val = ([[_type preProcess:[tagv objectAtIndex:j]] floatValue]+[[_type preProcess:[tagv objectAtIndex:j-1]] floatValue])/2.0f;
+							avg += (avg_val*durationSec)/3600.0/24.0;
+						}*/
+						avg+=[val floatValue];
+					}
+
 					//NSLog(@"added %@", dataPoint.xValue);
 				}else{
 					ymax = fmax(ymax, [val floatValue]); ymin=fmin(ymin, [val floatValue]);
 					[series addDataPoint:dataPoint];
+
+					if([_type isKindOfClass:[LuxTypeTranslator class]]){
+						avg+=[val floatValue]*3600*0.0185/1e6;
+					}else{
+						avg+=[val floatValue];
+					}
 				}
 				ymax2 = fmax([val floatValue], ymax2);
 				ymin2 = fmin([val floatValue], ymin2);
-				avg+=[val floatValue];
 			}
 		}
-		
+		if(![_type isKindOfClass:[LuxTypeTranslator class]])
+			avg/=tagv.count;
+
 		if(tod==nil){
 			NSMutableArray* bandSeries =[id2BandSeries objectForKey:tagId];
 			if(bandSeries==nil){
@@ -181,8 +210,10 @@
 			}
 		}
 		
-		avg/=series.count;
 		
+		if(![_type isKindOfClass:[MotionTypeTranslator class]])
+			[id2DLI setObject:[NSNumber numberWithFloat:avg] forKey:tagId];
+
 		if(title){
 			[title appendFormat:[_type labelFormat], avg];
 			if(tagi<tagCount-1)
@@ -190,8 +221,48 @@
 		}
 		avg2+=avg;
 	}
+	if(id2DLI!=nil){
+		if(id2DLI.count>0)
+		   [self.date2DLI setObject:id2DLI forKey:baseDate];
+	}
+		
 	return avg2/tagCount;
 }
+-(void)justShownCompleteDay:(NSDate *)date{
+	if([_type isKindOfClass:[MotionTypeTranslator class]])return;
+	NSMutableDictionary* id2DLI =self.date2DLI[date];
+	if(id2DLI==nil)return;
+	NSUInteger count = id2DLI.count;
+	iToast* toast;
+	if(count>1){
+		NSMutableArray* a = [[[NSMutableArray alloc]initWithCapacity:count]autorelease];
+
+		if([_type isKindOfClass:[LuxTypeTranslator class]]){
+			for(NSNumber* tagId in id2DLI.allKeys){
+				[a addObject:[NSString stringWithFormat:@"%@: %.2f mol/m\u00B2", [_id2nameMapping objectForKey:tagId], [[id2DLI objectForKey:tagId] floatValue] ]];
+			}
+			toast=[[iToast makeText:[NSString stringWithFormat:@"%@ DLI: \n%@", [MultiDayAxis stringFromDate:date], [a componentsJoinedByString:@"\n"]]] setDuration:4500];
+		}else{
+			for(NSNumber* tagId in id2DLI.allKeys){
+				[a addObject:[NSString stringWithFormat:@"%@: %@", [_id2nameMapping objectForKey:tagId],
+							  [NSString stringWithFormat:_type.labelFormat,  [[id2DLI objectForKey:tagId] floatValue] ] ]];
+			}
+			toast=[[iToast makeText:[NSString stringWithFormat:@"%@ Averages: \n%@", [MultiDayAxis stringFromDate:date], [a componentsJoinedByString:@"\n"]]] setDuration:4500];
+		}
+	}else{
+		NSNumber* dli = [id2DLI.allValues objectAtIndex:0];
+		if([_type isKindOfClass:[LuxTypeTranslator class]]){
+			toast=[[iToast makeText:[NSString stringWithFormat:@"%@ DLI: %.2f mol/m\u00B2", [MultiDayAxis stringFromDate:date], [dli floatValue] ]] setDuration:2000];
+		}else{
+			toast =[[iToast makeText:[NSString stringWithFormat:@"%@ Average: %@",  [MultiDayAxis stringFromDate:date],
+											  [NSString stringWithFormat:_type.labelFormat, [dli floatValue]] ]] setDuration:2000];
+		}
+	}
+	
+	toast.theSettings.toastType=iToastTypeInfo;
+	[toast show];
+}
+
 - (void) setDataSingleDay:(NSDictionary*) hourlyStatDay andMapping:(NSMutableDictionary*)mapping{
 	self.id2nameMapping = mapping;
 	

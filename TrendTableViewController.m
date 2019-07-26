@@ -50,7 +50,32 @@
     [super viewDidLoad];
 	[self.tableView registerNib:[UINib nibWithNibName:@"TrendTableViewCell" bundle:nil] forCellReuseIdentifier:@"trendViewCell"];  //  Class:TrendTableViewCell.self forCellReuseIdentifier:@"trendViewCell"];
 	[self.searchDisplayController.searchResultsTableView registerNib:[UINib nibWithNibName:@"TrendTableViewCell" bundle:nil] forCellReuseIdentifier:@"trendViewCell"];
-	
+
+	segmentedControl =
+	[[[MultiSelectSegmentedControl alloc]initWithItems:[NSArray arrayWithObjects:@"Show Humidity", @"Show Lux", nil]] autorelease];
+	segmentedControl.frame = CGRectMake(10, 10, self.tableView.frame.size.width-20, 34);
+	segmentedControl.delegate = self;
+	UIView* footer = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 40)] autorelease];
+	[footer addSubview:segmentedControl];
+	self.tableView.tableFooterView = footer;
+}
+-(void)viewDidLayoutSubviews{
+	segmentedControl.frame = CGRectMake(10, 10, self.tableView.frame.size.width-20, 34);
+}
+-(void)multiSelect:(MultiSelectSegmentedControl*) multiSelecSegmendedControl didChangeValue:(BOOL) value atIndex: (NSUInteger) index
+{
+	[AsyncURLConnection request:[WSROOT stringByAppendingString:@"ethClient.asmx/SaveTrendsOption"]
+						jsonObj:@{
+								  @"showRH": [multiSelecSegmendedControl.selectedSegmentIndexes containsIndex:0] ?@YES:@NO,
+								  @"showLux": [multiSelecSegmendedControl.selectedSegmentIndexes containsIndex:1] ?@YES:@NO
+								  }
+				  completeBlock:^(NSDictionary* retval){
+					  [self loadFromServer];
+				  }
+					 errorBlock:^(NSError* err, id* showFrom)
+	 			{
+					return YES;
+				} setMac:nil];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -101,8 +126,10 @@
 		if([filetimes.firstObject longLongValue]==0){
 			[filetimes removeObjectAtIndex:0];
 			[temperature removeObjectAtIndex:0];
-			if(rh!=nil && rh!=[NSNull null])[rh removeObjectAtIndex:0];
-			if(lux!=nil && lux!=[NSNull null])[lux removeObjectAtIndex:0];
+			if(rh!=nil && rh!=[NSNull null])
+				[rh removeObjectAtIndex:0];
+			if(lux!=nil && lux!=[NSNull null])
+				[lux removeObjectAtIndex:0];
 		}else
 			break;
 	}
@@ -146,10 +173,20 @@
 					  
 					  self.pb2span = [[NSMutableDictionary new] autorelease];
 					  self.trendList = [retd objectForKey:@"trends"];
+					  
+					  BOOL anyCap=NO, anyLux=NO;
+
 					  for(NSMutableDictionary* t in _trendList){
 						  [self updatePbiFromTrend:t];
-						  
+						  NSMutableArray* rh = [t objectForKey:@"rh"];
+						  if(rh!=[NSNull null] && rh!=nil)anyCap=YES;
+						  NSMutableArray* lux = [t objectForKey:@"lux"];
+						  if(lux!=[NSNull null] && lux!=nil)anyLux=YES;
 					  }
+					  NSMutableIndexSet* set = [[NSMutableIndexSet new] autorelease];
+					  if(anyCap)[set addIndex:0];
+					  if(anyLux)[set addIndex:1];
+					  segmentedControl.selectedSegmentIndexes = set;
 					  
 					  NSLog(@"GetTrends returned %ld trend", self.trendList.count);
 					  
@@ -208,11 +245,11 @@
 																				soapAction: soapAction
 																					   xml: xml
 																			 completeBlock:^(id retval){
+
 																				 NSMutableDictionary* t = retval;
 																				 for(int i=0;i<_trendList.count;i++){
 																					 if( [((NSDictionary*)[_trendList objectAtIndex:i]).uuid isEqualToString:t.uuid]  ){
 																						 [self updatePbiFromTrend:t];
-																						 
 																						 
 																						 [_trendList replaceObjectAtIndex:i withObject:t];
 																						 

@@ -176,7 +176,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 	[super viewDidLoad];
 	
 	monitor_light = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Monitor Brightness",nil) helpText:nil delegate:self];
-	light_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:0	Max:80000 Unit:@"lx" numberFormat:@"%.5g" delegate:self];
+	light_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:-1 	Max:80000 Unit:@"lx" numberFormat:@"%.5g" delegate:self];
 	light_scale = [IASKPSLuxRangeSpecifierViewCell newWithTitle:NSLocalizedString(@"Range:",nil) delegate:self];
 	
 	email =  [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:NSLocalizedString(@"Enter Email Addresses",nil) isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];

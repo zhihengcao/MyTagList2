@@ -31,6 +31,8 @@
 -(void)showRecentTrendFileTimes:(NSArray*)filetimes Temperatures:(NSArray*)temps Caps:(NSArray*)caps Lux:(NSArray*)lux tempRange:(NSArray*)tempRange capRange:(NSArray*)capRange luxRange:(NSArray*)luxRange dateRange:(NSArray*)dateRangeFiletime eventsToAnnotate:(NSArray*)events;
 
 @property (nonatomic, assign)BOOL hasALS;
+@property (nonatomic, assign)BOOL hasCap;
+//-(BOOL) hasCap;
 @property (nonatomic, retain)NSMutableDictionary* date2DLI;
 
 @end

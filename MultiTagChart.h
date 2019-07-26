@@ -24,5 +24,6 @@
 @property(nonatomic, retain)NSArray* colors;
 @property(nonatomic, retain)NSMutableDictionary* id2nameMapping;
 - (void) setDataSingleDay:(NSDictionary*) hourlyStatDay andMapping:(NSMutableDictionary*)mapping;
+@property (nonatomic, retain)NSMutableDictionary* date2DLI;
 
 @end

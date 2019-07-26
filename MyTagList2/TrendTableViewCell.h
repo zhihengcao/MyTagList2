@@ -17,6 +17,7 @@
 @property (retain, nonatomic) IBOutlet SingleTagChart *chart;
 @property (retain, nonatomic) IBOutlet UITextView *name;
 @property (retain, nonatomic) IBOutlet UILabel *temp;
+@property (retain, nonatomic) IBOutlet UILabel *cap_unit;
 @property (retain, nonatomic) IBOutlet UILabel *cap;
 @property (retain, nonatomic) IBOutlet UILabel *lux;
 @property (retain, nonatomic) IBOutlet UILabel *temp_unit;

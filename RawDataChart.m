@@ -811,12 +811,16 @@ int ZoomLevelFromTI(NSTimeInterval ti){
 }
 -(void)updateCompleteDay:(SChartDateRange*)range{
 	NSTimeInterval ti =[range.maximumAsDate timeIntervalSince1970] - [range.minimumAsDate timeIntervalSince1970];
-	if(ti > 3600*18 && ti<3600*50){
+	if(ti > 3600*24 && ti<3600*60){
 		// find the complete date
 		NSDate* date = [MultiDayAxis dateWithoutTime:
-						//[NSDate dateWithTimeIntervalSince1970:[range.maximumAsDate timeIntervalSince1970]/2.0 + [range.minimumAsDate timeIntervalSince1970]/2.0]
-						[NSDate dateWithTimeIntervalSince1970:[range.maximumAsDate timeIntervalSince1970]-3600*20]						
+						[NSDate dateWithTimeIntervalSince1970:[range.maximumAsDate timeIntervalSince1970]/2.0 + [range.minimumAsDate timeIntervalSince1970]/2.0]
+						//[NSDate dateWithTimeIntervalSince1970:[range.maximumAsDate timeIntervalSince1970]-3600*24]
 						];
+		
+//		if([ ((SChartDateRange*)self.xAxis.dataRange).maximumAsDate timeIntervalSinceDate:date]<24*3600)
+//			date = [date dateByAddingTimeInterval:-24*3600];
+		
 		if(_completeDate==nil || ![_completeDate isEqualToDate:date]){
 			self.completeDate = date;
 			[self justShownCompleteDay:date];

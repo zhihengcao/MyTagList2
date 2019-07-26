@@ -49,10 +49,14 @@
 	}
 	NSMutableArray* rh = [t objectForKey:@"rh"];
 	if(rh==nil || rh==[NSNull null]){
-		_cap.text = @"-";
+		_cap.text = @"";
+		_cap_unit.text = @"";
+		_chart.hasCap=NO;
 		rh=nil;
 	}else{
 		_cap.text = [NSString stringWithFormat:@"%.1f", [rh.lastObject floatValue] ];
+		_cap_unit.text = @"%";
+		_chart.hasCap=YES;
 	}
 	NSMutableArray* lux = [t objectForKey:@"lux"];
 	if(lux==[NSNull null] || lux==nil){
@@ -76,14 +80,14 @@
 			tempRange = @[th_low, th_high];
 	}
 	NSArray* capRange = nil;
-	if(t.rhState > CapDisarmed){
+	if(rh!=nil && t.rhState > CapDisarmed){
 		id th_low = [t objectForKey:@"rh_th_low"];
 		id th_high =[t objectForKey:@"rh_th_high"];
 		if(th_low!=nil && th_high!=nil)
 			capRange =  @[th_low, th_high];
 	}
 	NSArray* luxRange=nil;
-	if(t.lightState>LightDisarmed){
+	if(lux!=nil && t.lightState>LightDisarmed){
 		id th_low = [t objectForKey:@"lux_th_low"];
 		id th_high =[t objectForKey:@"lux_th_high"];
 		if(th_low!=nil && th_high!=nil)
@@ -154,6 +158,7 @@
 	self.image=nil;
 	self.temp_unit=nil;
 	self.lux_unit=nil;
-    [super dealloc];
+	[_cap_unit release];
+	[super dealloc];
 }
 @end

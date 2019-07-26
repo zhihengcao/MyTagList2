@@ -277,6 +277,7 @@
 		ADE187A114E0FBFF001C349E /* star.png in Resources */ = {isa = PBXBuildFile; fileRef = ADE1879F14E0FBFE001C349E /* star.png */; };
 		ADE187A214E0FBFF001C349E /* star@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADE187A014E0FBFF001C349E /* star@2x.png */; };
 		ADE187A514E1036A001C349E /* TableTBViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADE187A414E10369001C349E /* TableTBViewController.m */; };
+		ADE2CA3222D2C0520085F14D /* ph_usb@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADE2CA3122D2C0510085F14D /* ph_usb@2x.png */; };
 		ADECA91314F08768006D1AFC /* OptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADECA91214F08768006D1AFC /* OptionsViewController.m */; };
 		ADECA92A14F30A8F006D1AFC /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = ADECA92814F30A7E006D1AFC /* Default.png */; };
 		ADECA93B14F4CB1B006D1AFC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ADECA93A14F4CB1B006D1AFC /* AudioToolbox.framework */; };
@@ -706,6 +707,7 @@
 		ADE187A014E0FBFF001C349E /* star@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star@2x.png"; sourceTree = "<group>"; };
 		ADE187A314E10369001C349E /* TableTBViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableTBViewController.h; sourceTree = "<group>"; };
 		ADE187A414E10369001C349E /* TableTBViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableTBViewController.m; sourceTree = "<group>"; };
+		ADE2CA3122D2C0510085F14D /* ph_usb@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ph_usb@2x.png"; path = "../../../Downloads/ph_icon_antialiased/ph_usb@2x.png"; sourceTree = "<group>"; };
 		ADECA91114F08768006D1AFC /* OptionsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OptionsViewController.h; sourceTree = "<group>"; };
 		ADECA91214F08768006D1AFC /* OptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OptionsViewController.m; sourceTree = "<group>"; };
 		ADECA92814F30A7E006D1AFC /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -1046,6 +1048,7 @@
 		ADE186AC14D7299C001C349E /* images */ = {
 			isa = PBXGroup;
 			children = (
+				ADE2CA3122D2C0510085F14D /* ph_usb@2x.png */,
 				AD70A24F22C5945500E9CA28 /* icon_gear@2x.png */,
 				AD5582122243F61D000EB691 /* iOS_addbutton@2x.png */,
 				AD5E38FF22347C970001C86A /* ka_ambientlight.png */,
@@ -1301,6 +1304,7 @@
 					AD8701A51BE33FB600B445A3 = {
 						CreatedOnToolsVersion = 7.1;
 						DevelopmentTeam = 68273XHR4R;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -1309,6 +1313,7 @@
 					};
 					ADE185A814D678DB001C349E = {
 						DevelopmentTeam = 68273XHR4R;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -1519,6 +1524,7 @@
 				ADB0F90A17DCEFB20090586B /* UITableViewCellAccessoryDisclosureIndicator.PNG in Resources */,
 				AD1DB96C215D5C1600ABF356 /* question@2x.png in Resources */,
 				ADB917D1213F895A009EF309 /* handle_right@2x.png in Resources */,
+				ADE2CA3222D2C0520085F14D /* ph_usb@2x.png in Resources */,
 				AD0BB54618675ACE00149D42 /* ChuToy.aiff in Resources */,
 				AD7380681EBC555300A089B2 /* Laser Blasts.aiff in Resources */,
 				AD431C401F0E028B00C45AEF /* ph_probe@2x.png in Resources */,
@@ -1830,6 +1836,7 @@
 				CODE_SIGN_ENTITLEMENTS = TempRH/TempRH.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 68273XHR4R;
 				ENABLE_BITCODE = NO;
@@ -1854,6 +1861,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mytaglist.MyTagList2.TempRH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = tempRH_distribution_provisioning;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -1869,7 +1877,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_ENTITLEMENTS = TempRH/TempRH.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 68273XHR4R;
@@ -1891,6 +1900,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.mytaglist.MyTagList2.TempRH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = tempRH_distribution_provisioning;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -2001,6 +2011,7 @@
 				CODE_SIGN_ENTITLEMENTS = Kumostat.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 68273XHR4R;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2046,6 +2057,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = mytaglist2_distribution_provisioning;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				WRAPPER_EXTENSION = app;
@@ -2061,8 +2073,9 @@
 				CLANG_ENABLE_MODULES = NO;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = Kumostat.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 68273XHR4R;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2107,6 +2120,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = mytaglist2_distribution_provisioning;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				WRAPPER_EXTENSION = app;
