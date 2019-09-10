@@ -197,11 +197,11 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		NSString *capCellText;
 		if(_tag.has13bit ){
 			float dp = dewPoint(_tag.cap, _tag.temperatureDegC);
-			capCellText = [NSString stringWithFormat:@"%.0f%%/%.0f°%@", _tag.cap, temp_unit==1?dp*9.0/5.0+32.0:dp,temp_unit==1?@"F":@"C"];
+			capCellText = [NSString stringWithFormat:@"%.0f%%/%.1f°%@", _tag.cap, temp_unit==1?dp*9.0/5.0+32.0:dp,temp_unit==1?@"F":@"C"];
 		}
 		else if(_tag.hasThermocouple){
 			// internal chip temperature
-			capCellText = [NSString stringWithFormat:@"%.0f°C/%.0f°F\t\t", _tag.cap, _tag.cap*9.0/5.0+32.0];
+			capCellText = [NSString stringWithFormat:@"%.1f°C/%.1f°F\t\t", _tag.cap, _tag.cap*9.0/5.0+32.0];
 		}
 		else
 			capCellText = [NSString stringWithFormat:@"%.0f%%", _tag.cap];
@@ -228,7 +228,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	
 	ds18Cell.textField.text = _tag.ds18?@"DS18B20":(_tag.hasThermocouple&&!_tag.shorted? @"k-Type Thermocouple": @"SHT20");
 	
-	NSString *tempCellText = [NSString stringWithFormat:@"%.0f°C/%.0f°F", _tag.temperatureDegC, _tag.temperatureDegC*9.0/5.0+32.0];	
+	NSString *tempCellText =   [NSString stringWithFormat:_tag.hasHighResTemp?@"%.1f°C/%.1f°F":@"%.0f°C/%.0f°F", _tag.temperatureDegC, _tag.temperatureDegC*9.0/5.0+32.0];
 	if(_tag.tempEventState==TooLow)
 		temperatureCell.textField.text = [tempCellText stringByAppendingString:NSLocalizedString(@"(Too low)",nil)];
 	else if(_tag.tempEventState==TooHigh)

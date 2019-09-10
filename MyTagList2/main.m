@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
 			[NSBundle setLanguage:language];
 		}
 		else{
-			language = [[NSLocale preferredLanguages] firstObject];
+			//language = [[NSLocale preferredLanguages] firstObject];
+			language=@"en";		// default to english unless set in settings app. 
 			[[NSUserDefaults standardUserDefaults] setObject:language forKey:@"app_language"];
 			[[NSUserDefaults standardUserDefaults] synchronize];
 		}

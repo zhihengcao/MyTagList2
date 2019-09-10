@@ -81,6 +81,8 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 		case CapSensor: return @"Water/Moisture Sensor";
 		case ALS8k: return @"Tag Pro ALS";
 		case TCProbe: return @"Outdoor Probe";
+		case Usb: return self.version1==5?@"Precision External Power": @"External Power";
+		case UsbALS: return @"External Power w/ ALS";
 		default: return @"Unknown";
 	}
 }
@@ -121,20 +123,20 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 		case 0x23: return @"2.5";
 		case 0x24: return @"2.5";
 		case 0x25: return @"2.5";
-		case 0x4F: return @"rev. 4F";
-		case 0x4E: return @"rev. 4E RH/No-Motion";
-		case 0x4D: return @"rev. 4D Temperature-Only";
-		case 0x6F: return self.tagType==TagPro?@"2048pt" : @"rev. 6F";
+		case 0x4F: return @".4F";
+		case 0x4E: return @".4E RH/No-Motion";
+		case 0x4D: return @".4D Temperature-Only";
+		case 0x6F: return self.tagType==TagPro?@"2048pt" : @".6F";
 		case 0x6E: return self.tagType==TagPro?@"2KPT No-Motion" : @"RH/No-Motion";
 		case 0x6D: return self.tagType==TagPro?@"4KPT Temperature-Only" : @"Temperature-Only";
 		case 0x6A: return @"Accelerator Based 2KPT";
-		case 0x7F:return self.tagType==TagPro?@"8192pt" : (self.tagType==TCProbe?@"Thermocouple" :@"rev. 7F");
+		case 0x7F:return self.tagType==TagPro?@"8192pt" : (self.tagType==TCProbe?@"Thermocouple" :@".7F");
 		case 0x7E:return self.tagType==TagPro?@"8KPT No-Motion" : (self.tagType==TCProbe?@"Protimeter" : @"RH/No-Motion");
 		case 0x7D:return self.tagType==TagPro?@"16KPT Temperature-Only" : (self.tagType==TCProbe?@"Basic Temperature" :@"Temperature-Only");
 		case 0x7A: return @"Accelerator Based 8KPT";
-		case 0x8F: return @"rev. 8F";
-		case 0x8D: return @"rev. 8D Temperature-Only";
-		case 0x9F:return self.tagType==TCProbe?@"Thermocouple" : @"rev. 9F";
+		case 0x8F: return @".8F";
+		case 0x8D: return @".8D Temperature-Only";
+		case 0x9F:return self.tagType==TCProbe?@"Thermocouple" : @".9F";
 		case 0x9E:return self.tagType==TCProbe?@"Protimeter" : @"RH/No-Motion";
 		case 0x9D:return self.tagType==TCProbe?@"Basic Temperature" : @"Temperature-Only";
 		default: return @"";
@@ -239,6 +241,8 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 }
 @end
 @implementation NSDictionary (Tag)
+
+-(BOOL) hasHighResTemp{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==Usb|| t==UsbALS||  t==ALS8k || t==TCProbe || t==CapSensor; }
 
 -(float) lux{return [[self objectForKey:@"lux"] floatValue];}
 
@@ -350,15 +354,16 @@ NSTimeInterval serverTime2LocalTime = 0.0;
 -(BOOL) hasMotion{TagType t=self.tagType; int rev=self.rev; if(rev>=0x4E && (rev&0xF)==0xE)return false;
 	return t==MotionSensor || t==MotionRH || t==ReedSensor || t==ReedSensor_noHTU || t==PIR || t==TagPro || t==ALS8k;}
 -(BOOL) has3DCompass{TagType t=self.tagType; return t==MotionSensor || t==MotionRH || t==TagPro; }
--(BOOL) hasLogger{TagType t=self.tagType; return t==TagPro || t==ALS8k; }
--(BOOL) hasALS{TagType t=self.tagType; return t==ALS8k; }
+-(BOOL) hasLogger{TagType t=self.tagType; return t==TagPro || t==ALS8k || t==Usb || t==UsbALS; }
+-(BOOL) hasALS{TagType t=self.tagType; return t==ALS8k || t==UsbALS; }
 -(BOOL)hasProtimeter{return self.tagType==TCProbe && (self.rev&0xF)==0xE; }
 -(BOOL)hasThermocouple{return self.tagType==TCProbe && (self.rev&0xF)==0xF; }
--(BOOL) has13bit{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==ALS8k || (t==TCProbe && self.shorted /*using SHT20*/); }
+-(BOOL) has13bit{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==Usb|| t==UsbALS||  t==ALS8k || (t==TCProbe && self.shorted /*using SHT20*/); }
+
 -(BOOL) hasTemperatureSensor {TagType t=self.tagType; return t!=WeMo && t!=DropCam;}
 -(BOOL) hasCap{TagType t=self.tagType; int rev=self.rev; if(rev>=0x4D && (rev&0xF)==0xD)return false;
 	if(t==TCProbe && ((rev&0xF)==0xE || self.shorted))return true;
-	return t==MotionRH || t==ReedSensor ||  t==PIR || t==CapSensor || t==TagPro || t==ALS8k;}
+	return t==MotionRH || t==ReedSensor ||  t==PIR || t==CapSensor || t==TagPro || t==ALS8k || t==Usb || t==UsbALS;}
 
 -(BOOL) hasPIR{TagType t=self.tagType; return t==PIR;}
 -(BOOL) hasThermostat{TagType t=self.tagType; return t==Thermostat;}

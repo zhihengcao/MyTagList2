@@ -55,6 +55,7 @@ extern NSTimeInterval serverTime2LocalTime;
 @property (nonatomic, readonly) BOOL hasLogger;
 @property (nonatomic, readonly) BOOL hasPIR;
 @property (nonatomic, readonly) BOOL has13bit;
+@property (nonatomic, readonly) BOOL hasHighResTemp;
 @property (nonatomic, readonly) BOOL hasTemperatureSensor;
 @property (nonatomic, readonly) BOOL hasCap;
 @property (nonatomic, readonly) BOOL hasALS;

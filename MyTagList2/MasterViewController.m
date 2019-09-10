@@ -421,7 +421,7 @@
 		self.alpha=1;
 		self.userInteractionEnabled=YES;
 
-		NSString* tempData = [NSString stringWithFormat:tag.has13bit?@"%.1f°%@ ":@"%.0f°%@ ",
+		NSString* tempData = [NSString stringWithFormat:tag.hasHighResTemp?@"%.1f°%@ ":@"%.0f°%@ ",
 							  _useDegF?tag.temperatureDegC*9.0/5.0+32.0: tag.temperatureDegC,
 							  _useDegF?@"F":@"C"];
 		NSString* luxData;

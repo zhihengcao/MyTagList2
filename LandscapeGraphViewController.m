@@ -241,7 +241,8 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 	isMultiTag= (type!=nil);
 	
 	self = [super init];
-	
+	//frame.size.height -=self.view.safeAreaInsets
+	//self.view.safeAreaLayoutGuide
 	if(isMultiTag)
 	{
 		self.type= findTranslator(type);
@@ -351,14 +352,23 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 }*/
 
 -(void)loadView{
-	self.wantsFullScreenLayout = YES;
+	self.wantsFullScreenLayout = NO;
+	if ([self respondsToSelector:@selector(edgesForExtendedLayout)])
+		self.edgesForExtendedLayout = UIRectEdgeNone;
+
 	self.view = _chart;
 	self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	self.view.backgroundColor=[UIColor whiteColor];
+
+	UIWindow* top =UIApplication.sharedApplication.keyWindow;
+	if([top respondsToSelector:@selector(safeAreaInsets)]){
+		CGFloat safeAreaBottom=top.safeAreaInsets.bottom;
+		_chart.canvasInset = UIEdgeInsetsMake(0, 0, safeAreaBottom*0.7f, 0);
+	}
 }
 -(void)viewWillAppear:(BOOL)animated{
 
-	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
+/*	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
 		UINavigationBar* bar = self.navigationController.navigationBar;
 		bgImage = bar.backIndicatorImage;
 		[bar setBackgroundImage:[[UIImage new] autorelease]
@@ -366,6 +376,7 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 		shadowImage = [bar.shadowImage retain];
 		bar.shadowImage = [[UIImage new] autorelease];
 	}
+ */
 	[[UIBarButtonItem appearance]
 	 setBackButtonTitlePositionAdjustment:UIOffsetMake(-1000, -1000)
 	 forBarMetrics:UIBarMetricsLandscapePhone];

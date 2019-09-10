@@ -117,7 +117,7 @@
 		self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:(float)0x5e/(float)0xff green:(float)0x87/(float)0xff
 																				blue:(float)0xb0/(float)0xff alpha:1];
 	
-		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
+//		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
 		{
 			[self.navigationController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor]];
 			self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
