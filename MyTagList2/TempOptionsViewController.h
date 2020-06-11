@@ -16,6 +16,7 @@
 -(void)armTempsensorForAllTags;
 -(void)disarmTempsensorForTag:(NSDictionary*)tag;
 -(void)disarmTempsensorForAllTags;
+//-(void)iftttCall:(NSString*)appletID From:(TableLoadingButtonCell*)btncell;
 @end
 
 // [units  (celsius, farenheit)]
@@ -32,8 +33,8 @@
 	IASKPSDualSliderSpecifierViewCell *temp_range;
 	
 	IASKPSTextFieldSpecifierViewCell *email;
-	IASKPSToggleSwitchSpecifierViewCell *monitor_temp, *send_email, *send_tweet, *beep_pc, *use_speech, *vibrate, *notify_normal;
-	TableLoadingButtonCell* tweetLogin;
+	IASKPSToggleSwitchSpecifierViewCell *monitor_temp, *send_email, *send_tweet, *beep_pc, *use_speech, *vibrate, *notify_normal, *apns_ca;
+	TableLoadingButtonCell* tweetLogin, *sms_toohot, *sms_toocold, *call_toohot, *call_toocold, *tcc_heat, *tcc_cool, *tcc_off, *ifttt_create;
 	IASKPSTextFieldSpecifierViewCell *apns_sound, *interval, *th_low_delay, *th_high_delay, *apns_pause, *rn_toohot, *rn_toocold;
 
 	float old_th_low, old_th_high;
@@ -47,7 +48,7 @@
 @property(nonatomic, retain) 	NSMutableArray* cellArray;
 @property(nonatomic,assign) id<TempOptionsViewControllerDelegate> tempDelegate;
 @property(nonatomic, retain) NSMutableDictionary* tag;
-@property(nonatomic, retain) NSString* loginEmail;
+
 @property (nonatomic, readonly) BOOL modified;
 -(void) editedTableViewCell:(id)cell;
 @end

@@ -383,9 +383,8 @@
 
 	
 	if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
-		if([pc respondsToSelector:@selector(setPreferredContentSize:)])
-			pc.preferredContentSize=CGSizeMake(768,432);
-		pc.contentSizeForViewInPopover = CGSizeMake(768,432);
+		
+		pc.preferredContentSize = CGSizeMake([[UIScreen mainScreen] bounds].size.width,432);
 		
 		pc.navigationItem.title =
 		[NSDateFormatter localizedStringFromDate:[fn nsdate] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterMediumStyle];
@@ -424,9 +423,8 @@
 													 
 													 if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
 													  
-													  if([ivc respondsToSelector:@selector(setPreferredContentSize:)])
-														  ivc.preferredContentSize=CGSizeMake(768,432);
-													  ivc.contentSizeForViewInPopover = CGSizeMake(768,432);
+													 
+													  ivc.preferredContentSize = CGSizeMake([[UIScreen mainScreen] bounds].size.width,432);
 														 
 													  UIPopoverController *pvc = [[[UIPopoverController alloc] initWithContentViewController:[[[UINavigationController alloc]initWithRootViewController:ivc]autorelease]] autorelease];
 													  

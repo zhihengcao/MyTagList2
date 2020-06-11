@@ -47,6 +47,7 @@ int64_t getfiletime(void)
 		evc.topPVC = self;
 		self.dataSource = self;
 		self.delegate=self;
+		
 		//self.automaticallyAdjustsScrollViewInsets = true;
 		//self.wantsFullScreenLayout=NO;
 		//self.definesPresentationContext=YES;
@@ -101,8 +102,26 @@ int64_t getfiletime(void)
 	self.pcDots.frame=f;
 }*/
 
+#define tagScopes @[@"All",@"TooHot",@"Normal",@"TooCold",@"N/A"]
+#define eventScopes @[@"All",@"Temp",@"RH",@"Lux", @"Motion",@"Other"];
+
 -(void)viewDidLoad{
 	[super viewDidLoad];
+
+	self.searchController = [[UISearchController alloc]	 initWithSearchResultsController:nil];
+	self.searchController.dimsBackgroundDuringPresentation = NO;
+	self.definesPresentationContext = YES;
+
+	if(@available(iOS 11.0, *)){
+		self.navigationItem.searchController = self.searchController;
+		self.navigationItem.hidesSearchBarWhenScrolling=YES;
+	}else{
+		self.searchController.hidesNavigationBarDuringPresentation=NO;
+		_mvc.tableView.tableHeaderView = self.searchController.searchBar;
+	}
+	//self.navigationController.navigationBar.translucent=YES;
+
+	[self.searchController.searchBar sizeToFit];
 
 	
 	//self.automaticallyAdjustsScrollViewInsets = false;
@@ -121,7 +140,7 @@ int64_t getfiletime(void)
 	[UIPageControl appearance].currentPageIndicatorTintColor =[UIColor colorWithRed:0.6 green:0.6 blue:0.6 alpha:1];
     [_pcDots setNumberOfPages:3];
 
-    [navController.navigationBar addSubview:_pcDots];
+	[navController.navigationBar addSubview:_pcDots];
 }
 -(void)restorePreviousPage{
 	id topPage = [[NSUserDefaults standardUserDefaults] objectForKey:@"TopPage"];
@@ -167,7 +186,21 @@ int64_t getfiletime(void)
 	}];
 }
 -(void)setTvcBar{
+	
+//	if(@available(iOS 13.0, *))
+//		self.searchController.automaticallyShowsScopeBar = YES;
+	
+	self.searchController.searchBar.placeholder = @"Search by name";
+	self.searchController.searchBar.scopeButtonTitles = tagScopes;
+	self.searchController.searchResultsUpdater = _tvc;
+	self.searchController.searchBar.delegate = _tvc;
+	if(@available(iOS 11.0, *)){
+	}else{
+		_tvc.tableView.tableHeaderView = self.searchController.searchBar;
+	}
 
+	if(self.searchController.active)[_tvc updateSearchResultsForSearchController:self.searchController];
+	
 	[_pcDots setCurrentPage:2];
 	[self.navigationController setToolbarHidden:YES animated:NO];
 	
@@ -179,8 +212,22 @@ int64_t getfiletime(void)
 	[[NSUserDefaults standardUserDefaults]setInteger:2 forKey:@"TopPage"];
 }
 -(void)setEvcBar{
-
 	
+//	self.searchController.active=NO;
+//	if(@available(iOS 13.0, *))
+//		self.searchController.searchBar.showsScopeBar = NO;
+	
+	self.searchController.searchBar.placeholder = @"Search by keyword";
+	self.searchController.searchBar.scopeButtonTitles = eventScopes;
+	self.searchController.searchBar.selectedScopeButtonIndex = _savedSearchScopeEvc;
+	self.searchController.searchResultsUpdater = _evc;
+	self.searchController.searchBar.delegate = _evc;
+	if(@available(iOS 11.0, *)){
+	}else{
+		_evc.tableView.tableHeaderView = self.searchController.searchBar;
+	}
+	if(self.searchController.active)[_evc updateSearchResultsForSearchController:self.searchController];
+
 	[_pcDots setCurrentPage:0];
 	[self.navigationController setToolbarHidden:YES animated:NO];
 	
@@ -202,6 +249,22 @@ int64_t getfiletime(void)
 }
 -(void)setMvcBar{
 
+//	if(@available(iOS 13.0, *))
+	//	self.searchController.automaticallyShowsScopeBar = YES;
+
+	self.searchController.searchBar.scopeButtonTitles = tagScopes;
+	self.searchController.searchBar.selectedScopeButtonIndex = _savedSearchScopeMvc;
+	
+	self.searchController.searchBar.placeholder = @"Search by name";
+	self.searchController.searchResultsUpdater = _mvc;
+	self.searchController.searchBar.delegate = _mvc;
+	if(@available(iOS 11.0, *)){
+	}else{
+		_mvc.tableView.tableHeaderView = self.searchController.searchBar;
+	}
+	if(self.searchController.active)
+		[_mvc updateSearchResultsForSearchController:self.searchController];
+
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
 		UISplitViewController* svc = (UISplitViewController*)self.navigationController.parentViewController;
 		[NSTimer scheduledTimerWithTimeInterval:0.5 block:^{
@@ -213,7 +276,7 @@ int64_t getfiletime(void)
 	}
 	[_pcDots setCurrentPage:1];
 	
-	[self.navigationController setToolbarHidden:NO animated:NO];
+	[self.navigationController setToolbarHidden:NO animated:YES];
 	
 	self.navigationItem.title=_mvc.title;
 	self.navigationItem.leftBarButtonItem = mvc_left;
@@ -265,7 +328,16 @@ int64_t getfiletime(void)
 		return nil;
 	}
 }
-
+/*-(void)viewWillAppear:(BOOL)animated{
+	[super viewWillAppear:animated];
+	if(@available(iOS 11.0,*))
+		self.navigationItem.hidesSearchBarWhenScrolling = NO;
+}
+-(void)viewDidAppear:(BOOL)animated{
+	[super viewDidAppear:animated];
+	if(@available(iOS 11.0,*))
+		self.navigationItem.hidesSearchBarWhenScrolling = YES;
+}*/
 @end
 @implementation EventsViewController
 @synthesize loader=_loader, savedSearchTerm=_savedSearchTerm;
@@ -287,13 +359,8 @@ int64_t getfiletime(void)
 	return self;
 }
 -(void)reloadFromServer{
-	[_events removeAllObjects];
-	[_uuid2events removeAllObjects];
-	[_filteredEvents removeAllObjects];
-	[_dates removeAllObjects];
-	[self.tableView reloadData];
-	if(searchWasActive)
-		[self.searchDisplayController.searchResultsTableView reloadData];
+	[self removeEvents];
+//	if(searchWasActive)[self.searchDisplayController.searchResultsTableView reloadData];
 
 	olderThan = getfiletime();
 	_loader(self, olderThan,32);
@@ -302,8 +369,7 @@ int64_t getfiletime(void)
 	if(self.isVisible)
 		[self reloadFromServer];
 	else{
-		[_events removeAllObjects];
-		[_uuid2events removeAllObjects];
+		[self removeEvents];
 	}
 }
 -(void)removeEvents{
@@ -311,6 +377,8 @@ int64_t getfiletime(void)
 	[_uuid2events removeAllObjects];
 	[_filteredEvents removeAllObjects];
 	[_dates removeAllObjects];
+	NSLog(@"%@: Removed all dates", [NSThread currentThread]);
+	[self.tableView reloadData];
 }
 -(void)viewWillAppear:(BOOL)animated{
 	if(_events.count==0)
@@ -336,9 +404,10 @@ int64_t getfiletime(void)
 
 -(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
+	if(_dates.count<=section)return nil;
     HeaderLabel *label = [[[HeaderLabel alloc] init] autorelease];
     label.text=[_dates objectAtIndex:section];
-    label.backgroundColor=[UIColor colorWithWhite:1 alpha:0.8];
+	label.backgroundColor=[UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:0.8];
     label.textAlignment=NSTextAlignmentRight;
     return label;
 }
@@ -347,6 +416,8 @@ int64_t getfiletime(void)
 	if([self.refreshControl isRefreshing])
 		[self.refreshControl endRefreshing];
 //	[self.tableView beginUpdates];
+	
+	BOOL			searchWasActive = self.topPVC.searchController.active;
 	
 	for(NSMutableDictionary* entry in events1D) {
 
@@ -361,20 +432,20 @@ int64_t getfiletime(void)
 			
 			NSMutableArray* firstDay =[_events objectAtIndex:0];
 			[firstDay insertObject:entry atIndex:0];
+			
 			NSMutableArray* firstDayFiltered=nil;
 			if(searchWasActive && [self shouldAddToFilteredList:entry]){
 				firstDayFiltered=[_filteredEvents objectAtIndex:0];
 				[firstDayFiltered insertObject:entry atIndex:0];
 			}
 			
-//			[self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0 ]] withRowAnimation:UITableViewRowAnimationTop];
 		}else{
 			[_dates insertObject:dateString atIndex:0];
-//			[self.tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationTop];
 			
 			NSMutableArray* firstDay =  [[NSMutableArray new] autorelease]; //[[@[entry] mutableCopy] autorelease];
 			[firstDay addObject:entry];
 			[_events insertObject:firstDay atIndex:0];
+
 			NSMutableArray* firstDayFiltered=nil;
 			if(searchWasActive){
 				firstDayFiltered=[[NSMutableArray new] autorelease];
@@ -384,12 +455,11 @@ int64_t getfiletime(void)
 				}
 			}
 			
-//			[self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0 ]] withRowAnimation:UITableViewRowAnimationTop];
 		}
 	}
 //	[self.tableView endUpdates];
 	[self.tableView reloadData];
-	if(searchWasActive)[self.searchDisplayController.searchResultsTableView reloadData];
+	//if(searchWasActive)[self.searchDisplayController.searchResultsTableView reloadData];
 	
 }
 -(void)addToMotionEventTable:(NSMutableDictionary*)entry
@@ -411,8 +481,10 @@ int64_t getfiletime(void)
 	if(self.refreshControl.refreshing)
 		[self.refreshControl endRefreshing];
 
-//	if(searchWasActive)[self.searchDisplayController.searchResultsTableView beginUpdates];
-	[self.tableView beginUpdates];
+	BOOL searchWasActive = self.topPVC.searchController.active;
+
+	if(!searchWasActive)
+		[self.tableView beginUpdates];
 	
 	for(NSMutableDictionary* entry in events1D) {
 		[self addToMotionEventTable:entry];
@@ -422,29 +494,30 @@ int64_t getfiletime(void)
 																	olderThan / 10000000) - 11644473600)];
 		[entry setObject:timestamp forKey:@"nsdate"];
 		NSString* dateString = [NSDateFormatter localizedStringFromDate:timestamp dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterNoStyle];
-		if(_dates.count>0 && [dateString isEqualToString:[_dates objectAtIndex:_dates.count-1]]){
+		if(_dates.count>0 && [dateString isEqualToString:[_dates lastObject]]){
 			
-			NSMutableArray* lastDay =[_events objectAtIndex:_events.count-1];
+			NSMutableArray* lastDay =[_events lastObject];
 			[lastDay addObject:entry];
+
 			NSMutableArray* lastDayFiltered=nil;
 			if(searchWasActive && [self shouldAddToFilteredList:entry]){
-				lastDayFiltered=[_filteredEvents objectAtIndex:_filteredEvents.count-1];
+				lastDayFiltered=[_filteredEvents lastObject];
 			   [lastDayFiltered addObject:entry];
 			}
-			/*if(searchWasActive)
-				[self.searchDisplayController.searchResultsTableView  insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:lastDayFiltered.count-1 inSection:_filteredEvents.count-1 ]] withRowAnimation:UITableViewRowAnimationFade];*/
-
-			[self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:lastDay.count-1 inSection:_events.count-1 ]] withRowAnimation:UITableViewRowAnimationFade];
+			
+			if(!searchWasActive)
+				[self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:lastDay.count-1 inSection:_events.count-1 ]] withRowAnimation:UITableViewRowAnimationFade];
+			
 		}else{
 			[_dates addObject:dateString];
-			/*if(searchWasActive)
-				[self.searchDisplayController.searchResultsTableView insertSections:[NSIndexSet indexSetWithIndex:_dates.count-1] withRowAnimation:UITableViewRowAnimationFade];*/
 
-			[self.tableView insertSections:[NSIndexSet indexSetWithIndex:_dates.count-1] withRowAnimation:UITableViewRowAnimationFade];
+			if(!searchWasActive)
+				[self.tableView insertSections:[NSIndexSet indexSetWithIndex:_dates.count-1] withRowAnimation:UITableViewRowAnimationFade];
 
 			NSMutableArray* lastDay = [[NSMutableArray new] autorelease];
 			[_events addObject:lastDay];
 			[lastDay addObject:entry];
+			
 			NSMutableArray* lastDayFiltered=nil;
 			if(searchWasActive){
 				lastDayFiltered=[[NSMutableArray new] autorelease];
@@ -455,13 +528,12 @@ int64_t getfiletime(void)
 //					[self.searchDisplayController.searchResultsTableView  insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:lastDayFiltered.count-1 inSection:_filteredEvents.count-1 ]] withRowAnimation:UITableViewRowAnimationFade];
 				}
 			}
-			
-			[self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:lastDay.count-1 inSection:_events.count-1 ]] withRowAnimation:UITableViewRowAnimationFade];
+			if(!searchWasActive)
+				[self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:lastDay.count-1 inSection:_events.count-1 ]] withRowAnimation:UITableViewRowAnimationFade];
 		}
 	}
-	//if(searchWasActive)[self.searchDisplayController.searchResultsTableView endUpdates];
-	[self.tableView endUpdates];
-	if(searchWasActive)[self.searchDisplayController.searchResultsTableView reloadData];
+	if(searchWasActive)[self.tableView reloadData];
+	else  [self.tableView endUpdates];
 	
 	runLoader = (events1D.count>=32);
 }
@@ -485,11 +557,11 @@ int64_t getfiletime(void)
     // create a filtered list that will contain products for the search results table.
 	_filteredEvents = [[NSMutableArray arrayWithCapacity:[_events count]] retain];
 	
-	if (self.savedSearchTerm)
+	/*if (self.savedSearchTerm)
 	{
         [self.searchDisplayController setActive:searchWasActive];
         [self.searchDisplayController.searchBar setText:self.savedSearchTerm];
-    }
+    }*/
 	
 //	[self.tableView reloadData];
 	
@@ -523,20 +595,23 @@ int64_t getfiletime(void)
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	NSLog(@"%@: numberOfSectionsInTableView: returning %ld", [NSThread currentThread], _dates.count);
+/*	if (self.topPVC.searchController.active)
 	{
         return [_filteredEvents count];
     }
-	else
-		return [_events count];
+	else*/
+	return [_dates count];
 }
 -(NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+	if(_dates.count<=section)
+		return nil;
 	return [_dates objectAtIndex:section];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView  numberOfRowsInSection:(NSInteger)section
 {
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.topPVC.searchController.active)
 	{
         return [[_filteredEvents objectAtIndex:section] count];
     }
@@ -560,7 +635,7 @@ int64_t getfiletime(void)
     }
 	
 	NSDictionary *event;
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.topPVC.searchController.active)
 	{
 		if(indexPath.section >= _filteredEvents.count)return cell;
 		NSArray* s = [_filteredEvents objectAtIndex:indexPath.section];
@@ -591,25 +666,38 @@ int64_t getfiletime(void)
 	return 56.0;
 	
 }
+-(BOOL)withinScope:(NSDictionary*)event{
+	NSInteger savedSearchScope = self.topPVC.savedSearchScopeEvc;
+	if(savedSearchScope==0)return YES;
+	NSInteger sensorType = [[event objectForKey:@"sensorType"] integerValue];
+	if(savedSearchScope==1 && sensorType!=1 && sensorType!=11)return NO;
+	if(savedSearchScope==2 && sensorType!=2 && sensorType!=3 && sensorType!=12)return NO;
+	if(savedSearchScope==3 && sensorType!=7 && sensorType!=17)return NO;
+	if(savedSearchScope==4 && sensorType!=0)return NO;
+	if(savedSearchScope==5 && (sensorType<=3 || sensorType==7 || sensorType==11 || sensorType==12 || sensorType==17))return NO;
+	return YES;
+}
 -(BOOL)shouldAddToFilteredList:(NSDictionary*) event{
+	if(![self withinScope:event])return NO;
 	NSString *tagName = [event objectForKey:@"tagName"];
 	NSString *eventName = [event objectForKey:@"eventText"];
 	
-	if(NSNotFound != [tagName rangeOfString:_savedSearchTerm options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) ].location)
-	{
-		return YES;
-	}
-	if(NSNotFound != [eventName rangeOfString:_savedSearchTerm options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) ].location)
+	if( _savedSearchTerm.length==0
+	   || NSNotFound != [tagName rangeOfString:_savedSearchTerm options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) ].location ||
+	   NSNotFound != [eventName rangeOfString:_savedSearchTerm options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) ].location)
 	{
 		return YES;
 	}
 	return NO;
 }
-#pragma mark UISearchDisplayController Delegate Methods
-- (void)filterListBySearchText:(NSString*)searchText
+
+// sensorType: 0 motion, 1,11 temp,  2, 12 cap, 3 water, 7, 17 lux, 
+// 	eventScopes =@[@"All",@"Temp",@"RH",@"Lux", @"Motion",@"Other"];
+- (void)filterListBySearchText:(NSString*)searchText scope:(NSInteger)scope
 {
 	[_filteredEvents removeAllObjects]; // First clear the filtered array.
 	self.savedSearchTerm=searchText;
+	self.topPVC.savedSearchScopeEvc = scope;
 	
 	for (int i=0;i<_events.count;i++)
 	{
@@ -622,7 +710,18 @@ int64_t getfiletime(void)
 		}
 	}
 }
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
+{
+	NSString *searchString = searchController.searchBar.text;
+	[self filterListBySearchText:searchString scope: searchController.searchBar.selectedScopeButtonIndex];
+	[self.tableView reloadData];
+}
+- (void)searchBar:(UISearchBar *)searchBar selectedScopeButtonIndexDidChange:(NSInteger)selectedScope
+{
+	[self updateSearchResultsForSearchController:self.topPVC.searchController];
+}
 
+/*
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
 {
     [self filterListBySearchText:searchString];
@@ -646,7 +745,7 @@ int64_t getfiletime(void)
 	searchWasActive=NO;
 	self.topPVC.navigationController.navigationBarHidden=NO;
 }
-
+*/
 
 @end
 

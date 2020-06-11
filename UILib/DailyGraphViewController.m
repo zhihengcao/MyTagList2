@@ -247,6 +247,7 @@
 -(void)dealloc{
 	NSLog(@"DailyGraphViewController::dealloc");
 	self.date2DLI=nil;
+	self.tempBaseline=nil; self.capBaseline=nil; self.luxBaseline=nil;
 	self.data=nil;
 	self.id2nameMapping=nil;
 	[self releaseSubViews];
@@ -347,7 +348,11 @@
 			cell=[[[ChartTableViewCell alloc]initSingleTagGraphWithReuseId:@"ChartCell" ] autorelease];
 			cell.chart.dewPointMode=self.dewPointMode;
 			cell.chart.capIsChipTemperatureMode = self.capIsChipTemperatureMode;
-			((SingleTagChart*)cell.chart).date2DLI=self.date2DLI;
+			SingleTagChart* stchart =(SingleTagChart*)cell.chart;
+			stchart.date2DLI=self.date2DLI;
+			stchart.tempBaseline = self.tempBaseline;
+			stchart.capBaseline = self.capBaseline;
+			stchart.luxBaseline = self.luxBaseline;
 		}
 		cell.chart.useLogScaleForLight = [[NSUserDefaults standardUserDefaults]boolForKey:LogScalePrefKey];
 	}

@@ -643,7 +643,7 @@ static NSArray* mobileDevices = nil;
 		_done=[done copy];
 		self.snippets = snippets;
 		self.title=@"Compatible KumoApps";
-		searchWasActive=NO;
+//		searchWasActive=NO;
 	}
 	return self;
 }
@@ -682,8 +682,8 @@ static NSArray* mobileDevices = nil;
 	self.navigationController.toolbarHidden=YES;
 }
 -(void)viewDidDisappear:(BOOL)animated{
-    searchWasActive = [self.searchDisplayController isActive];
-    savedSearchTerm = [self.searchDisplayController.searchBar text];
+//    searchWasActive = [self.searchDisplayController isActive];
+//    savedSearchTerm = [self.searchDisplayController.searchBar text];
 	[super viewDidDisappear:animated];
 }
 -(void)viewDidUnload{
@@ -692,24 +692,38 @@ static NSArray* mobileDevices = nil;
 }
 -(void)viewDidLoad{
 	[super viewDidLoad];
+	self.searchController = [[UISearchController alloc]	 initWithSearchResultsController:nil];
+	self.searchController.dimsBackgroundDuringPresentation = NO;
+	self.definesPresentationContext = YES;
+	if(@available(iOS 11.0, *)){
+		self.navigationItem.searchController = self.searchController;
+		self.navigationItem.hidesSearchBarWhenScrolling=YES;
+	}else{
+		self.searchController.hidesNavigationBarDuringPresentation=NO;
+		self.tableView.tableHeaderView = self.searchController.searchBar;
+	}
+	self.searchController.searchBar.placeholder = @"Search by keyword";
+	self.searchController.searchResultsUpdater = self;
+
+	[self.searchController.searchBar sizeToFit];
 
 	// create a filtered list that will contain products for the search results table.
 	_filteredSnippets = [[NSMutableArray arrayWithCapacity:[_snippets count]] retain];
 	
-	if (savedSearchTerm)
+/*	if (savedSearchTerm)
 	{
         [self.searchDisplayController setActive:searchWasActive];
         [self.searchDisplayController.searchBar setText:savedSearchTerm];
         savedSearchTerm = nil;
     }
-	
+	*/
 	[self.tableView reloadData];
 	CGSize reqsz =  self.tableView.contentSize;
-	self.contentSizeForViewInPopover = CGSizeMake(350, reqsz.height>600?600:reqsz.height);
+	self.preferredContentSize = CGSizeMake(350, reqsz.height>600?600:reqsz.height);
 }
 - (NSInteger)tableView:(UITableView *)tableView  numberOfRowsInSection:(NSInteger)section
 {
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.searchController.active)
 	{
         return [_filteredSnippets count];
     }
@@ -733,7 +747,7 @@ static NSArray* mobileDevices = nil;
 	
 	NSInteger optionIndex=[ip row];
 
-	NSDictionary* snippet = (tableView == self.searchDisplayController.searchResultsTableView)?
+	NSDictionary* snippet = (self.searchController.active)?
 		(NSDictionary*)[_filteredSnippets objectAtIndex:optionIndex]:
 		(NSDictionary*)[_snippets objectAtIndex:optionIndex];
 	
@@ -759,7 +773,7 @@ static NSArray* mobileDevices = nil;
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)ip
 {
 	NSInteger optionIndex = [ip row];
-	if(tableView==self.searchDisplayController.searchResultsTableView)
+	if(self.searchController.active)
 		_done([_filteredSnippets objectAtIndex:optionIndex]);
 	else
 		_done([_snippets objectAtIndex:optionIndex]);
@@ -781,9 +795,15 @@ static NSArray* mobileDevices = nil;
 		}
 	}
 }
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
+{
+	NSString *searchString = searchController.searchBar.text;
+	[self filterListBySearchText:searchString];
+	[self.tableView reloadData];
+}
 
+/*
 #pragma mark UISearchDisplayController Delegate Methods
-
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
 {
     [self filterListBySearchText:searchString];
@@ -806,6 +826,6 @@ static NSArray* mobileDevices = nil;
 	[self.tableView setContentOffset:contentOffsetBeforeSearch animated:YES];
 	searchWasActive=NO;
 }
-
+*/
 
 @end

@@ -10,9 +10,9 @@
 #import "TrendTableViewCell.h"
 #import "Tag.h"
 #import "AsyncURLConnection.h"
-#import "MultiSelectSegmentedControl.h"
+#import "MultiSelectSegmentedControl-Swift.h"
 
-@interface TrendTableViewController : UITableViewController <UISearchDisplayDelegate, UISearchBarDelegate, MultiSelectSegmentedControlDelegate>
+@interface TrendTableViewController : UITableViewController <UISearchResultsUpdating, UISearchBarDelegate, MultiSelectSegmentedControlDelegate>
 {
 	BOOL 		reloadPending;
 	BOOL			searchWasActive;
@@ -34,7 +34,7 @@
 @property (nonatomic, retain) 	NSString		*savedSearchTerm;
 
 @property (nonatomic, retain) NSMutableDictionary *pb2span;
-@property (nonatomic, retain) NSMutableDictionary *uuid2events;
+@property (nonatomic, retain, readwrite) NSMutableDictionary *uuid2events;
 
 @property (nonatomic, retain) NSMutableArray *trendList;
 @property (nonatomic, retain) NSMutableArray *filteredTrendList;

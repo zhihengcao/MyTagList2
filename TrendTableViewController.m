@@ -45,11 +45,33 @@
 	self.uuid2events=nil;
 	[super dealloc];
 }
-
+-(void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator{
+	[coordinator animateAlongsideTransition:^(id  _Nonnull context) {
+		[self updateViewFrame];
+	} completion:^(id  _Nonnull context) {
+		// after rotation
+	}];
+}
+-(void)updateViewFrame{
+	CGRect frame = self.view.frame;
+	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	if(orientation==UIDeviceOrientationLandscapeRight || orientation==UIDeviceOrientationLandscapeLeft){
+		if(frame.origin.x != -16){
+			frame.origin.x = -16; frame.size.width+=16;
+		}
+	}else{
+		if(frame.origin.x == -16){
+			frame.origin.x = 0;
+			frame.size.width-=16;
+		}
+	}
+	self.view.frame = frame;
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
+	
 	[self.tableView registerNib:[UINib nibWithNibName:@"TrendTableViewCell" bundle:nil] forCellReuseIdentifier:@"trendViewCell"];  //  Class:TrendTableViewCell.self forCellReuseIdentifier:@"trendViewCell"];
-	[self.searchDisplayController.searchResultsTableView registerNib:[UINib nibWithNibName:@"TrendTableViewCell" bundle:nil] forCellReuseIdentifier:@"trendViewCell"];
+//	[self.searchDisplayController.searchResultsTableView registerNib:[UINib nibWithNibName:@"TrendTableViewCell" bundle:nil] forCellReuseIdentifier:@"trendViewCell"];
 
 	segmentedControl =
 	[[[MultiSelectSegmentedControl alloc]initWithItems:[NSArray arrayWithObjects:@"Show Humidity", @"Show Lux", nil]] autorelease];
@@ -62,7 +84,7 @@
 -(void)viewDidLayoutSubviews{
 	segmentedControl.frame = CGRectMake(10, 10, self.tableView.frame.size.width-20, 34);
 }
--(void)multiSelect:(MultiSelectSegmentedControl*) multiSelecSegmendedControl didChangeValue:(BOOL) value atIndex: (NSUInteger) index
+-(void)multiSelect:(MultiSelectSegmentedControl*) multiSelecSegmendedControl didChange:(BOOL) value at: (NSInteger) index
 {
 	[AsyncURLConnection request:[WSROOT stringByAppendingString:@"ethClient.asmx/SaveTrendsOption"]
 						jsonObj:@{
@@ -88,6 +110,7 @@
 	[comet cancel]; [comet release]; comet=nil;
 }
 -(void)viewDidAppear:(BOOL)animated{
+
 	NSLog(@"tvc.viewWillAppear, _trendList=%@", _trendList);
 	if(_trendList.count==0 || reloadPending)
 		[self loadFromServer];
@@ -96,6 +119,9 @@
 		if(comet==nil)[self getNextUpdate];
 	}
 	[super viewDidAppear:animated];
+
+	[self updateViewFrame];
+
 }
 
 -(void)setSplitViewRatio{
@@ -253,12 +279,12 @@
 																						 
 																						 [_trendList replaceObjectAtIndex:i withObject:t];
 																						 
-																						 if([self.searchDisplayController isActive])
-																							 [self.searchDisplayController.searchResultsTableView reloadData];
+																						 if(self.topPVC.searchController.active)
+																							 [self.tableView reloadData];
 																						 else
 																						 {
 																							 [self.tableView beginUpdates];
-																							 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+																							 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 																							 [self.tableView endUpdates];
 																						 }
 																						 break;
@@ -279,19 +305,98 @@
 																				 return NO;
 																			 }] retain];
 }
+
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	if(_trendList.count==0)return;
 	
 	NSDictionary *t;
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.topPVC.searchController.active)
 	{
 		t = [_filteredTrendList objectAtIndex:indexPath.row];
 	}else{
 		t = [_trendList objectAtIndex:[indexPath row]];
 	}
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	[_delegate tagSelected:t.uuid fromCell:[tableView cellForRowAtIndexPath:indexPath]];
+	
+	if([t.uuid isEqualToString:@"39a61aaa-57b4-4e15-8106-a30917688d5d"])
+		[self startAnimationAtCell:indexPath];
+	else
+		[_delegate tagSelected:t.uuid fromCell:[tableView cellForRowAtIndexPath:indexPath]];
+}
+
+-(void)startAnimationAtCell:(NSIndexPath*)ip{
+	
+/*	should_run_comet=NO;
+	
+	NSLog(@"%@",[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
+	__block int frame_count=0;    // need 300 frame animation, covering 2PM to 7PM (300min).
+	__block NSTimer* timer  = [NSTimer scheduledTimerWithTimeInterval:2 block:^{
+		
+		[AsyncURLConnection request:[WSROOT stringByAppendingString:@"ethClient.asmx/GetTrendBackDated"]
+							jsonObj:@{
+									  @"uuid": @"39a61aaa-57b4-4e15-8106-a30917688d5d",
+									  @"filetime": [NSNumber numberWithLongLong:132314925810781650L - (600- frame_count-24*60)*60*1e7],
+									  @"decimate":@2
+									  }
+					  completeBlock:^(NSDictionary* retval){
+		
+						  frame_count++;
+						  if(frame_count>360){
+							  [timer invalidate];
+						  }
+
+						  [_trendList replaceObjectAtIndex:0 withObject:[retval objectForKey:@"d"]];
+						  [self.tableView beginUpdates];
+						  [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:ip] withRowAnimation:UITableViewRowAnimationNone];
+						  [self.tableView endUpdates];
+						  
+						  CGRect rect = self.navigationController.view.window.bounds;
+						  UIGraphicsImageRenderer* r = [[UIGraphicsImageRenderer alloc]initWithSize:rect.size];
+						  UIImage *image = [r imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull rendererContext) {
+							  [self.navigationController.view drawViewHierarchyInRect:rect afterScreenUpdates:YES];
+						  }];
+						  NSData *imageData = UIImagePNGRepresentation(image);
+						  if (imageData) {
+							  [imageData writeToFile:[NSString stringWithFormat: @"%@/SunnyCal_v3_%03d.png",
+													  [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0],  frame_count] atomically:NO];
+						  } else {
+							  NSLog(@"error while taking screenshot");
+						  }
+
+						  
+					  } errorBlock:^BOOL(NSError *error, id *sender) {
+						  return NO;
+					  } setMac:nil];
+
+		
+		if(frame_count%5==0){
+			
+			[AsyncURLConnection request:[WSROOT stringByAppendingString:@"ethClient.asmx/GetTrendBackDated"]
+								jsonObj:@{
+										  @"uuid": 	@"47c1a61d-0eb8-420c-81cf-71be5fb76b41",
+										  @"filetime": [NSNumber numberWithLongLong:132314925810781650L - (600- frame_count - 24*60)*60*1e7],
+										  @"decimate":@1
+										  }
+						  completeBlock:^(NSDictionary* retval){
+							  
+							  
+							  [_trendList replaceObjectAtIndex:1 withObject:[retval objectForKey:@"d"]];
+							  [self.tableView beginUpdates];
+							  [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+							  [self.tableView endUpdates];
+							  
+						  } errorBlock:^BOOL(NSError *error, id *sender) {
+							  return NO;
+						  } setMac:nil];
+			
+		}
+
+		
+	} repeats:YES];
+
+*/
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -304,7 +409,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.topPVC.searchController.active)
 	{
 		return _filteredTrendList.count;
 	}else{
@@ -322,7 +427,7 @@
  
 
 	NSMutableDictionary* t;
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.topPVC.searchController.active)
 	{
 		if(indexPath.row >= _filteredTrendList.count)return cell;
 		t = [_filteredTrendList objectAtIndex:indexPath.row];
@@ -426,7 +531,7 @@
     return YES;
 }
 
-
+/*
 -(BOOL)shouldAddToFilteredList:(NSDictionary*) trend{
 	NSString *tagName = trend.name;
 	
@@ -448,8 +553,45 @@
 		if([self shouldAddToFilteredList:t])
 			[_filteredTrendList addObject:t];
 	}
+}*/
+- (void)filterTagBySearchText:(NSString*)searchText scope:(NSInteger)scope
+{
+	[_filteredTrendList removeAllObjects]; // First clear the filtered array.
+	NSString* trimmedSearchText;
+	if(searchText.length>1 && [searchText characterAtIndex:0]==' ')
+		trimmedSearchText = [searchText substringFromIndex:1];
+	else
+		trimmedSearchText = searchText;
+	
+	for (int i=0;i<_trendList.count;i++)
+	{
+		NSDictionary* trend = [_trendList objectAtIndex:i];
+		if([searchText isEqualToString:@""] || NSNotFound != [trend.name rangeOfString:trimmedSearchText options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) ].location)
+		{
+			if(scope>0){
+				if(scope==1 && trend.tempState!=TooHigh)continue;
+				else if(scope==2 && trend.tempState!=Normal)continue;
+				else if(scope==3 && trend.tempState!=TooLow)continue;
+				else if(scope==4 && trend.tempState!=TempDisarmed)continue;
+			}
+			[_filteredTrendList addObject:trend];
+		}
+	}
 }
 
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
+{
+	NSString *searchString = searchController.searchBar.text;
+	[self filterTagBySearchText:searchString scope:searchController.searchBar.selectedScopeButtonIndex];
+	[self.tableView reloadData];
+}
+- (void)searchBar:(UISearchBar *)searchBar selectedScopeButtonIndexDidChange:(NSInteger)selectedScope
+{
+	self.topPVC.savedSearchScopeMvc = selectedScope;
+	[self updateSearchResultsForSearchController:self.topPVC.searchController];
+}
+
+/*
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
 {
 	[self filterListBySearchText:searchString];
@@ -472,5 +614,5 @@
 	self.navigationController.navigationBarHidden=NO;
 	[self.tableView setContentOffset:contentOffsetBeforeSearch animated:YES];
 }
-
+*/
 @end

@@ -52,6 +52,8 @@ typedef void (^logDownloader_t)(GraphViewController* vc, UIBarButtonItem* sender
 @property(nonatomic)BOOL capIsChipTemperatureMode;
 @property(nonatomic,retain)NSDictionary* data;
 @property(nonatomic,retain)NSMutableDictionary* date2DLI;
+@property (nonatomic, retain) NSNumber* capBaseline, *tempBaseline, *luxBaseline;
+
 //@property (nonatomic, retain)	LandscapeGraphViewController* landscapeVC;
 @property (nonatomic, retain)NSMutableDictionary* id2nameMapping;
 @end

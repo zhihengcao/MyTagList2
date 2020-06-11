@@ -41,10 +41,10 @@
 		
 		_useLogScaleForLight = [[NSUserDefaults standardUserDefaults] boolForKey:LogScalePrefKey];
 		self.colors = @[
-				   [UIColor colorWithRed:(float)0x7c/255.0 green:(float)0xb5/255.0 blue:(float)0xec/255.0 alpha:0.95],
+				   [UIColor colorWithRed:(float)0x7c/255.0 green:(float)0xb5/255.0 blue:(float)0xec/255.0 alpha:0.95],    // too cold color
 				   [UIColor colorWithRed:(float)0x43/255.0 green:(float)0x43/255.0 blue:(float)0x48/255.0 alpha:0.95],
 				   [UIColor colorWithRed:(float)0x90/255.0 green:(float)0xed/255.0 blue:(float)0x7d/255.0 alpha:0.95],
-				   [UIColor colorWithRed:(float)0xf7/255.0 green:(float)0xa3/255.0 blue:(float)0x5c/255.0 alpha:0.95],
+				   	[UIColor colorWithRed:(float)0xf7/255.0 green:(float)0xa3/255.0 blue:(float)0x5c/255.0 alpha:0.95],    // too dry color
 				   
 				   
 				   [UIColor colorWithRed:(float)0x80/255.0 green:(float)0x85/255.0 blue:(float)0xe9/255.0 alpha:0.95],
@@ -108,10 +108,12 @@
 	if(![_type isKindOfClass:[MotionTypeTranslator class]])id2DLI = [[NSMutableDictionary new] autorelease];
 
 	NSInteger tagCount = [[hourlyStatDay objectForKey:@"ids"] count];
-	NSArray* values =[hourlyStatDay objectForKey:@"values"], *tods=[hourlyStatDay objectForKey:@"tods"], *ids=[hourlyStatDay objectForKey:@"ids"];
+	NSArray* values =[hourlyStatDay objectForKey:@"values_base64"], *tods=[hourlyStatDay objectForKey:@"tods_base64"], *ids=[hourlyStatDay objectForKey:@"ids"];
+	
 	for(int tagi=0;tagi<tagCount;tagi++){
 		
-		NSArray* tagv =[values objectAtIndex:tagi];
+		NSData* tagv =[NSData dataFromBase64String: [values objectAtIndex:tagi]];
+		
 		NSNumber* tagId =[ids objectAtIndex:tagi ];
 		
 		if(![arrayOfIds containsObject:tagId])
@@ -119,30 +121,42 @@
 		
 		NSMutableArray* series=nil;
 		NSMutableArray* rawSeries=nil;
-		NSArray* tod=nil;
+		NSData* tod=nil;
 		if(tods){
-			tod=[tods objectAtIndex:tagi];
+			tod=[NSData dataFromBase64String: [tods objectAtIndex:tagi]];
 			rawSeries=[id2RawSeries objectForKey:tagId];
 			if(rawSeries==nil){
-				rawSeries = [[[NSMutableArray alloc]initWithCapacity:[tagv count]] autorelease];
+				rawSeries = [[[NSMutableArray alloc]initWithCapacity:tagv.length/sizeof(double)] autorelease];
 				[id2RawSeries setObject:rawSeries forKey:tagId];
 			}
 		}else{
 			series =[id2Series objectForKey:tagId];
 			if(series==nil){
-				series = [[[NSMutableArray alloc]initWithCapacity:[tagv count]] autorelease];
+				series = [[[NSMutableArray alloc]initWithCapacity:tagv.length/sizeof(double)] autorelease];
 				[id2Series setObject:series forKey:tagId];
 			}
 		}
 		
 		float ymin=[_type yminInit], ymax =[_type ymaxInit];
 		float avg =0;
-		
-		for(int j=0;j<[tagv count];j++){
-			NSNumber* val = [_type preProcess:[tagv objectAtIndex:j]];
+
+		double *raw, *prev_raw;
+		UInt32 *raw_tod, *prev_raw_tod;
+		for(int j=0;j<tagv.length/sizeof(double);j++){
+			prev_raw = raw;
+			//memcpy(&raw, [tagv bytes]+j*sizeof(double), sizeof(double));
+			raw = (double*)((char*)[tagv bytes]+j*8);
+			NSNumber* val = [_type preProcess:[NSNumber numberWithDouble:*raw]];
+			
+			if(tod){
+				prev_raw_tod = raw_tod;
+				//memcpy(&raw_tod, [tod bytes]+j*sizeof(raw_tod), sizeof(raw_tod));
+				raw_tod = (UInt32*)((char*)[tod bytes]+j*4);
+			}
+			
 			if(val){
 				SChartDataPoint* dataPoint = [[SChartDataPoint new] autorelease];
-				dataPoint.xValue = [NSDate dateWithTimeInterval:(tod? [tod[j] intValue]:3600*j) sinceDate:baseDate];
+				dataPoint.xValue = [NSDate dateWithTimeInterval:(tod? *raw_tod:3600*j) sinceDate:baseDate];
 				dataPoint.yValue = val;
 				
 				
@@ -154,8 +168,8 @@
 
 					if([_type isKindOfClass:[LuxTypeTranslator class]]){
 						if(j>0){
-							int durationSec =[tod[j] intValue]-[tod[j-1] intValue];
-							float avg_lux = ([[tagv objectAtIndex:j] floatValue]+[[tagv objectAtIndex:j-1] floatValue])/2.0f;
+							int durationSec = *raw_tod- *prev_raw_tod;
+							float avg_lux = (*raw+*prev_raw)/2.0f;
 							avg += (avg_lux*durationSec)*0.0185f/1e6;
 						}
 					}else{
@@ -183,7 +197,7 @@
 			}
 		}
 		if(![_type isKindOfClass:[LuxTypeTranslator class]])
-			avg/=tagv.count;
+			avg/=(tagv.length/sizeof(double));
 
 		if(tod==nil){
 			NSMutableArray* bandSeries =[id2BandSeries objectForKey:tagId];

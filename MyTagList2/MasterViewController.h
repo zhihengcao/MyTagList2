@@ -44,16 +44,16 @@ typedef NS_ENUM(NSInteger, TagCellDisplayMode) {
 	DisplayModeLux=3
 };
 
-@interface MasterViewController : TableTBViewController <UISearchDisplayDelegate, UISearchBarDelegate, UIGestureRecognizerDelegate>{
+@interface MasterViewController : TableTBViewController <UISearchResultsUpdating, UISearchBarDelegate, UIGestureRecognizerDelegate>{
 
 	NSMutableArray* _tagList;
 	NSMutableArray	*_filteredTagList;	// The content filtered as a result of a search.
 	
 	// The saved state of the search UI if a memory warning removed the view.
-    NSString		*savedSearchTerm;
+    /*NSString		*savedSearchTerm;
     NSInteger		savedScopeButtonIndex;
     BOOL			searchWasActive;
-	CGPoint			contentOffsetBeforeSearch;
+	CGPoint			contentOffsetBeforeSearch;  */
 	
 	UIBarButtonItem *searchBtn, *reorderDoneBtn;
 }
@@ -69,6 +69,7 @@ typedef NS_ENUM(NSInteger, TagCellDisplayMode) {
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil delegate: (id<MasterViewControllerDelegate>) delegate;
 
 @property(nonatomic,assign) id<MasterViewControllerDelegate> delegate;
+
 
 @property (nonatomic, retain) NSMutableArray *tagList;
 //@property (retain, nonatomic) IBOutlet UIBarButtonItem *stopBeepAllBtn;

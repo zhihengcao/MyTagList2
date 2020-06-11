@@ -30,7 +30,7 @@
 	IASKPSDualSliderSpecifierViewCell *light_range;
 	
 	IASKPSTextFieldSpecifierViewCell *email;
-	IASKPSToggleSwitchSpecifierViewCell *monitor_light, *send_email, *send_tweet, *beep_pc, *use_speech, *vibrate;
+	IASKPSToggleSwitchSpecifierViewCell *monitor_light, *send_email, *send_tweet, *beep_pc, *use_speech, *vibrate, *apns_ca;
 	TableLoadingButtonCell* tweetLogin;
 	IASKPSTextFieldSpecifierViewCell *apns_sound, *interval, *th_low_delay, *th_high_delay, *apns_pause;
 
@@ -44,7 +44,6 @@
 @property(nonatomic, retain) 	NSMutableArray* cellArray;
 @property(nonatomic,assign) id<LightOptionsViewControllerDelegate> lightDelegate;
 @property(nonatomic, retain) NSDictionary* tag;
-@property(nonatomic, retain) NSString* loginEmail;
 @property (nonatomic, readonly) BOOL modified;
 -(void) editedTableViewCell:(id)cell;
 

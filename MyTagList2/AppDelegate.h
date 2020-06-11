@@ -30,9 +30,9 @@
 #import "GCDAsyncUdpSocket.h"
 #import "WebViewController.h"
 #import "TrendTableViewController.h"
-//#import <UserNotifications/UserNotifications.h>
+#import <UserNotifications/UserNotifications.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate, MasterViewControllerDelegate, LoginControllerDelegate, DetailViewControllerDelegate, OptionsViewControllerDelegate, TempOptionsViewControllerDelegate, CapOptionsViewControllerDelegate, LightOptionsViewControllerDelegate, AssociationDoneDelegate, RegisterViewControllerDelegate, ScriptConfigViewControllerDelegate, CLLocationManagerDelegate, UIDocumentInteractionControllerDelegate, NSXMLParserDelegate, UIPopoverControllerDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, MasterViewControllerDelegate, LoginControllerDelegate, DetailViewControllerDelegate, OptionsViewControllerDelegate, TempOptionsViewControllerDelegate, CapOptionsViewControllerDelegate, LightOptionsViewControllerDelegate, AssociationDoneDelegate, RegisterViewControllerDelegate, ScriptConfigViewControllerDelegate, CLLocationManagerDelegate, UIDocumentInteractionControllerDelegate, NSXMLParserDelegate, UIPopoverControllerDelegate,UNUserNotificationCenterDelegate>
 {
 	int _postbackInterval;
 	int _rxFilter;
@@ -140,7 +140,9 @@
 
 @property (strong, nonatomic) UIPopoverController* updateOption_popov;
 @property (strong, nonatomic) UIPopoverController* associate_popov;
+
 @property (strong, nonatomic) UIWindow *window;
+
 @property (strong, nonatomic) MasterViewController *mvc;
 @property (strong, nonatomic) DetailViewController *dvc;
 @property(retain, nonatomic) EventsViewController* evc;

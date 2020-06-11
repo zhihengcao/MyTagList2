@@ -37,6 +37,13 @@ BOOL dewPointMode = NO;
 }
 
 -(void)releaseViews{
+	[sms_toocold release]; sms_toocold=nil;
+	[sms_toohot release]; sms_toohot=nil;
+	[call_toocold release]; call_toocold=nil;
+	[call_toohot release]; call_toohot=nil;
+	[tcc_off release]; tcc_off=nil; [tcc_cool release]; tcc_cool=nil; [tcc_heat release]; tcc_heat=nil;
+	[ifttt_create release]; ifttt_create=nil;
+	
 	[temp_units release]; temp_units=nil;
 	[temp_range release]; temp_range=nil;
 	[temp_cal release]; temp_cal=nil;
@@ -51,6 +58,8 @@ BOOL dewPointMode = NO;
 	[vibrate release]; vibrate=nil;
 	[apns_sound release]; apns_sound=nil;
 	[apns_pause release]; apns_pause=nil;
+	[apns_ca release]; apns_ca=nil;
+	
 	[send_tweet release]; send_tweet=nil;
 	[notify_normal release]; notify_normal=nil;
 	[tweetLogin release]; tweetLogin=nil;
@@ -100,6 +109,8 @@ BOOL dewPointMode = NO;
 	c.beep_pc_vibrate = vibrate.toggle.on;
 	c.send_tweet = send_tweet.toggle.on;
 	
+	c.apnsCA = apns_ca.toggle.on;
+	
 	[self.delegate optionViewSaveBtnClicked:self];
 
 }
@@ -138,9 +149,13 @@ BOOL dewPointMode = NO;
 	temp_range.slider.currentValue = chosen_temp_unit? tag.temperatureDegC*9.0/5.0+32 : tag.temperatureDegC;
 	temp_range.slider.maximumValue = chosen_temp_unit?c.threshold_q.max*9.0/5.0+32:c.threshold_q.max;
 	temp_range.slider.minimumValue = chosen_temp_unit?c.threshold_q.min*9.0/5.0+32:c.threshold_q.min;
+
 	temp_range.slider.stepSize = chosen_temp_unit?c.threshold_q.step*9.0/5.0:c.threshold_q.step;
 	temp_range.slider.selectedMaximumValue = chosen_temp_unit?c.th_high*9.0/5.0+32:c.th_high;
 	temp_range.slider.selectedMinimumValue=chosen_temp_unit? c.th_low*9.0/5.0+32: c.th_low;
+
+	temp_range.slider.minimumRange=chosen_temp_unit? c.th_window*9.0/5.0: c.th_window;
+
 	[temp_range sliderValueChanged:nil];
 
 	[threshold_window setVal:chosen_temp_unit>0?c.th_window*9.0/5.0:c.th_window];
@@ -154,7 +169,7 @@ BOOL dewPointMode = NO;
 	use_speech.toggleOn=c.beep_pc_tts; vibrate.toggleOn=c.beep_pc_vibrate;
 	apns_sound.textField.text = c.apnsSound.isEmpty?apns_sound_choices[0]:c.apnsSound;
 	apns_pause.textField.text = apns_pause_choices[ c.apns_pause_index ];
-
+	apns_ca.toggleOn = c.apnsCA;
 
 	int selected=1;
 	for(int i=0;i<sizeof(monitor_interval_choices)/sizeof(int);i++)
@@ -181,34 +196,45 @@ BOOL dewPointMode = NO;
 {
     [super viewDidLoad];
 	
-	monitor_temp = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Monitor Temperature",nil) helpText:nil delegate:self];
-	temp_units = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Temperature Units:",nil)];
+	monitor_temp = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Monitor temperature",nil) helpText:nil delegate:self];
+	temp_units = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Temperature units:",nil)];
 	temp_units.textField.text = [temp_unit_choices objectAtIndex:chosen_temp_unit];
 	if(chosen_temp_unit==0){
-		temp_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:degC_min Max:degC_max Unit:@"°C"	numberFormat:@"%.1f"	delegate:self];
-		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate To:",nil) Min:degC_min Max:degC_max Step:0.1 Unit:@"°C" delegate:self];
-		threshold_window = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold Window",nil) Min:0 Max:5 Step:0.05 Unit:@"°C" delegate:self];
+		temp_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal range <",nil) Min:degC_min Max:degC_max Unit:@"°C"	numberFormat:@"%.1f"	delegate:self];
+		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate to:",nil) Min:degC_min Max:degC_max Step:0.1 Unit:@"°C" delegate:self];
+		threshold_window = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold window",nil) Min:0 Max:5 Step:0.05 Unit:@"°C" delegate:self];
 	}else{
-		temp_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:degF_min Max:degF_max Unit:@"°F" numberFormat:@"%.1f" delegate:self];
-		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate To:",nil) Min:degF_min Max:degF_max Step:0.1 Unit:@"°F" delegate:self];
-		threshold_window = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold Window",nil) Min:0 Max:9 Step:0.1 Unit:@"°F" delegate:self];
+		temp_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal range <",nil) Min:degF_min Max:degF_max Unit:@"°F" numberFormat:@"%.1f" delegate:self];
+		temp_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate to:",nil) Min:degF_min Max:degF_max Step:0.1 Unit:@"°F" delegate:self];
+		threshold_window = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold window",nil) Min:0 Max:9 Step:0.1 Unit:@"°F" delegate:self];
 	}
 	temp_cal_btn = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Calibrate",nil) Progress:NSLocalizedString(@"Saving...",nil)];
-	temp_uncal_btn = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Remove Calibration",nil) Progress:NSLocalizedString(@"Saving...",nil)];
+	temp_uncal_btn = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Remove calibration",nil) Progress:NSLocalizedString(@"Saving...",nil)];
 
-	email =  [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:NSLocalizedString(@"Enter Email Addresses",nil) isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
-	send_email = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Email",nil) helpText:NSLocalizedString(@"The tag will send you email when temperature becomes too high, too low or back to normal range.",nil) delegate:self];
-	send_tweet = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Post Tweet",nil) helpText:NSLocalizedString(@"The tag will tweet on behalf of you when temperature becomes too high, too low or back to normal range.",nil) delegate:self];
-	tweetLogin = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Twitter Login",nil) Progress:NSLocalizedString(@"Redirecting",nil)];
-	
-	beep_pc = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notification",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' when temperature becomes too high, too low or returns within the normal range.",nil) delegate:self];
-	use_speech = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
+	email =  [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:NSLocalizedString(@"Enter email addresses",nil) isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
+	send_email = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send email",nil) helpText:NSLocalizedString(@"The tag will send you email when temperature becomes too high, too low or back to normal range.",nil) delegate:self];
+	send_tweet = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Post tweet",nil) helpText:NSLocalizedString(@"The tag will tweet on behalf of you when temperature becomes too high, too low or back to normal range.",nil) delegate:self];
+	tweetLogin = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Twitter login",nil) Progress:NSLocalizedString(@"Redirecting",nil)];
+	sms_toohot = [TableLoadingButtonCell newWithTitle:@"Text me if too hot" Progress:@"Loading ifttt.com"];
+	sms_toocold = [TableLoadingButtonCell newWithTitle:@"Text me if too cold" Progress:@"Loading ifttt.com"];
+	call_toohot = [TableLoadingButtonCell newWithTitle:@"Call me if too hot" Progress:@"Loading ifttt.com"];
+	call_toocold = [TableLoadingButtonCell newWithTitle:@"Call me if too cold" Progress:@"Loading ifttt.com"];
+
+	tcc_heat = [TableLoadingButtonCell newWithTitle:@"Turn on heat when cold" Progress:@"Loading ifttt.com"];
+	tcc_cool = [TableLoadingButtonCell newWithTitle:@"Turn on AC when hot" Progress:@"Loading ifttt.com"];
+	tcc_off = [TableLoadingButtonCell newWithTitle:@"Turn off heat/AC when normal" Progress:@"Loading ifttt.com"];
+ 	ifttt_create = [TableLoadingButtonCell newWithTitle:@"Other options..." Progress:@"Loading ifttt.com"];
+
+	beep_pc = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send push notification",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' when temperature becomes too high, too low or returns within the normal range.",nil) delegate:self];
+	use_speech = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
 
 	notify_normal = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tNotify back to normal",nil) helpText:NSLocalizedString(@"In addition to when too hot/too cold, send push notification also when temperature is back to normal range.",nil) delegate:self];
 
-	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
-	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
-	apns_pause =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPause Action Effective For: ",nil)];
+	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
+	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush notification sound: ",nil)];
+	apns_pause =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPause action effective For: ",nil)];
+	apns_ca = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tCritical Alert",nil) helpText:NSLocalizedString(@"Send as \"Critical Alert\" even if your phone is in Do Not Disturb mode (iOS 12 and later).",nil)  delegate:self];
+
 
 	interval =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Check temperature every: ",nil)];
 	th_high_delay =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Notify too hot after consecutive:",nil)];
@@ -244,29 +270,32 @@ BOOL dewPointMode = NO;
 // [when out of range (email, addr, ringpc, usespeech, vib)
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return _tag.isNest? 2:3;
+	return _tag.isNest? 2:3 + (monitor_temp.toggleOn?1:0);
 }
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
 	if(section==0)
 		return nil;
-	else if(section==2 && !_tag.isNest)
+	else if(section==1)
+		return NSLocalizedString(@"Monitor Temperature:",nil);
+	else if(monitor_temp.toggleOn && section==2)
+		return @"Using IFTTT";
+	else //if(section==2 && !_tag.isNest)
 		if(chosen_temp_unit)
 			return [NSLocalizedString(@"Temperature Calibration",nil) stringByAppendingFormat:@" (Raw Reading: %.1f°F)", (_tag.temperatureDegC-_tag.tempCalOffset)*9.0/5.0+32.0];
 		else
 			return [NSLocalizedString(@"Temperature Calibration",nil) stringByAppendingFormat:@" (Raw Reading: %.1f°C)", _tag.temperatureDegC-_tag.tempCalOffset];
-
-	else
-		return NSLocalizedString(@"Monitor Temperature:",nil);
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
 	if(section==0)
 		return 1;
-	else if(section==2 && !_tag.isNest)
-		return 3;
-	else
+	else if(section==1)
 		return self.cellArray.count;
+	else if(monitor_temp.toggleOn && section==2)
+		return 8;
+	else //if(section==2 && !_tag.isNest)
+		return 3;
 }
 
 -(void) editedTableViewCell:(UITableViewCell*)cell{
@@ -304,8 +333,9 @@ BOOL dewPointMode = NO;
 		[self updateCellArray];
 		[self animateCellPresence:notify_normal fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:use_speech fromArray:oldCells toArray:self.cellArray];
-		[self animateCellPresence:apns_pause fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_sound fromArray:oldCells toArray:self.cellArray];
+		[self animateCellPresence:apns_ca fromArray:oldCells toArray:self.cellArray];
+		[self animateCellPresence:apns_pause fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:vibrate fromArray:oldCells toArray:self.cellArray];
 		[self.tableView endUpdates];
 		[self scheduleRecalculatePopoverSize];
@@ -313,7 +343,7 @@ BOOL dewPointMode = NO;
 
 	}else if(cell==monitor_temp){
 
-		NSArray* oldCells = [[self.cellArray copy] autorelease];
+/*		NSArray* oldCells = [[self.cellArray copy] autorelease];
 		[self.tableView beginUpdates];
 		[monitor_temp updateToggleOn];
 		[self updateCellArray];
@@ -331,10 +361,20 @@ BOOL dewPointMode = NO;
 		[self animateCellPresence:use_speech fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_pause fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_sound fromArray:oldCells toArray:self.cellArray];
+		[self animateCellPresence:apns_ca fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:vibrate fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:rn_toohot fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:rn_toocold fromArray:oldCells toArray:self.cellArray];
-		[self.tableView endUpdates];
+		if(monitor_temp.toggleOn)
+			[self.tableView insertSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationFade];
+		else
+			[self.tableView deleteSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationFade];
+		
+		[self.tableView endUpdates];*/
+		
+		[monitor_temp updateToggleOn];
+		[self updateCellArray];
+		[self.tableView reloadData];
 		[self scheduleRecalculatePopoverSize];
 		
 	}
@@ -371,8 +411,9 @@ BOOL dewPointMode = NO;
 		if(beep_pc.toggleOn){
 			[cells addObject:notify_normal];
 			[cells addObject:use_speech];
-			[cells addObject:apns_pause];
 			[cells addObject:apns_sound];
+			[cells addObject:apns_ca];
+			[cells addObject:apns_pause];
 			[cells addObject:vibrate];
 		}
 		[cells addObject:send_tweet];
@@ -388,15 +429,27 @@ BOOL dewPointMode = NO;
 	if(ip.section==0){
 		return temp_units;
 	}
-	else if(ip.section==2 && !_tag.isNest){
+	else if(ip.section==1)
+		return [self.cellArray objectAtIndex:ip.row];
+	else if(monitor_temp.toggleOn && ip.section==2){
+		switch(ip.row){
+			case 0: return sms_toohot;
+			case 1: return sms_toocold;
+			case 2: return call_toohot;
+			case 3: return call_toocold;
+			case 4: return tcc_heat;
+			case 5: return tcc_cool;
+			case 6: return tcc_off;
+			case 7: return ifttt_create;
+			default: return nil;
+		}
+	}else /*if(ip.section==2 && !_tag.isNest)*/{
 		if(ip.row==0)
 			return temp_cal;
 		else if(ip.row==1)
 			return temp_cal_btn;
 		else
 			return temp_uncal_btn;
-	}else{
-		return [self.cellArray objectAtIndex:ip.row];
 	}
 }
 
@@ -412,6 +465,8 @@ BOOL dewPointMode = NO;
 	temp_range.slider.selectedMinimumValue = (temp_range.slider.selectedMinimumValue-32)*5.0/9.0;
 	temp_range.slider.minimumValue = (temp_range.slider.minimumValue-32)*5.0/9.0;
 	temp_range.slider.maximumValue = (temp_range.slider.maximumValue-32)*5.0/9.0;
+	temp_range.slider.minimumRange = (temp_range.slider.minimumRange)*5.0/9.0;
+
 	temp_range.slider.stepSize=temp_range.slider.stepSize*5.0/9.0;
 	temp_range.slider.selectedMaximumValue = (temp_range.slider.selectedMaximumValue-32)*5.0/9.0;
 	[temp_range sliderValueChanged:nil];
@@ -430,6 +485,8 @@ BOOL dewPointMode = NO;
 	temp_range.slider.selectedMaximumValue = (temp_range.slider.selectedMaximumValue*9.0/5.0+32);
 	temp_range.slider.minimumValue = temp_range.slider.minimumValue*9.0/5.0+32;
 	temp_range.slider.maximumValue = temp_range.slider.maximumValue*9.0/5.0+32;
+	temp_range.slider.minimumRange = temp_range.slider.minimumRange*9.0/5.0;
+
 	temp_range.slider.stepSize=temp_range.slider.stepSize*9.0/5.0;
 	temp_range.slider.selectedMinimumValue = (temp_range.slider.selectedMinimumValue*9.0/5.0+32);
 	[temp_range sliderValueChanged:nil];
@@ -493,21 +550,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 														  [[self tableView] reloadData];
 													  }
 												  } ] autorelease];
-	}else if(ip.section==2 && !_tag.isNest){
-		if(ip.row==1){
-			float degC = temp_cal.slider.value; 
-			if(chosen_temp_unit)degC = (degC-32.0)*5.0/9.0;
-			[self.tempDelegate tempCalibrateBtnClickedForTag:_tag Temperature:degC BtnCell:temp_cal_btn ThresholdSlider:temp_range.slider useDegF:chosen_temp_unit!=0];
-		}else if(ip.row==2){
-			float degC =_tag.temperatureDegC-_tag.tempCalOffset;
-			if(chosen_temp_unit)
-				[temp_cal setVal: degC*9.0/5.0+32.0];
-			else
-				[temp_cal setVal:degC];
-			
-			[self.tempDelegate tempCalibrateBtnClickedForTag:_tag Temperature:degC BtnCell:temp_cal_btn ThresholdSlider:temp_range.slider useDegF:chosen_temp_unit!=0];
-		}
-	}else{
+	}else if(ip.section==1){
 		UITableViewCell* cell =[self tableView:tableView cellForRowAtIndexPath:ip];
 		if([cell isKindOfClass:[IASKPSToggleSwitchSpecifierViewCell class]]){
 			[((IASKPSToggleSwitchSpecifierViewCell*)cell) toggleHelp];
@@ -623,6 +666,34 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 		}
 		else if(cell==tweetLogin){
 			[self.delegate optionViewTwitterLoginBtnClicked:tweetLogin];
+		}
+	}
+	else if(monitor_temp.toggleOn && ip.section==2){
+		switch(ip.row){
+			case 0: [self.delegate iftttCall:@"MBPASaxK" From:sms_toohot];break;
+			case 1: [self.delegate iftttCall:@"Gbt8vQgT" From:sms_toocold];break;
+			case 2: [self.delegate iftttCall:@"ANTiPcBQ" From:call_toohot];break;
+			case 3: [self.delegate iftttCall:@"uWJK9QyF" From:call_toocold];break;
+
+			case 4: [self.delegate iftttCall:@"uUf5J9bz" From:tcc_heat];break;
+			case 5: [self.delegate iftttCall:@"uu9ExgeV" From:tcc_cool];break;
+			case 6: [self.delegate iftttCall:@"eyWc2Ve5" From:tcc_off];break;
+			case 7: [self.delegate iftttCreateCallFrom:ifttt_create]; break;
+		}
+	}
+	else /*if(ip.section==2 && !_tag.isNest)*/{
+		if(ip.row==1){
+			float degC = temp_cal.slider.value;
+			if(chosen_temp_unit)degC = (degC-32.0)*5.0/9.0;
+			[self.tempDelegate tempCalibrateBtnClickedForTag:_tag Temperature:degC BtnCell:temp_cal_btn ThresholdSlider:temp_range.slider useDegF:chosen_temp_unit!=0];
+		}else if(ip.row==2){
+			float degC =_tag.temperatureDegC-_tag.tempCalOffset;
+			if(chosen_temp_unit)
+				[temp_cal setVal: degC*9.0/5.0+32.0];
+			else
+				[temp_cal setVal:degC];
+			
+			[self.tempDelegate tempCalibrateBtnClickedForTag:_tag Temperature:degC BtnCell:temp_cal_btn ThresholdSlider:temp_range.slider useDegF:chosen_temp_unit!=0];
 		}
 	}
 	if(picker!=nil)

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "IASKSettingsReader.h"
-#import "MultiSelectSegmentedControl.h"
+#import "MultiSelectSegmentedControl-Swift.h"
 
 @interface IASKPSWiringSpecifierViewCell : UITableViewCell {
 }

@@ -321,10 +321,10 @@
 }
 +(int) dBmToBars:(float)dBm {
 	if (dBm <= -115) return 0;
-	else if (dBm < -105) return 1;
-	else if (dBm < -90) return 2;
-	else if (dBm < -80) return 3;
-	else if (dBm < -70) return 4;
+	else if (dBm < -90) return 1;
+	else if (dBm < -83) return 2;
+	else if (dBm < -76) return 3;
+	else if (dBm < -69) return 4;
 	else return 5;
 }
 /*static NSString* timeFromString(NSDate* date){
@@ -442,7 +442,7 @@
 		}else if(tag.isWeMo){
 			capData = [NSString stringWithFormat:@"💡%.0f%% ", tag.cap];
 		}else if(tag.hasThermocouple && !tag.shorted){
-			capData = [NSString stringWithFormat:@"%.1f°%@ (Chip)",	 _useDegF?tag.cap*9.0/5.0+32.0: tag.cap,	 _useDegF?@"F":@"C"];
+			capData = [NSString stringWithFormat:@"%.1f°%@ (Ambient)",	 _useDegF?tag.cap*9.0/5.0+32.0: tag.cap,	 _useDegF?@"F":@"C"];
 		}else
 			capData=nil;
 		
@@ -612,21 +612,25 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 		
 		[[self tableView] reloadData];		
 		CGSize reqsz =  self.tableView.contentSize;
-		self.topPVC.navigationController.contentSizeForViewInPopover = CGSizeMake(480, reqsz.height>800?800:reqsz.height);
+		self.topPVC.navigationController.preferredContentSize = CGSizeMake(480, reqsz.height>800?800:reqsz.height);
 	}
 
+	/*
 	if(_tagList.count==0){
-		self.searchDisplayController.searchBar.hidden=YES;
+		self.searchController.searchBar.hidden=YES;
 		[[self tableView] setContentOffset:CGPointMake(0, 48)];
 	}
 	else{
-		self.searchDisplayController.searchBar.hidden=NO;
+		self.searchController.searchBar.hidden=NO;
 		[[self tableView] setContentOffset:CGPointMake(0, 0)];
 	}
+	 */
 }
 
 -(void) addNewTag:(NSMutableDictionary*)tag{	
 //	if(_tagList.count>0){
+	self.topPVC.searchController.active=NO;
+	
 		[self.tableView beginUpdates];
 	
 	[_tagList insertObject:tag atIndex:0];
@@ -638,11 +642,13 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 		[_tagList insertObject:tag atIndex:0];
 		[self.tableView reloadData];
 	}*/
-	self.searchDisplayController.searchBar.hidden=NO;
+	//self.searchController.searchBar.hidden=NO;
 	[[self tableView] setContentOffset:CGPointMake(0, 0)];
 //	[self.tableView reloadData];
 }
 -(void) deleteTagWithSlaveId:(int)slaveId{
+	self.topPVC.searchController.active=NO;
+
 	for(int i=0;i<_tagList.count;i++){
 		NSMutableDictionary* tag = [_tagList objectAtIndex:i];
 		if(tag.slaveId == slaveId){
@@ -660,6 +666,8 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 }
 
 -(void) deleteTagWithUuid:(NSString*)uuid{
+	self.topPVC.searchController.active=NO;
+
 	for(int i=0;i<_tagList.count;i++){
 		NSMutableDictionary* tag = [_tagList objectAtIndex:i];
 		if([[tag uuid] isEqualToString: uuid]){
@@ -733,34 +741,31 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 }
 -(void) updateTag:(NSMutableDictionary*)tag loadImage:(BOOL)loadimage{
 	
-	int iall, ifiltered;
-	iall = [self updateTag:tag inList:_tagList];
-	ifiltered = [self updateTag:tag inList:_filteredTagList];
-	int i =[self.searchDisplayController isActive]?ifiltered:iall;
+	int i = [self updateTag:tag inList:_tagList];
+	int ifiltered = [self updateTag:tag inList:_filteredTagList];
+	//int i =[self.topPVC.searchController isActive]?ifiltered:iall;*/
 	
 	if(i==-1){
 		if(tag!=nil && ([tag.mac compare: [tagManagerMacList objectAtIndex:currentTagManagerIndex]]==NSOrderedSame ||
 						[[NSUserDefaults standardUserDefaults] boolForKey:TagManagerChooseAllPrefKey])){
-			if([self.searchDisplayController isActive]){
-				// todo
-			}else
-				[self addNewTag:[[tag mutableCopy] autorelease]];
+			[self addNewTag:[[tag mutableCopy] autorelease]];
 		}
 	}else{
-		
+		int displayed_index = self.topPVC.searchController.active ? ifiltered : i;
+		if(displayed_index != -1){
 		TagTableViewCell* cell = (TagTableViewCell*)[self.tableView
-													 cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:0]];
-		if(cell){
-			//[cell setData:tag loadImage:loadimage animated:YES];  // already done in cellForRowAtIndexPath
-			if([self.searchDisplayController isActive])
-				[self.searchDisplayController.searchResultsTableView reloadData];
-			else
-			{
-				[self.tableView beginUpdates];
-				[self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
-				[self.tableView endUpdates];
+													 cellForRowAtIndexPath:[NSIndexPath indexPathForRow:displayed_index inSection:0]];
+			if(cell){
+				//[cell setData:tag loadImage:loadimage animated:YES];  // already done in cellForRowAtIndexPath
+				/*if(self.topPVC.searchController.active){
+				 [self.tableView reloadData];
+				 }else*/
+				{
+					[self.tableView beginUpdates];
+					[self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:displayed_index inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+					[self.tableView endUpdates];
+				}
 			}
-
 		}
 	}
 }
@@ -771,7 +776,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	
     if (self) {
 		
-		savedSearchTerm=nil;
+		//savedSearchTerm=nil;
 		_tagList = [[NSMutableArray arrayWithObject:[NSDictionary
 						dictionaryWithObjectsAndKeys:NSLocalizedString(@"Loading...",nil) ,@"name", [NSNumber numberWithBool:YES], @"disabled",nil]] retain];
 
@@ -804,7 +809,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 		
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 		    self.clearsSelectionOnViewWillAppear = NO;
-		    self.contentSizeForViewInPopover = CGSizeMake(320.0, 600.0);
+		    self.preferredContentSize = CGSizeMake(320.0, 600.0);
 		}		
     }
     return self;
@@ -817,7 +822,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 - (void)navigationBarDoubleTap:(UIGestureRecognizer*)recognizer {
 	CGPoint touchPoint = [recognizer locationOfTouch:0 inView:recognizer.view];
 	NSLog(@"%f",recognizer.view.frame.size.width);
-	if(touchPoint.x > 100 && touchPoint.x < recognizer.view.frame.size.width-100){
+	if(touchPoint.x > 100 && touchPoint.x < recognizer.view.frame.size.width-100 && touchPoint.y<32){
 		if(self.topPVC.isTagManagerChoiceVisible)
 //			[_delegate tagManagerDropdownPressed:self.navigationController.navigationBar];
 			[_delegate tagManagerDropdownPressed:recognizer.view];
@@ -851,9 +856,10 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 - (void)dealloc
 {	
 	[self releaseViews];
-	[self setAssociateTagBtn:nil];
+//	[self setAssociateTagBtn:nil];
+
 	self.tagList = nil;
-	[savedSearchTerm release];
+	//[savedSearchTerm release];
     [super dealloc];
 }
 - (void)viewDidUnload {
@@ -869,9 +875,11 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 #pragma mark - View lifecycle
 -(void)searchButtonPressed{
 //	[self.tableView setContentOffset:CGPointMake(0,0) animated:NO];
-	[self.searchDisplayController.searchBar becomeFirstResponder];
-	[self.searchDisplayController setActive:YES];
+//	[self.searchDisplayController.searchBar becomeFirstResponder];
+//	[self.searchDisplayController setActive:YES];
+	[self.topPVC.searchController setActive:YES];
 }
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
 	return  THUMB_HEIGHT;
 }
@@ -896,18 +904,18 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	// Do any additional setup after loading the view, typically from a nib.
 
 	self.title = @"Wireless Tags";
-	
+		
 	// create a filtered list that will contain products for the search results table.
 	_filteredTagList = [[NSMutableArray arrayWithCapacity:[_tagList count]] retain];
 	
 	// restore search settings if they were saved in didReceiveMemoryWarning.
-    if (savedSearchTerm)
+    /*if (savedSearchTerm)
 	{
-        [self.searchDisplayController setActive:searchWasActive];
-        [self.searchDisplayController.searchBar setSelectedScopeButtonIndex:savedScopeButtonIndex];
-        [self.searchDisplayController.searchBar setText:savedSearchTerm];
+        [self.searchController setActive:searchWasActive];
+        [self.searchController.searchBar setSelectedScopeButtonIndex:savedScopeButtonIndex];
+        [self.searchController.searchBar setText:savedSearchTerm];
         savedSearchTerm = nil;
-	}/*else{
+	}else{
 		self.tableView.contentOffset = CGPointMake(0,  self.searchDisplayController.searchBar.frame.size.height - self.tableView.contentOffset.y);
 	}*/
 
@@ -982,7 +990,11 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 
 	[super viewWillAppear:animated];
 
+	if(@available(iOS 11.0,*))
+		self.topPVC.navigationItem.hidesSearchBarWhenScrolling = NO;
+
 	self.topPVC.pcDots.alpha=1;
+	[self.navigationController setToolbarHidden:NO animated:YES];
 
 /*	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone){
 		NSLog(@" is %f",self.searchDisplayController.searchBar.frame.size.height);
@@ -1003,18 +1015,25 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	return NO;
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
 {
-    [super viewDidAppear:animated];
-	self.topPVC.navigationController.toolbarHidden=NO;
+	NSString *searchString = searchController.searchBar.text;
+	[self filterTagBySearchText:searchString scope:searchController.searchBar.selectedScopeButtonIndex];
+	[self.tableView reloadData];
+}
+- (void)searchBar:(UISearchBar *)searchBar selectedScopeButtonIndexDidChange:(NSInteger)selectedScope
+{
+	self.topPVC.savedSearchScopeMvc = selectedScope;
+	[self updateSearchResultsForSearchController:self.topPVC.searchController];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
     // save the state of the search UI so that it can be restored if the view is re-created
-    searchWasActive = [self.searchDisplayController isActive];
-    savedSearchTerm = [self.searchDisplayController.searchBar text];
-    savedScopeButtonIndex = [self.searchDisplayController.searchBar selectedScopeButtonIndex];
+	/*searchWasActive = self.searchController.active;
+	savedSearchTerm = self.searchController.searchBar.text;
+    savedScopeButtonIndex = [self.searchController.searchBar selectedScopeButtonIndex];
+	*/
 	[super viewDidDisappear:animated];
 }
 
@@ -1037,7 +1056,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 - (NSInteger)tableView:(UITableView *)tableView
  numberOfRowsInSection:(NSInteger)section 
 {
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.topPVC.searchController.active)
 	{
         return [_filteredTagList count]+1;
     }
@@ -1054,7 +1073,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	UITableView *tableView = self.tableView; // Or however you get your table view
 	for(NSIndexPath* ip in [tableView indexPathsForVisibleRows]){
 		NSDictionary *tag;
-		if ([self.searchDisplayController isActive])
+		if ([self.topPVC.searchController isActive])
 		{
 			if(ip.row >= _filteredTagList.count)continue;
 			tag = [_filteredTagList objectAtIndex:ip.row];
@@ -1102,7 +1121,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
     cell.useDegF = self.delegate.useDegF;
 	
 	NSMutableDictionary *tag;
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if (self.topPVC.searchController.active)
 	{
 		if(indexPath.row >= _filteredTagList.count)return cell;
 		tag = [_filteredTagList objectAtIndex:indexPath.row];
@@ -1190,7 +1209,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	}
 
 	NSDictionary *tag;
-	if (tableView == self.searchDisplayController.searchResultsTableView)
+	if ( self.topPVC.searchController.active)
 	{
 		if(indexPath.row >= _filteredTagList.count)return;
         tag = [_filteredTagList objectAtIndex:indexPath.row];
@@ -1205,7 +1224,8 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	}*/
 }
 
-- (void)filterTagBySearchText:(NSString*)searchText scope:(NSString*)scope
+// scope=0: all, 1: toohot, 2: normal, 3: toocold, 4: off
+- (void)filterTagBySearchText:(NSString*)searchText scope:(NSInteger)scope
 {
 	[_filteredTagList removeAllObjects]; // First clear the filtered array.
 	NSString* trimmedSearchText;
@@ -1215,13 +1235,16 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 		trimmedSearchText = searchText;
 	
 	for (NSDictionary *tag in _tagList)
-	{		
-		if ([scope isEqualToString:@"All"] || [tag.eventCategoryString isEqualToString:scope])
+	{
+		if([searchText isEqualToString:@""] || NSNotFound != [tag.name rangeOfString:trimmedSearchText options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) ].location)
 		{
-			if([searchText isEqualToString:@" "] || NSNotFound != [tag.name rangeOfString:trimmedSearchText options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) ].location)
-			{
-				[_filteredTagList addObject:tag];
-            }
+			if(scope>0){
+				if(scope==1 && tag.tempEventState!=TooHigh)continue;
+				else if(scope==2 && tag.tempEventState!=Normal)continue;
+				else if(scope==3 && tag.tempEventState!=TooLow)continue;
+				else if(scope==4 && tag.tempEventState!=TempDisarmed)continue;
+			}
+			[_filteredTagList addObject:tag];
 		}
 	}
 }
@@ -1274,18 +1297,16 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	[tag1 release];
 }
 
+
 #pragma mark -
 #pragma mark UISearchDisplayController Delegate Methods
-
-- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+/*- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
 {
     [self filterTagBySearchText:searchString scope:
 	 [[self.searchDisplayController.searchBar scopeButtonTitles] objectAtIndex:[self.searchDisplayController.searchBar selectedScopeButtonIndex]]];
     // Return YES to cause the search result table view to be reloaded.
     return YES;
 }
-
-
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchScope:(NSInteger)searchOption
 {
     [self filterTagBySearchText:[self.searchDisplayController.searchBar text] scope:
@@ -1305,7 +1326,7 @@ NSString * const TagDisplayModePrefKey = @"TagDisplayModePrefKey";
 	[self.tableView setContentOffset:contentOffsetBeforeSearch animated:YES];
     self.topPVC.navigationController.navigationBarHidden=NO;
 }
-
+*/
 
 @end
 @implementation UILabel(EllipsisFix)

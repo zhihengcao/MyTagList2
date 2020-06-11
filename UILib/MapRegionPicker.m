@@ -521,13 +521,13 @@
     return cell;
 }
 
--(void)scrollViewDidScroll:(UIScrollView *)scrollView
+/*-(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     UISearchBar *searchBar = self.searchDisplayController.searchBar;
     CGRect rect = searchBar.frame;
     rect.origin.y = MIN(0, scrollView.contentOffset.y);
     searchBar.frame = rect;
-}
+}*/
 
 #pragma mark - UISearchBarDelegate
 

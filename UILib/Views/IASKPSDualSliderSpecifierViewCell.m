@@ -60,11 +60,15 @@
 }*/
 -(IBAction)upperNegateClicked:(id)sender{
 	NSString* text = _upper.text;
+	if(text.length==0)return;
+
 	if([text characterAtIndex:0]=='-') _upper.text = [text substringFromIndex:1];
 	else _upper.text = [@"-" stringByAppendingString:text];
 }
 -(IBAction)lowerNegateClicked:(id)sender{
 	NSString* text = _lower.text;
+	if(text.length==0)return;
+	
 	if([text characterAtIndex:0]=='-') _lower.text = [text substringFromIndex:1];
 	else _lower.text = [@"-" stringByAppendingString:text];
 }

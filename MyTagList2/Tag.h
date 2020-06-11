@@ -20,7 +20,7 @@ extern NSMutableSet* selectedTags;
 
 typedef enum{
 	BasicTag=2, MotionSensor=12, MotionRH=13, TagPro=21, ALS8k=26, TCProbe=42, 
-	SolarTag=22, CapSensor=32, ExtResSensor=33, CurrentSensor=42, ReedSensor=52, ReedSensor_noHTU=53, Thermostat=62, PIR = 72, WeMo=82, DropCam=92, Usb=102, UsbALS=106
+	SolarTag=22, CapSensor=32, ExtResSensor=33, CurrentSensor=42, ReedSensor=52, ReedSensor_noHTU=53, Thermostat=62, PIR = 72, WeMo=82, DropCam=92, Usb=102, UsbALS=107, UsbZmod=106
 } TagType;
 typedef enum{
 	Disarmed=0, Armed=1, Moved=2, Opened=3, Closed=4, DetectedMovement=5, TimedOut=6, Stabilizing=7

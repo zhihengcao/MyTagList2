@@ -54,10 +54,14 @@
 		_chart.hasCap=NO;
 		rh=nil;
 	}else{
-		_cap.text = [NSString stringWithFormat:@"%.1f", [rh.lastObject floatValue] ];
-		_cap_unit.text = @"%";
+		BOOL chipTempMode =[[t objectForKey:@"chipTemp"] boolValue];
+		_cap.text = [NSString stringWithFormat:@"%.1f", useDegF&&chipTempMode? [rh.lastObject floatValue]*9.0/5.0+32.0: [rh.lastObject floatValue] ];
+		_cap_unit.text = chipTempMode?_temp_unit.text:  @"%";
 		_chart.hasCap=YES;
+		_chart.capIsChipTemperatureMode =chipTempMode;
+		_chart.dewPointMode = chipTempMode;  // single temperature axis.
 	}
+	
 	NSMutableArray* lux = [t objectForKey:@"lux"];
 	if(lux==[NSNull null] || lux==nil){
 		_lux_unit.text=@"";
@@ -105,7 +109,7 @@
 	[_chart.xAxis setRangeWithMinimum:_chart.earliestDate andMaximum:_chart.latestDate];
 */
 	[_chart showRecentTrendFileTimes:filetimes Temperatures:temperature Caps:rh Lux:lux tempRange:tempRange capRange:capRange
-							luxRange:luxRange dateRange: span? span: @[filetimes.firstObject, filetimes.lastObject] eventsToAnnotate:[t objectForKey:@"events"]];
+							luxRange:luxRange dateRange: /*span? span:*/ @[filetimes.firstObject, filetimes.lastObject] eventsToAnnotate:[t objectForKey:@"events"]];
 }
 -(NSString*)UserFriendlyTimeStringFor:(long long)filetime{
 	if(filetime==0)return @"(NO DATA)";
@@ -113,9 +117,10 @@
 	NSDate* now = [[[NSDate alloc] init] autorelease];
 	NSTimeInterval diff = [now timeIntervalSinceDate:lastComm];
 	float daysDifference = (float)diff / 60.0 / 60.0 / 24.0;
-	if(daysDifference>=3)return  [NSDateFormatter localizedStringFromDate:lastComm dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle];
-	else if(daysDifference<0.5)return [NSDateFormatter localizedStringFromDate:lastComm dateStyle:NSDateFormatterNoStyle timeStyle:NSDateFormatterShortStyle];
-	else return [NSDateFormatter localizedStringFromDate:lastComm dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+//	if(daysDifference>=3)return  [NSDateFormatter localizedStringFromDate:lastComm dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterNoStyle];
+//	else if(daysDifference<0.5)
+		return [NSDateFormatter localizedStringFromDate:lastComm dateStyle:NSDateFormatterNoStyle timeStyle:NSDateFormatterShortStyle];
+//	else return [NSDateFormatter localizedStringFromDate:lastComm dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
 }
 - (void)layoutSubviews
 {
@@ -123,7 +128,12 @@
 	if(self.frame.size.width<190)_chart.hidden=YES;
 	else {
 		_chart.hidden=NO;
-		_chart.frame=CGRectMake( 180, 12, self.frame.size.width-185, self.frame.size.height-15);
+		
+		UIDeviceOrientation devOrientation = [UIDevice currentDevice].orientation;
+		if (UIDeviceOrientationIsLandscape(devOrientation))
+			_chart.frame=CGRectMake( 180, 12, self.frame.size.width-228, self.frame.size.height-15);
+		else
+			_chart.frame=CGRectMake( 180, 12, self.frame.size.width-185, self.frame.size.height-15);
 
 		//NSLog(@"TrendTableCell layoutSubViews redrawn=%d", redrawn);
 		//[self setTrend:self.trend useDegF:self.useDegF andFiletimeSpan:self.span];

@@ -150,8 +150,13 @@ NSString * const showedGraphPinchTooltip = @"showedGraphPinchTooltip";
 				_portraitVC.capIsChipTemperatureMode = self.chart.capIsChipTemperatureMode;
 				_portraitVC.logDownloader = self.logDownloader; // portrait mode does not have share button.
 			}
-			if(!isMultiTag)
-				_portraitVC.date2DLI=((SingleTagChart*)self.chart).date2DLI;
+			if(!isMultiTag){
+				SingleTagChart* stchart =(SingleTagChart*)self.chart;
+				_portraitVC.date2DLI = stchart.date2DLI;
+				_portraitVC.tempBaseline = stchart.tempBaseline;
+				_portraitVC.capBaseline = stchart.capBaseline;
+				_portraitVC.luxBaseline = stchart.luxBaseline;
+			}
 		}
 		[self.navigationController pushViewController:_portraitVC animated:YES];
 

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9C197870C5D82E4FE809CCC3 /* libPods-WirelessTag.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 31C5FBEF3262C70387953C39 /* libPods-WirelessTag.a */; };
+		4EE64A022C1ACCF2B3054D37 /* Pods_WirelessTag.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C8224F30D7ACF0029B3DDEC /* Pods_WirelessTag.framework */; };
 		AD0582BA19A8739600D369B0 /* Computer Error.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0582B219A8739600D369B0 /* Computer Error.aiff */; };
 		AD0582BB19A8739600D369B0 /* Door Bell.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0582B319A8739600D369B0 /* Door Bell.aiff */; };
 		AD0582BC19A8739600D369B0 /* Door Chime.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0582B419A8739600D369B0 /* Door Chime.aiff */; };
@@ -18,7 +18,6 @@
 		AD0582C119A8739600D369B0 /* Your Turn.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0582B919A8739600D369B0 /* Your Turn.aiff */; };
 		AD0BB532185E32CA00149D42 /* IASKPSWiringSpecifierViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = AD0BB531185E32CA00149D42 /* IASKPSWiringSpecifierViewCell.xib */; };
 		AD0BB535185E34C200149D42 /* IASKPSWiringSpecifierViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0BB534185E34C200149D42 /* IASKPSWiringSpecifierViewCell.m */; };
-		AD0BB538185E675700149D42 /* MultiSelectSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0BB537185E675700149D42 /* MultiSelectSegmentedControl.m */; };
 		AD0BB53B185E6C0800149D42 /* KumostatOptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0BB53A185E6C0800149D42 /* KumostatOptionsViewController.m */; };
 		AD0BB54418675ACE00149D42 /* Bip.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0BB53C18675ACE00149D42 /* Bip.aiff */; };
 		AD0BB54518675ACE00149D42 /* Boing.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0BB53D18675ACE00149D42 /* Boing.aiff */; };
@@ -37,6 +36,7 @@
 		AD0BB55B18675B9400149D42 /* Whit.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0BB55218675B9400149D42 /* Whit.aiff */; };
 		AD0BB55C18675B9400149D42 /* Wild Eep.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0BB55318675B9400149D42 /* Wild Eep.aiff */; };
 		AD0BB55D18675B9400149D42 /* moof.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD0BB55418675B9400149D42 /* moof.aiff */; };
+		AD0CF5AE234EAEA6003EBE04 /* ph_tm@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD0CF5AD234EAEA6003EBE04 /* ph_tm@2x.png */; };
 		AD0FC62614FC22B7001FBD0B /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0FC62514FC22B7001FBD0B /* Reachability.m */; };
 		AD0FC62914FC25DC001FBD0B /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD0FC62814FC25DC001FBD0B /* SystemConfiguration.framework */; };
 		AD0FC63214FDAFEE001FBD0B /* RegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0FC63114FDAFED001FBD0B /* RegisterViewController.m */; };
@@ -116,6 +116,8 @@
 		AD63090A1A008AF1007B0E81 /* Door_Close.aiff in Resources */ = {isa = PBXBuildFile; fileRef = AD6309091A008AF1007B0E81 /* Door_Close.aiff */; };
 		AD677E2F159245B500F20EA4 /* NSData+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = AD677E2D159245B500F20EA4 /* NSData+MD5.m */; };
 		AD677E361592476200F20EA4 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = AD677E341592476200F20EA4 /* NSData+Base64.m */; };
+		AD689AC92492D90000F9E1C9 /* SciChart_WirelessTag.plist in Resources */ = {isa = PBXBuildFile; fileRef = AD689AC82492D90000F9E1C9 /* SciChart_WirelessTag.plist */; };
+		AD6E5FA824872D13007F81B7 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD6E5FA724872D13007F81B7 /* WebKit.framework */; };
 		AD6E613D16360F7E00F1D163 /* TempOptionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6E613B16360F7E00F1D163 /* TempOptionsViewController.m */; };
 		AD70A25022C5945500E9CA28 /* icon_gear@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD70A24F22C5945500E9CA28 /* icon_gear@2x.png */; };
 		AD7346821CD91FA100B67D6F /* signal0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD73467C1CD91FA100B67D6F /* signal0@2x.png */; };
@@ -189,6 +191,7 @@
 		AD998D7F180F0D200063C976 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD998D7E180F0D200063C976 /* CoreLocation.framework */; };
 		AD998D82180F0FE40063C976 /* handleMap.png in Resources */ = {isa = PBXBuildFile; fileRef = AD998D80180F0FE40063C976 /* handleMap.png */; };
 		AD998D83180F0FE40063C976 /* handleMap@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD998D81180F0FE40063C976 /* handleMap@2x.png */; };
+		AD9A5BE62447C6D60014F847 /* icon_ambient_temp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AD9A5BE52447C6D60014F847 /* icon_ambient_temp@2x.png */; };
 		AD9F1E8E194EC3600077FBCB /* EventsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD9F1E8D194EC3600077FBCB /* EventsViewController.m */; };
 		ADAA07011EE75E6900E8E627 /* tutorial_switch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADAA07001EE75E6900E8E627 /* tutorial_switch@2x.png */; };
 		ADAA07031EE7BB0100E8E627 /* icon_chip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADAA07021EE7BB0100E8E627 /* icon_chip@2x.png */; };
@@ -224,7 +227,12 @@
 		ADB917D2213F895A009EF309 /* handle_left@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADB917CF213F8959009EF309 /* handle_left@2x.png */; };
 		ADB917D4213FB0F2009EF309 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ADB917D3213FB0F2009EF309 /* Launch Screen.storyboard */; };
 		ADBC350414E329AC00F7B23E /* ActionSheet+Blocks.m in Sources */ = {isa = PBXBuildFile; fileRef = ADBC350314E329AC00F7B23E /* ActionSheet+Blocks.m */; };
+		ADCA0E882401CBD3003FCAC6 /* icon_light_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADCA0E872401CBD3003FCAC6 /* icon_light_off@2x.png */; };
+		ADCA0E8A2401CE8D003FCAC6 /* icon_notepad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADCA0E892401CE8D003FCAC6 /* icon_notepad@2x.png */; };
+		ADCA0E8C2401CEB7003FCAC6 /* icon_notepad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ADCA0E8B2401CEB7003FCAC6 /* icon_notepad@2x.png */; };
 		ADCB51801EBB8CD400FBD963 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ADCB517F1EBB8CD400FBD963 /* libc++.tbd */; };
+		ADD1D207246327250019FFAA /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD8701A71BE33FB600B445A3 /* NotificationCenter.framework */; };
+		ADD1D2082463282C0019FFAA /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD7A0A931DBF15D200A9BECF /* UserNotifications.framework */; };
 		ADD2249C1EBBDDC900A036C0 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD7A6D5E1A2CD34F00B8DF3E /* Photos.framework */; };
 		ADD2249D1EBBE8C000A036C0 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD1EEBE01CE59990005BB07B /* MobileCoreServices.framework */; };
 		ADD2249E1EBBEBC200A036C0 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ADECA93714F46EDF006D1AFC /* AVFoundation.framework */; };
@@ -318,7 +326,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		31C5FBEF3262C70387953C39 /* libPods-WirelessTag.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WirelessTag.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C8224F30D7ACF0029B3DDEC /* Pods_WirelessTag.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WirelessTag.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8965BF9837BF008E5A4B6BEF /* Pods-WirelessTag.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WirelessTag.release.xcconfig"; path = "Pods/Target Support Files/Pods-WirelessTag/Pods-WirelessTag.release.xcconfig"; sourceTree = "<group>"; };
 		AD0582B219A8739600D369B0 /* Computer Error.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = "Computer Error.aiff"; sourceTree = "<group>"; };
 		AD0582B319A8739600D369B0 /* Door Bell.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = "Door Bell.aiff"; sourceTree = "<group>"; };
@@ -331,8 +339,6 @@
 		AD0BB531185E32CA00149D42 /* IASKPSWiringSpecifierViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = IASKPSWiringSpecifierViewCell.xib; sourceTree = "<group>"; };
 		AD0BB533185E346600149D42 /* IASKPSWiringSpecifierViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IASKPSWiringSpecifierViewCell.h; sourceTree = "<group>"; };
 		AD0BB534185E34C200149D42 /* IASKPSWiringSpecifierViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IASKPSWiringSpecifierViewCell.m; sourceTree = "<group>"; };
-		AD0BB536185E675700149D42 /* MultiSelectSegmentedControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultiSelectSegmentedControl.h; sourceTree = "<group>"; };
-		AD0BB537185E675700149D42 /* MultiSelectSegmentedControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MultiSelectSegmentedControl.m; sourceTree = "<group>"; };
 		AD0BB539185E6C0800149D42 /* KumostatOptionsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KumostatOptionsViewController.h; sourceTree = "<group>"; };
 		AD0BB53A185E6C0800149D42 /* KumostatOptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KumostatOptionsViewController.m; sourceTree = "<group>"; };
 		AD0BB53C18675ACE00149D42 /* Bip.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = Bip.aiff; path = "../../Downloads/macossounds 2/AIFF/Bip.aiff"; sourceTree = "<group>"; };
@@ -352,6 +358,7 @@
 		AD0BB55218675B9400149D42 /* Whit.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = Whit.aiff; path = "../../Downloads/macossounds 2/AIFF/Whit.aiff"; sourceTree = "<group>"; };
 		AD0BB55318675B9400149D42 /* Wild Eep.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = "Wild Eep.aiff"; path = "../../Downloads/macossounds 2/AIFF/Wild Eep.aiff"; sourceTree = "<group>"; };
 		AD0BB55418675B9400149D42 /* moof.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = moof.aiff; path = "../../Downloads/macossounds 2/AIFF/moof.aiff"; sourceTree = "<group>"; };
+		AD0CF5AD234EAEA6003EBE04 /* ph_tm@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ph_tm@2x.png"; sourceTree = "<group>"; };
 		AD0FC62414FC22B7001FBD0B /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		AD0FC62514FC22B7001FBD0B /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		AD0FC62814FC25DC001FBD0B /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -496,6 +503,10 @@
 		AD677E2E159245B500F20EA4 /* NSData+MD5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+MD5.h"; sourceTree = "<group>"; };
 		AD677E341592476200F20EA4 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
 		AD677E351592476200F20EA4 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
+		AD689AC82492D90000F9E1C9 /* SciChart_WirelessTag.plist */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; name = SciChart_WirelessTag.plist; path = MyTagList2/SciChart_WirelessTag.plist; sourceTree = "<group>"; };
+		AD6E5FA424808B1B007F81B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MasterViewController_iPhone.xib; sourceTree = "<group>"; };
+		AD6E5FA624808B1C007F81B7 /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/MasterViewController_iPhone.strings; sourceTree = "<group>"; };
+		AD6E5FA724872D13007F81B7 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		AD6E613B16360F7E00F1D163 /* TempOptionsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TempOptionsViewController.m; sourceTree = "<group>"; };
 		AD6E613C16360F7E00F1D163 /* TempOptionsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TempOptionsViewController.h; sourceTree = "<group>"; };
 		AD70A24F22C5945500E9CA28 /* icon_gear@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon_gear@2x.png"; path = "../../../Downloads/wlanpref_0005/icon_gear@2x.png"; sourceTree = "<group>"; };
@@ -580,6 +591,7 @@
 		AD998D7E180F0D200063C976 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		AD998D80180F0FE40063C976 /* handleMap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = handleMap.png; sourceTree = "<group>"; };
 		AD998D81180F0FE40063C976 /* handleMap@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "handleMap@2x.png"; sourceTree = "<group>"; };
+		AD9A5BE52447C6D60014F847 /* icon_ambient_temp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_ambient_temp@2x.png"; sourceTree = "<group>"; };
 		AD9B3B1F163E691400D7A7DB /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		AD9F1E8C194EC3600077FBCB /* EventsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventsViewController.h; sourceTree = "<group>"; };
 		AD9F1E8D194EC3600077FBCB /* EventsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventsViewController.m; sourceTree = "<group>"; };
@@ -633,6 +645,9 @@
 		ADB917D3213FB0F2009EF309 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		ADBC350214E329AC00F7B23E /* ActionSheet+Blocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ActionSheet+Blocks.h"; sourceTree = "<group>"; };
 		ADBC350314E329AC00F7B23E /* ActionSheet+Blocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ActionSheet+Blocks.m"; sourceTree = "<group>"; };
+		ADCA0E872401CBD3003FCAC6 /* icon_light_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_light_off@2x.png"; sourceTree = "<group>"; };
+		ADCA0E892401CE8D003FCAC6 /* icon_notepad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_notepad@2x.png"; sourceTree = "<group>"; };
+		ADCA0E8B2401CEB7003FCAC6 /* icon_notepad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon_notepad@2x.png"; path = "../../../Downloads/labels/icon_notepad@2x.png"; sourceTree = "<group>"; };
 		ADCB517F1EBB8CD400FBD963 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		ADCB51991EBB954E00FBD963 /* libPods.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPods.a; path = "Pods/../build/Debug-iphoneos/libPods.a"; sourceTree = "<group>"; };
 		ADDB1AB11E69350D00061E8C /* tutorial_tm@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tutorial_tm@2x.png"; sourceTree = "<group>"; };
@@ -742,6 +757,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ADD1D2082463282C0019FFAA /* UserNotifications.framework in Frameworks */,
+				ADD1D207246327250019FFAA /* NotificationCenter.framework in Frameworks */,
 				AD2B4D621EBE968800055075 /* AssetsLibrary.framework in Frameworks */,
 				AD7380541EBC4B7A00A089B2 /* CoreMedia.framework in Frameworks */,
 				ADD2249E1EBBEBC200A036C0 /* AVFoundation.framework in Frameworks */,
@@ -750,6 +767,7 @@
 				ADCB51801EBB8CD400FBD963 /* libc++.tbd in Frameworks */,
 				AD37A5C51A06F04F00C5CB6E /* ShinobiCharts.framework in Frameworks */,
 				ADF2D5491A05B5700014B243 /* MediaPlayer.framework in Frameworks */,
+				AD6E5FA824872D13007F81B7 /* WebKit.framework in Frameworks */,
 				AD1CBFA118EB57BC00CCA1D3 /* CoreText.framework in Frameworks */,
 				AD1CBF9F18EB57A400CCA1D3 /* OpenGLES.framework in Frameworks */,
 				AD998D7F180F0D200063C976 /* CoreLocation.framework in Frameworks */,
@@ -760,7 +778,7 @@
 				ADE1873014D73D49001C349E /* QuartzCore.framework in Frameworks */,
 				ADE185AE14D678DB001C349E /* UIKit.framework in Frameworks */,
 				ADE185B214D678DB001C349E /* CoreGraphics.framework in Frameworks */,
-				9C197870C5D82E4FE809CCC3 /* libPods-WirelessTag.a in Frameworks */,
+				4EE64A022C1ACCF2B3054D37 /* Pods_WirelessTag.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -872,6 +890,7 @@
 		ADE1859E14D678DB001C349E = {
 			isa = PBXGroup;
 			children = (
+				AD689AC82492D90000F9E1C9 /* SciChart_WirelessTag.plist */,
 				AD4F3FB52243EC84004D5EEE /* TrendTableViewController.h */,
 				AD4F3FB62243EC84004D5EEE /* TrendTableViewController.m */,
 				AD35DD8320292CEE005CA5FF /* Settings.bundle */,
@@ -913,6 +932,7 @@
 		ADE185AC14D678DB001C349E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AD6E5FA724872D13007F81B7 /* WebKit.framework */,
 				AD2B4D611EBE968800055075 /* AssetsLibrary.framework */,
 				AD7380531EBC4B7A00A089B2 /* CoreMedia.framework */,
 				ADCB51991EBB954E00FBD963 /* libPods.a */,
@@ -930,7 +950,7 @@
 				ADE185AF14D678DB001C349E /* Foundation.framework */,
 				ADE185B114D678DB001C349E /* CoreGraphics.framework */,
 				AD8701A71BE33FB600B445A3 /* NotificationCenter.framework */,
-				31C5FBEF3262C70387953C39 /* libPods-WirelessTag.a */,
+				7C8224F30D7ACF0029B3DDEC /* Pods_WirelessTag.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1048,6 +1068,8 @@
 		ADE186AC14D7299C001C349E /* images */ = {
 			isa = PBXGroup;
 			children = (
+				ADCA0E872401CBD3003FCAC6 /* icon_light_off@2x.png */,
+				AD0CF5AD234EAEA6003EBE04 /* ph_tm@2x.png */,
 				ADE2CA3122D2C0510085F14D /* ph_usb@2x.png */,
 				AD70A24F22C5945500E9CA28 /* icon_gear@2x.png */,
 				AD5582122243F61D000EB691 /* iOS_addbutton@2x.png */,
@@ -1070,6 +1092,7 @@
 				AD7346E31CD9DA7500B67D6F /* icon_timelapse@2x.png */,
 				AD7346CC1CD9AD5B00B67D6F /* ph_dropcam@2x.png */,
 				AD7346CD1CD9AD5B00B67D6F /* ph_pir@2x.png */,
+				ADCA0E892401CE8D003FCAC6 /* icon_notepad@2x.png */,
 				AD7346CE1CD9AD5B00B67D6F /* ph_pro_2k@2x.png */,
 				AD7346CF1CD9AD5B00B67D6F /* ph_pro_8k@2x.png */,
 				AD7346D01CD9AD5B00B67D6F /* ph_pro_accel@2x.png */,
@@ -1093,6 +1116,7 @@
 				AD7346881CD9247200B67D6F /* icon_battery@2x.png */,
 				AD7346891CD9247200B67D6F /* icon_bell@2x.png */,
 				AD73468A1CD9247200B67D6F /* icon_motionsensor@2x.png */,
+				AD9A5BE52447C6D60014F847 /* icon_ambient_temp@2x.png */,
 				AD73468B1CD9247200B67D6F /* icon_thermostat@2x.png */,
 				AD73467C1CD91FA100B67D6F /* signal0@2x.png */,
 				AD73467D1CD91FA100B67D6F /* signal1@2x.png */,
@@ -1114,6 +1138,7 @@
 				AD43E02218EE635E00001978 /* pinch_zoom_notice.png */,
 				ADF9211D1830774C00C321D9 /* bar-highlight-orange-mid.png */,
 				ADF9211E1830774C00C321D9 /* bar-highlight-orange-mid@2x.png */,
+				ADCA0E8B2401CEB7003FCAC6 /* icon_notepad@2x.png */,
 				ADF9211F1830774C00C321D9 /* bar-highlight-mid.png */,
 				ADF921201830774C00C321D9 /* bar-highlight-mid@2x.png */,
 				ADB408C6182E271700BD985E /* icon_57.png */,
@@ -1173,8 +1198,6 @@
 				ADF2D53B1A01EE360014B243 /* CSStickyHeaderFlowLayout.m */,
 				ADF2D53C1A01EE360014B243 /* CSStickyHeaderFlowLayout.h */,
 				ADF2D53D1A01EE360014B243 /* CSStickyHeaderFlowLayoutAttributes.h */,
-				AD0BB536185E675700149D42 /* MultiSelectSegmentedControl.h */,
-				AD0BB537185E675700149D42 /* MultiSelectSegmentedControl.m */,
 				AD998D6B180CDF890063C976 /* DraggableCircleView.m */,
 				AD998D6C180CDF890063C976 /* RegionAnnotation.h */,
 				AD998D6D180CDF890063C976 /* RegionAnnotation.m */,
@@ -1280,8 +1303,7 @@
 				ADE185A614D678DB001C349E /* Frameworks */,
 				ADE185A714D678DB001C349E /* Resources */,
 				AD8701B71BE33FB600B445A3 /* Embed App Extensions */,
-				C398F3B80E2762AD00EA430E /* [CP] Embed Pods Frameworks */,
-				702E66CD3A5D9C0316CC3BC2 /* [CP] Copy Pods Resources */,
+				0088D7210C3A4B803E1CFA53 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1330,6 +1352,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 				de,
@@ -1377,7 +1400,9 @@
 				AD7346DE1CD9AD5B00B67D6F /* ph_tag13b@2x.png in Resources */,
 				AD70A25022C5945500E9CA28 /* icon_gear@2x.png in Resources */,
 				ADE185CA14D678DB001C349E /* MasterViewController_iPad.xib in Resources */,
+				ADCA0E8C2401CEB7003FCAC6 /* icon_notepad@2x.png in Resources */,
 				AD7346841CD91FA100B67D6F /* signal2@2x.png in Resources */,
+				AD9A5BE62447C6D60014F847 /* icon_ambient_temp@2x.png in Resources */,
 				AD3775301D591E760095BB85 /* IASKPSLuxRangeSpecifierViewCell.xib in Resources */,
 				AD0BB55618675B9400149D42 /* Single Click.aiff in Resources */,
 				AD0582C019A8739600D369B0 /* Train Horn.aiff in Resources */,
@@ -1401,6 +1426,7 @@
 				AD998D78180E524A0063C976 /* currentLocation.png in Resources */,
 				AD5E390222347C970001C86A /* ka_ambientlight.png in Resources */,
 				ADF921221830774C00C321D9 /* bar-highlight-orange-mid@2x.png in Resources */,
+				ADCA0E882401CBD3003FCAC6 /* icon_light_off@2x.png in Resources */,
 				AD7380631EBC555300A089B2 /* Door Buzzer.aiff in Resources */,
 				ADB408BE182CC55300BD985E /* ylogo152.png in Resources */,
 				ADDB1AB21E69350D00061E8C /* tutorial_tm@2x.png in Resources */,
@@ -1433,6 +1459,7 @@
 				AD73806B1EBC555300A089B2 /* Power Off Computer.aiff in Resources */,
 				ADAA07011EE75E6900E8E627 /* tutorial_switch@2x.png in Resources */,
 				AD43E02318EE635E00001978 /* landscape_notice.png in Resources */,
+				AD689AC92492D90000F9E1C9 /* SciChart_WirelessTag.plist in Resources */,
 				ADE1874214D76994001C349E /* shield.png in Resources */,
 				AD0582BA19A8739600D369B0 /* Computer Error.aiff in Resources */,
 				AD0582BB19A8739600D369B0 /* Door Bell.aiff in Resources */,
@@ -1501,9 +1528,11 @@
 				AD5A011C1CB48A71002D8E6A /* SnippetCategoryCollectionViewController_iPad.xib in Resources */,
 				ADB408C1182E196700BD985E /* Images.xcassets in Resources */,
 				AD0582BD19A8739600D369B0 /* Honk.aiff in Resources */,
+				ADCA0E8A2401CE8D003FCAC6 /* icon_notepad@2x.png in Resources */,
 				AD7346E41CD9DA7500B67D6F /* icon_snapshot@2x.png in Resources */,
 				AD7380641EBC555300A089B2 /* Bottle Rocket.aiff in Resources */,
 				AD7346A51CD960B100B67D6F /* icon_camera@2x.png in Resources */,
+				AD0CF5AE234EAEA6003EBE04 /* ph_tm@2x.png in Resources */,
 				AD7346D81CD9AD5B00B67D6F /* ph_pir@2x.png in Resources */,
 				AD5A01161CB457DF002D8E6A /* ka_log.png in Resources */,
 				AD0BB55A18675B9400149D42 /* Voltage.aiff in Resources */,
@@ -1554,50 +1583,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		702E66CD3A5D9C0316CC3BC2 /* [CP] Copy Pods Resources */ = {
+		0088D7210C3A4B803E1CFA53 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-WirelessTag/Pods-WirelessTag-resources.sh",
-				"${PODS_ROOT}/DBCamera/DBCamera/Resources/DBCameraImages.xcassets",
-				"${PODS_ROOT}/DBCamera/DBCamera/Localizations/DBCamera.bundle",
-				"${PODS_ROOT}/DBCamera/DBCamera/Filters/1977.acv",
-				"${PODS_ROOT}/DBCamera/DBCamera/Filters/amaro.acv",
-				"${PODS_ROOT}/DBCamera/DBCamera/Filters/Hudson.acv",
-				"${PODS_ROOT}/DBCamera/DBCamera/Filters/mayfair.acv",
-				"${PODS_ROOT}/DBCamera/DBCamera/Filters/Nashville.acv",
-				"${PODS_ROOT}/DBCamera/DBCamera/Filters/Valencia.acv",
-				"${PODS_ROOT}/DBCamera/DBCamera/Filters/Vignette.acv",
-				"${PODS_ROOT}/GPUImage/framework/Resources/lookup.png",
-				"${PODS_ROOT}/GPUImage/framework/Resources/lookup_amatorka.png",
-				"${PODS_ROOT}/GPUImage/framework/Resources/lookup_miss_etikate.png",
-				"${PODS_ROOT}/GPUImage/framework/Resources/lookup_soft_elegance_1.png",
-				"${PODS_ROOT}/GPUImage/framework/Resources/lookup_soft_elegance_2.png",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-WirelessTag/Pods-WirelessTag-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C398F3B80E2762AD00EA430E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WirelessTag/Pods-WirelessTag-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/DBCamera/DBCamera.framework",
+				"${BUILT_PRODUCTS_DIR}/GPUImage/GPUImage.framework",
+				"${BUILT_PRODUCTS_DIR}/MultiSelectSegmentedControl/MultiSelectSegmentedControl.framework",
+				"${BUILT_PRODUCTS_DIR}/SweeterSwift/SweeterSwift.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DBCamera.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GPUImage.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MultiSelectSegmentedControl.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SweeterSwift.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-WirelessTag/Pods-WirelessTag-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WirelessTag/Pods-WirelessTag-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E35168C03B74DCC45811C45E /* [CP] Check Pods Manifest.lock */ = {
@@ -1683,7 +1690,6 @@
 				AD4B401D153B77B000B6F5BD /* ActionSheetDatePicker.m in Sources */,
 				AD37025718959F50002BCDE3 /* WebImageOperations.m in Sources */,
 				AD4B4030153E926000B6F5BD /* AccountOptionsViewController.m in Sources */,
-				AD0BB538185E675700149D42 /* MultiSelectSegmentedControl.m in Sources */,
 				AD5A01051CB4560D002D8E6A /* SnippetCategoryCollectionViewController.m in Sources */,
 				AD4B4033153E92E100B6F5BD /* WebViewController.m in Sources */,
 				AD677E2F159245B500F20EA4 /* NSData+MD5.m in Sources */,
@@ -1778,6 +1784,8 @@
 				AD431C521F569AA100C45AEF /* ja */,
 				AD431C591F569ABA00C45AEF /* es */,
 				AD431C601F569AC200C45AEF /* it */,
+				AD6E5FA424808B1B007F81B7 /* Base */,
+				AD6E5FA624808B1C007F81B7 /* English */,
 			);
 			name = MasterViewController_iPhone.xib;
 			sourceTree = "<group>";
@@ -1834,9 +1842,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_ENTITLEMENTS = TempRH/TempRH.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 3.3.9;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 68273XHR4R;
 				ENABLE_BITCODE = NO;
@@ -1855,13 +1864,14 @@
 					"\"${PODS_ROOT}/Headers/Public/GPUImage\"",
 				);
 				INFOPLIST_FILE = TempRH/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 3.3.9;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mytaglist.MyTagList2.TempRH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = tempRH_distribution_provisioning;
+				PROVISIONING_PROFILE_SPECIFIER = temprh_wca_debug_21;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -1876,10 +1886,11 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_ENTITLEMENTS = TempRH/TempRH.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 3.3.9;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 68273XHR4R;
 				ENABLE_BITCODE = NO;
@@ -1894,13 +1905,14 @@
 					"\"${PODS_ROOT}/Headers/Public/GPUImage\"",
 				);
 				INFOPLIST_FILE = TempRH/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 3.3.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mytaglist.MyTagList2.TempRH;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = tempRH_distribution_provisioning;
+				PROVISIONING_PROFILE_SPECIFIER = tempRH_dist_prov_2021;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -1947,7 +1959,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PROVISIONING_PROFILE = "49DB7D0A-0C59-4CC2-9348-3587DC28A822";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "49DB7D0A-0C59-4CC2-9348-3587DC28A822";
@@ -1990,7 +2002,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PROVISIONING_PROFILE = "339e61c4-774a-4a27-b05f-8eff34fb78d4";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "339e61c4-774a-4a27-b05f-8eff34fb78d4";
@@ -2006,12 +2018,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
-				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = Kumostat.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 3.3.9;
 				DEVELOPMENT_TEAM = 68273XHR4R;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2027,12 +2040,13 @@
 					"\"${PODS_ROOT}/Headers/Public/GPUImage\"",
 				);
 				INFOPLIST_FILE = "MyTagList2/MyTagList2-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/build/Debug-iphoneos",
 				);
+				MARKETING_VERSION = 3.3.9;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-isystem",
@@ -2057,7 +2071,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = mytaglist2_distribution_provisioning;
+				PROVISIONING_PROFILE_SPECIFIER = mytaglist_wca_debug_21;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				WRAPPER_EXTENSION = app;
@@ -2070,12 +2084,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
-				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = Kumostat.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 3.3.9;
 				DEVELOPMENT_TEAM = 68273XHR4R;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2091,12 +2106,13 @@
 					"\"${PODS_ROOT}/Headers/Public/GPUImage\"",
 				);
 				INFOPLIST_FILE = "MyTagList2/MyTagList2-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/build/Debug-iphoneos",
 				);
+				MARKETING_VERSION = 3.3.9;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-isystem",
@@ -2120,7 +2136,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = mytaglist2_distribution_provisioning;
+				PROVISIONING_PROFILE_SPECIFIER = MyTagList2_2021_w_CriticalAlerts;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				WRAPPER_EXTENSION = app;

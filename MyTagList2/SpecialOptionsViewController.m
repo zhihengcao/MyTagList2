@@ -47,7 +47,7 @@
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-	self.contentSizeForViewInPopover = CGSizeMake(640, 300);
+	self.preferredContentSize = CGSizeMake(640, 300);
 	
 	_writeBtn = [[UIBarButtonItem alloc]initWithTitle:NSLocalizedString(@"Update",nil) style:UIBarButtonItemStyleDone target:self action:@selector(_writeBtnPressed:)];
 	int v2flag = _tag.v2flag;
@@ -67,7 +67,7 @@
 	_cachePostbackCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
 	_cachePostbackCell.textLabel.lineBreakMode = NSLineBreakByWordWrapping; //UILineBreakModeWordWrap;
 	_cachePostbackCell.textLabel.numberOfLines = 0;
-	_cachePostbackCell.textLabel.text = [NSLocalizedString(@"Buffer multiple temperature/humidity data points locally before updating",nil) stringByAppendingString:@" ℹ️"];
+	_cachePostbackCell.textLabel.text = [NSLocalizedString(@"Buffer multiple temperature/humidity data points locally before transmitting",nil) stringByAppendingString:@" ℹ️"];
 	_cachePostbackCell.accessoryType = (v2flag&8)!=0? UITableViewCellAccessoryCheckmark: UITableViewCellAccessoryNone;
 	UITapGestureRecognizer* recog =[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapTooltip:)] autorelease];
 	[_cachePostbackCell addGestureRecognizer:recog];

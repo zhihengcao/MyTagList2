@@ -342,7 +342,9 @@ BOOL temp_unit;
 	return @"%.0f%%";
 }
 -(NSNumber*)preProcess:(NSNumber*)degC{
-	if ([degC floatValue] == -99) return nil;
+	float cap = [degC floatValue];
+	if (cap <= -98) return nil;
+	if (cap >= 115) return nil;
 	return degC;
 }
 -(float)ymaxInit{return self.dewPointMode? -100: 0;}

@@ -37,6 +37,8 @@
 	[send_email release]; send_email=nil;
 	[beep_pc release]; beep_pc=nil; [use_speech release]; use_speech=nil; [vibrate release]; vibrate=nil;
 	[apns_sound release]; apns_sound=nil;
+	[apns_ca release]; apns_ca=nil;
+	
 	[apns_pause release]; apns_pause=nil;
 	[send_tweet release]; send_tweet=nil;
 	[tweetLogin release]; tweetLogin=nil;
@@ -79,6 +81,7 @@
 	c.beep_pc_tts = use_speech.toggle.on;
 	c.beep_pc_vibrate = vibrate.toggle.on;
 	c.send_tweet = send_tweet.toggle.on;
+	c.apnsCA = apns_ca.toggle.on;
 	
 	[self.delegate optionViewSaveBtnClicked:self];
 }
@@ -150,6 +153,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 	else email.textField.text=c.loginEmail;
 	beep_pc.toggleOn= c.beep_pc;
 	use_speech.toggleOn=c.beep_pc_tts; vibrate.toggleOn=c.beep_pc_vibrate;
+	apns_ca.toggleOn = c.apnsCA;
 	apns_sound.textField.text = c.apnsSound.isEmpty?apns_sound_choices[0]:c.apnsSound;
 	apns_pause.textField.text = apns_pause_choices[ c.apns_pause_index ];
 		
@@ -186,10 +190,11 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 	
 	beep_pc = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notification",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' when ambient light becomes too bright, too dark or back to normal range.",nil) delegate:self];
 	use_speech = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
-	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
+	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
 	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
 	apns_pause =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPause Action Effective For: ",nil)];
-	
+	apns_ca = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tCritical Alert",nil) helpText:NSLocalizedString(@"Send as \"Critical Alert\" even if your phone is in Do Not Disturb mode (iOS 12 and later).",nil)  delegate:self];
+
 	interval =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Check brightness every: ",nil)];
 	th_high_delay =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Notify too-bright after consecutive: ",nil)];
 	th_low_delay =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Notify too-dark after consecutive: ",nil)];
@@ -269,6 +274,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 		[beep_pc updateToggleOn];
 		[self updateCellArray];
 		[self animateCellPresence:use_speech fromArray:oldCells toArray:self.cellArray];
+		[self animateCellPresence:apns_ca fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_pause fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:apns_sound fromArray:oldCells toArray:self.cellArray];
 		[self animateCellPresence:vibrate fromArray:oldCells toArray:self.cellArray];
@@ -302,6 +308,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 		[self.tableView deleteRowsAtIndexPaths:
 		 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:oldIndex inSection:1],nil] withRowAnimation:UITableViewRowAnimationFade];
 	}
+ 
 }
 -(void)updateCellArray{
 	[self.cellArray removeAllObjects];
@@ -314,6 +321,7 @@ static int monitor_interval_choices[] ={15, 30, 60, 90, 120, 180, 300};
 	[cells addObject:beep_pc];
 	if(beep_pc.toggleOn){
 		[cells addObject:use_speech];
+		[cells addObject:apns_ca];
 		[cells addObject:apns_pause];
 		[cells addObject:apns_sound];
 		[cells addObject:vibrate];

@@ -21,6 +21,7 @@
 -(void)disarmCapSensorForAllTags;
 -(void)dewPointModeChanged;
 -(void)saveWaterSensorConfig:(NSMutableDictionary*)config;
+//-(void)iftttCall:(NSString*)appletID From:(TableLoadingButtonCell*)btncell;
 @end
 
 // [units  (celsius, farenheit)]
@@ -38,12 +39,12 @@
 	IASKPSTextFieldSpecifierViewCell* responsiveness;
 	IASKPSTextFieldSpecifierViewCell *email, *email_cap2;
 	IASKPSToggleSwitchSpecifierViewCell *monitor_cap, *send_email, *send_email_cap2, *send_tweet, *send_tweet_cap2, *beep_pc, *beep_pc_cap2,
-	*use_speech, *use_speech_cap2, *vibrate, *vibrate_cap2, *notify_open_cap2;
+	*use_speech, *use_speech_cap2, *vibrate, *vibrate_cap2, *notify_open_cap2, *apns_ca, *apns_ca_cap2;
 
 	IASKPSTextFieldSpecifierViewCell* cap_units;
 
 	IASKPSTextFieldSpecifierViewCell *apns_sound, *apns_sound_cap2,*apns_pause, *rn_toowet, *rn_toodry, *rn_cap2;
-	TableLoadingButtonCell* tweetLogin, *tweetLogin_cap2;
+	TableLoadingButtonCell* tweetLogin, *tweetLogin_cap2, *sms_toodry, *sms_toowet, *call_toodry, *call_toowet, *ifttt_create;
 	float old_th_low, old_th_high;
 }
 -(void)setConfig:(NSMutableDictionary *)c2 andTag:(NSMutableDictionary*)tag;
@@ -57,7 +58,7 @@
 
 @property(nonatomic,assign) id<CapOptionsViewControllerDelegate> capDelegate;
 @property(nonatomic, retain) NSMutableDictionary* tag;
-@property(nonatomic, retain) NSString* loginEmail;
+
 @property (nonatomic, readonly) BOOL modified;
 -(void) editedTableViewCell:(id)cell;
 

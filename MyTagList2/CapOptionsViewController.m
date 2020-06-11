@@ -16,7 +16,7 @@
 @synthesize modified=_modified, capDelegate=_capDelegate, tag=_tag, cap2Config=_cap2Config, rnc_cap2=_rnc_cap2, rnc_toowet=_rnc_toowet, rnc_toodry=_rnc_toodry;
 @synthesize loginEmail=_loginEmail;
 
-static int responsiveness_values[] = {4,8,16,32,48};
+static int responsiveness_values[] = {4,8,12,16,24,32,48,72,96,144,240};
 
 - (id)initWithDelegate:(id<OptionsViewControllerDelegate, CapOptionsViewControllerDelegate>)delegate
 {
@@ -25,14 +25,20 @@ static int responsiveness_values[] = {4,8,16,32,48};
 		self.capDelegate = delegate;
 		_modified=NO;
 		responsiveness_choices = [[NSArray
-								   arrayWithObjects:NSLocalizedString(@"Fast (worst battery life)",nil), NSLocalizedString(@"Medium fast",nil),
-								   NSLocalizedString(@"Medium",nil), NSLocalizedString(@"Medium slow",nil), NSLocalizedString(@"Slow (best battery life)",nil), nil] retain];
+								   arrayWithObjects:@"Every 5 seconds", @"Every 10 seconds",
+								   @"Every 15 seconds", @"Every 20 seconds",  @"Every 30 seconds",  @"Every 40 seconds", @"Every minute", @"Every 90 seconds",
+								   @"Every 2 minutes", @"Every 3 minutes",  @"Every 5 minutes", nil] retain];
 		cap_unit_choices=[[NSArray arrayWithObjects:NSLocalizedString(@"Relative Humidity (%)",nil),NSLocalizedString(@"Dew Point (°F/°C)",nil), nil] retain];
 		self.rnc_cap2_changed=NO;
     }
     return self;
 }
 -(void)releaseViews{
+	[sms_toodry release]; sms_toodry=nil;
+	[sms_toowet release]; sms_toowet=nil;
+	[call_toodry release]; call_toodry=nil;
+	[call_toowet release]; call_toowet=nil;
+	[ifttt_create release]; ifttt_create=nil;
 	[responsiveness release]; responsiveness=nil; 
 	[cap_range release]; cap_range=nil;
 	[cap_cal release]; cap_cal=nil;
@@ -59,6 +65,9 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	[rn_toodry release]; rn_toodry=nil;
 	[rn_toowet release]; rn_toowet=nil;
 	[rn_cap2 release]; rn_cap2=nil;
+	
+	[apns_ca_cap2 release]; apns_ca_cap2=nil;
+	[apns_ca release]; apns_ca=nil;
 }
 -(void)dealloc{
 	[responsiveness_choices release];
@@ -134,6 +143,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	c.beep_pc_tts = use_speech.toggle.on;
 	c.beep_pc_vibrate = vibrate.toggle.on;
 	c.send_tweet = send_tweet.toggle.on;
+	c.apnsCA = apns_ca.toggle.on;
 	
 	if(_cap2Config!=nil){
 		
@@ -146,6 +156,8 @@ static int responsiveness_values[] = {4,8,16,32,48};
 		
 		_cap2Config.beep_pc_vibrate = vibrate_cap2.toggle.on;
 		_cap2Config.notify_open = notify_open_cap2.toggle.on;
+		_cap2Config.apnsCA = apns_ca_cap2.toggle.on;
+		
 		[self.capDelegate saveWaterSensorConfig:_cap2Config];
 	}
 	
@@ -170,12 +182,12 @@ static int responsiveness_values[] = {4,8,16,32,48};
 
 -(int)responsiveness_index_from_interval:(int)interval{
 	int i;
-	for(i=0;i<sizeof(responsiveness_values);i++){
+	for(i=0;i<sizeof(responsiveness_values)/sizeof(int);i++){
 		if(interval<=responsiveness_values[i]){
 			break;
 		}
 	}
-	return i;
+	return sizeof(responsiveness_values)/sizeof(int)-1;
 }
 
 -(void)updateTag:(NSMutableDictionary*)tag{
@@ -207,6 +219,8 @@ static int responsiveness_values[] = {4,8,16,32,48};
 		vibrate_cap2.toggleOn=_cap2Config.beep_pc_vibrate;
 		apns_sound_cap2.textField.text=_cap2Config.apnsSound.isEmpty?apns_sound_choices[0]:_cap2Config.apnsSound;
 		notify_open_cap2.toggleOn = _cap2Config.notify_open;
+		apns_ca_cap2.toggleOn = _cap2Config.apnsCA;
+
 	}else{
 		monitor_cap.title=NSLocalizedString(@"Monitor Humidity",nil);
 	}
@@ -215,6 +229,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	cap_range.slider.currentValue = tag.cap;
 	cap_range.slider.selectedMaximumValue = c.th_high;
 	cap_range.slider.selectedMinimumValue=c.th_low;
+	cap_range.slider.minimumRange = c.th_window;
 	[cap_range sliderValueChanged:nil];
 		
 	send_email.toggleOn = c.send_email;
@@ -226,9 +241,10 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	
 	beep_pc.toggleOn= c.beep_pc;
 	use_speech.toggleOn=c.beep_pc_tts; vibrate.toggleOn=c.beep_pc_vibrate;
+	apns_ca.toggleOn = c.apnsCA;
+	
 	apns_sound.textField.text = c.apnsSound.isEmpty?apns_sound_choices[0]:c.apnsSound;
 	apns_pause.textField.text = apns_pause_choices[ c.apns_pause_index ];
-
 	monitor_cap.toggleOn = (tag.capEventState>CapDisarmed);
 	[cap_cal setVal:tag.cap];
 	[super setConfig:c];
@@ -242,7 +258,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	cap_units.textField.text = [cap_unit_choices objectAtIndex:dewPointMode];
 
 	monitor_cap = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Monitor Humidity/Moisture",nil) helpText:NSLocalizedString(@"Periodically check humidity sensor/capacitive moisture sensor reading and notify when reading becomes too high/too low or returns to normal.",nil) delegate:self];
-	responsiveness = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Response:",nil)];
+	responsiveness = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Check Interval:",nil)];
 	
 	cap_range = [IASKPSDualSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"< Normal Range <",nil) Min:0 Max:100 Unit:@"%" numberFormat:@"%.1f" delegate:self];
 	cap_cal = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Calibrate To:",nil) Min:0 Max:100 Step: 1 Unit:@"%" delegate:self];
@@ -262,20 +278,27 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	
 	tweetLogin = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Twitter Login",nil) Progress:NSLocalizedString(@"Redirecting",nil)];
 	tweetLogin_cap2 = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Twitter Login",nil) Progress:NSLocalizedString(@"Redirecting",nil)];
-	
+	sms_toowet = [TableLoadingButtonCell newWithTitle:@"Text me if too wet" Progress:@"Loading ifttt.com"];
+	sms_toodry = [TableLoadingButtonCell newWithTitle:@"Text me if too dry" Progress:@"Loading ifttt.com"];
+	call_toowet = [TableLoadingButtonCell newWithTitle:@"Call me if too wet" Progress:@"Loading ifttt.com"];
+	call_toodry = [TableLoadingButtonCell newWithTitle:@"Call me if too dry" Progress:@"Loading ifttt.com"];
+	ifttt_create = [TableLoadingButtonCell newWithTitle:@"Other options..." Progress:@"Loading ifttt.com"];
+
 	beep_pc = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notification",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' when humidity/moisture/water-level becomes too high, too low or returns within the normal range.",nil) delegate:self];
 	beep_pc_cap2 = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notification",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' when water is detected at sensor tip.",nil) delegate:self];
 	
 	use_speech = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
 	use_speech_cap2 = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
 	
-	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil) delegate:self];
-	vibrate_cap2 = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil) delegate:self];
+	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil) delegate:self];
+	vibrate_cap2 = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil) delegate:self];
 	
 	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
 	apns_pause =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPause Action Effective For: ",nil)];
+	apns_ca = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tCritical Alert",nil) helpText:NSLocalizedString(@"Send as \"Critical Alert\" even if your phone is in Do Not Disturb mode (iOS 12 and later).",nil)  delegate:self];
 
 	apns_sound_cap2 = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
+	apns_ca_cap2 = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tCritical Alert",nil) helpText:NSLocalizedString(@"Send as \"Critical Alert\" even if your phone is in Do Not Disturb mode (iOS 12 and later).",nil)  delegate:self];
 
 	rn_toowet =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Notify too wet:",nil)];  rn_toowet.textField.text = rnc_timespan_choices[0];
 	rn_toodry =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Notify too dry:",nil)]; rn_toodry.textField.text = rnc_timespan_choices[0];
@@ -304,7 +327,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 // [when out of range (email, addr, ringpc, usespeech, vib)
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 3;
+	return 4;
 }
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
@@ -314,6 +337,8 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	}
 	else if(section==1)
 		return NSLocalizedString(@"Monitor Moisture:",nil);
+	else if(section==2)
+		return @"Using IFTTT";
 	else if(_tag.needCapCal)
 		return [NSLocalizedString(@"Water-Level/Moisture Calibration",nil) stringByAppendingFormat:@" (Raw Reading: %.1f%%)", ((1.0/_tag.capRaw - 1.0/240.0) * (-100) / (1.0 / 240.0 - 1.0 / 8.0))];
 	else
@@ -323,13 +348,15 @@ static int responsiveness_values[] = {4,8,16,32,48};
 {
 	if(section==0){
 		if(_cap2Config)
-			return 2+(send_email_cap2.toggleOn?2:1)+(beep_pc_cap2.toggleOn?4:1)+(send_tweet_cap2.toggleOn?2:1);
+			return 2+(send_email_cap2.toggleOn?2:1)+(beep_pc_cap2.toggleOn?5:1)+(send_tweet_cap2.toggleOn?2:1);
 		return 1;
 	}
+	if(section==1)
+		return monitor_cap.toggleOn? (5+(send_email.toggleOn?2:1)+(beep_pc.toggleOn?6:1)+(send_tweet.toggleOn?2:1)) : 1;
 	else if(section==2){
-		return 3;
+		return monitor_cap.toggleOn? 5:1;
 	}else
-		return monitor_cap.toggleOn? (5+(send_email.toggleOn?2:1)+(beep_pc.toggleOn?5:1)+(send_tweet.toggleOn?2:1)) : 1;
+		return 3;
 }
 
 -(void) editedTableViewCell:(UITableViewCell*)cell{
@@ -370,12 +397,12 @@ static int responsiveness_values[] = {4,8,16,32,48};
 			[beep_pc updateToggleOn];
 			[self.tableView insertRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:base inSection:1],
-			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1],[NSIndexPath indexPathForRow:base+3 inSection:1],nil] withRowAnimation:UITableViewRowAnimationTop];
+			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1],[NSIndexPath indexPathForRow:base+3 inSection:1],[NSIndexPath indexPathForRow:base+4 inSection:1],nil] withRowAnimation:UITableViewRowAnimationTop];
 		}else{
 			[beep_pc updateToggleOn];
 			[self.tableView deleteRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:base inSection:1],
-			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1],[NSIndexPath indexPathForRow:base+3 inSection:1],nil] withRowAnimation:UITableViewRowAnimationTop];
+			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1],[NSIndexPath indexPathForRow:base+3 inSection:1],[NSIndexPath indexPathForRow:base+4 inSection:1],nil] withRowAnimation:UITableViewRowAnimationTop];
 		}
 		[self.tableView endUpdates];
 		[self scheduleRecalculatePopoverSize];
@@ -416,12 +443,12 @@ static int responsiveness_values[] = {4,8,16,32,48};
 			[beep_pc_cap2 updateToggleOn];
 			[self.tableView insertRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:base inSection:0],
-			  [NSIndexPath indexPathForRow:base+1 inSection:0],[NSIndexPath indexPathForRow:base+2 inSection:0],nil] withRowAnimation:UITableViewRowAnimationTop];
+			  [NSIndexPath indexPathForRow:base+1 inSection:0],[NSIndexPath indexPathForRow:base+2 inSection:0],[NSIndexPath indexPathForRow:base+3 inSection:0],nil] withRowAnimation:UITableViewRowAnimationTop];
 		}else{
 			[beep_pc_cap2 updateToggleOn];
 			[self.tableView deleteRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:base inSection:0],
-			  [NSIndexPath indexPathForRow:base+1 inSection:0],[NSIndexPath indexPathForRow:base+2 inSection:0],nil] withRowAnimation:UITableViewRowAnimationTop];
+			  [NSIndexPath indexPathForRow:base+1 inSection:0],[NSIndexPath indexPathForRow:base+2 inSection:0],[NSIndexPath indexPathForRow:base+3 inSection:0],nil] withRowAnimation:UITableViewRowAnimationTop];
 		}
 		[self.tableView endUpdates];
 		[self scheduleRecalculatePopoverSize];
@@ -429,17 +456,22 @@ static int responsiveness_values[] = {4,8,16,32,48};
 	}
 	else if(cell==monitor_cap){
 		[self.tableView beginUpdates];
-		NSMutableArray* ips = [NSMutableArray arrayWithCapacity:10];
-		int num = (5+(send_email.toggle.on?2:1)+(beep_pc.toggle.on?5:1)+(send_tweet.toggle.on?2:1));
+		NSMutableArray* ips = [NSMutableArray arrayWithCapacity:16];
+		int num = (5+(send_email.toggle.on?2:1)+(beep_pc.toggle.on?6:1)+(send_tweet.toggle.on?2:1));
 		for(int i=1;i<num;i++){
 			[ips addObject:[NSIndexPath indexPathForRow:i inSection:1]];
+		}
+		for(int i=1;i<=4;i++){
+			[ips addObject:[NSIndexPath indexPathForRow:i inSection:2]];
 		}
 		if(monitor_cap.toggle.on){
 			[monitor_cap updateToggleOn];
 			[self.tableView insertRowsAtIndexPaths:ips withRowAnimation:UITableViewRowAnimationTop];
+			//[self.tableView insertSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationTop];
 		}else{
 			[monitor_cap updateToggleOn];
 			[self.tableView deleteRowsAtIndexPaths:ips withRowAnimation:UITableViewRowAnimationTop];
+			//[self.tableView deleteSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationTop];
 		}
 		[self.tableView endUpdates];
 		[self scheduleRecalculatePopoverSize];
@@ -460,6 +492,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 			[cells addObject:beep_pc_cap2];
 			if(beep_pc_cap2.toggleOn){
 				[cells addObject:use_speech_cap2];
+				[cells addObject:apns_ca_cap2];
 				[cells addObject:apns_sound_cap2];
 				[cells addObject:vibrate_cap2];
 			}
@@ -469,14 +502,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 		}
 		else return cap_units;
 	}
-	else if(ip.section==2 ){
-		if(ip.row==0)
-			return cap_cal;
-		else if(ip.row==1)
-			return cap_cal_btn;
-		else
-			return cap_uncal_btn;
-	}else{
+	else if(ip.section==1){
 		NSMutableArray* cells = [NSMutableArray arrayWithCapacity:5];
 		[cells addObject:monitor_cap];
 		if(monitor_cap.toggleOn){
@@ -492,6 +518,7 @@ static int responsiveness_values[] = {4,8,16,32,48};
 			[cells addObject:beep_pc];
 			if(beep_pc.toggleOn){
 				[cells addObject:use_speech];
+				[cells addObject:apns_ca];
 				[cells addObject:apns_pause];
 				[cells addObject:apns_sound];
 				[cells addObject:vibrate];
@@ -500,6 +527,25 @@ static int responsiveness_values[] = {4,8,16,32,48};
 			[cells addObject:rn_toodry];
 		}
 		return [cells objectAtIndex:ip.row];
+	}
+	else if(ip.section==2){
+		if(monitor_cap.toggleOn)
+			switch(ip.row){
+				case 0: return sms_toodry;
+				case 1: return sms_toowet;
+				case 2: return call_toodry;
+				case 3: return call_toowet;
+				default: return ifttt_create;
+			}
+		else return ifttt_create;
+	}
+	else{
+		if(ip.row==0)
+			return cap_cal;
+		else if(ip.row==1)
+			return cap_cal_btn;
+		else
+			return cap_uncal_btn;
 	}
 }
 
@@ -587,14 +633,8 @@ static int responsiveness_values[] = {4,8,16,32,48};
 													  } helpText:NSLocalizedString(@"This choice will affect how humidity is displayed/plotted for all tags with humidity sensor.",nil) ] autorelease];
 		}
 	}
-	else if(ip.section==2 ){
-		if(ip.row==1){
-			float RH = cap_cal.slider.value; 
-			[self.capDelegate capCalibrateBtnClickedForTag:_tag Cap:RH BtnCell:cap_cal_btn];
-		}else if(ip.row==2){
-			[self.capDelegate capResetCalibrateBtnClickedForTag:_tag BtnCell:cap_uncal_btn];
-		}
-	}else{
+	
+	else if(ip.section==1){
 		UITableViewCell* cell = [self tableView:tableView cellForRowAtIndexPath:ip];
 		if([cell isKindOfClass:[IASKPSToggleSwitchSpecifierViewCell class]]){
 			[((IASKPSToggleSwitchSpecifierViewCell*)cell) toggleHelp];
@@ -685,8 +725,23 @@ static int responsiveness_values[] = {4,8,16,32,48};
 													  } helpText:NSLocalizedString(@"Slower response time allows longer battery life at the expense of longer delay in notification, by sampling sensor data less often.",nil) ] autorelease];
 		}
 	}
-	[super presentPicker:picker fromCell:[tableView cellForRowAtIndexPath:ip]];
-
+	else if(ip.section==2){
+		UITableViewCell* cell = [self tableView:tableView cellForRowAtIndexPath:ip];
+		if(cell==sms_toodry) [self.delegate iftttCall:@"BnMsUZBg" From:sms_toodry];
+		else if(cell ==sms_toowet) [self.delegate iftttCall:@"eqQyK6Ab" From:sms_toowet];
+		else if(cell==call_toodry) [self.delegate iftttCall:@"kSiBPq74" From:call_toodry];
+		else if(cell==call_toowet) [self.delegate iftttCall:@"GbU3eVLS" From:call_toowet];
+		else [self.delegate iftttCreateCallFrom:ifttt_create];		
+	}
+	else{
+		if(ip.row==1){
+			float RH = cap_cal.slider.value;
+			[self.capDelegate capCalibrateBtnClickedForTag:_tag Cap:RH BtnCell:cap_cal_btn];
+		}else if(ip.row==2){
+			[self.capDelegate capResetCalibrateBtnClickedForTag:_tag BtnCell:cap_uncal_btn];
+		}
+	}
+	if(picker)[super presentPicker:picker fromCell:[tableView cellForRowAtIndexPath:ip]];
 /*	if(!picker)return;
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
 		popoverController = [[UIPopoverController alloc] 

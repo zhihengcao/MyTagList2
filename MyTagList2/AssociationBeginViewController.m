@@ -28,7 +28,7 @@
 {
     [super viewDidLoad];
  	self.title = NSLocalizedString(@"Associate New...",nil);
-	self.contentSizeForViewInPopover = CGSizeMake(480, 300);
+	self.preferredContentSize = CGSizeMake(480, 300);
 }
 -(void)dealloc{
 	self.searchBtnCell=nil; self.storeBtnCell=nil; self.addNestBtnCell=nil; self.scannedThermostats = nil; self.undeleteBtnCell=nil;
@@ -50,7 +50,7 @@
 #pragma mark - Table view data source
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return (_delegate.showWeMoButton ?6: 5) + (_delegate.showDropcam?1:0);
+	return (_delegate.showWeMoButton ?5: 4) + (_delegate.showDropcam?1:0);
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
 	if(section==0)return 180;
@@ -79,7 +79,7 @@
 		textView.selectable=YES;
 		textView.dataDetectorTypes=UIDataDetectorTypeLink;
 		textView.scrollEnabled = NO;
-		textView.textContainerInset = UIEdgeInsetsMake(8, 10, 0, 10);
+		textView.textContainerInset = UIEdgeInsetsMake(8, 22, -4, 10);
 		textView.attributedText = attributedText;
 		textView.delegate = self;
 		return textView;
@@ -97,17 +97,17 @@
 		return NSLocalizedString(@"Please remove battery insulating tape or insert battery into an unpaired Wireless Tag. If the tag is not already associated with a Tag Manager, a light should be flashing on the tag.",nil);
 	else if(section==1)
 		return NSLocalizedString(@"Add more tag managers to your account to extend signal coverage and/or to allow adding more tags.",nil);
+/*	else if(section==2)
+		return NSLocalizedString(@"Regulate temperature not at the thermostat, but at chosen Wireless Tag. Build historical temperature/humidity graph at your Thermostat. Run KumoApps such as 'turn off when window is left open', 'turn on when my phone gets close to a location.'",nil);*/
 	else if(section==2)
-		return NSLocalizedString(@"Regulate temperature not at the thermostat, but at chosen Wireless Tag. Build historical temperature/humidity graph at your Thermostat. Run KumoApps such as 'turn off when window is left open', 'turn on when my phone gets close to a location.'",nil);
-	else if(section==3)
-		return NSLocalizedString(@"Regulate temperature not at the thermostat, but at chosen Wireless Tag. Run KumoApps such as 'set to away mode when window is left open', 'set to home mode when my phone gets close to a location.'",nil);//@"Regulate temperature using not thermometer inside the thermostat but one inside your chosen Wireless Tag. You can also install KumoApps such as 'set to home/turn on thermostat when my phone gets close to a location.'";
+		return NSLocalizedString(@"Regulate temperature not at the thermostat, but at chosen Wireless Tag. Run KumoApps such as 'set to away mode when window is left open', 'set to home mode when my phone gets close to a location. Build historical temperature/humidity graph. (Unavailable currently to new users due to closure of the Works with Nest program by Google)'",nil);//@"Regulate temperature using not thermometer inside the thermostat but one inside your chosen Wireless Tag. You can also install KumoApps such as 'set to home/turn on thermostat when my phone gets close to a location.'";
 	else{
 		if(!_delegate.showDropcam)section++;
-		if(section==4)
+		if(section==3)
 			return NSLocalizedString(@"Run KumoApp to cloud-record short videos whenever a Wireless Tag detects motion. Make time lapses. No cloud recording subscription required!",nil);//@"Cloud-record videos taken from your Dropcam and make time lapses, even if you don't have Cloud Recording subscription. Install KumoApps such as 'record for 15 seconds when sensor detected motion or door is open and email footage to me'. ";
-		else if(section==5)
+		else if(section==4)
 			return NSLocalizedString(@"Activate the Wireless Tag IFTTT channel to make your tag work with hundreds of other IFTTT channels. (You need to create an account at IFTTT if you do not already have one)",nil);//@"Interact with hundreds of other IFTTT channels. There are 15+ types of triggers and 10+ types of actions in the WirelessTag channel to cover almost every feature of Wireless Sensor Tags and Kumo Sensors.";
-		else if(section==6 && _delegate.showWeMoButton)
+		else if(section==5 && _delegate.showWeMoButton)
 			return NSLocalizedString(@"Run KumoApps such as 'Turn on light when sensors detects motion' or 'turn on an appliance when my phone gets close to home.' Unlike IFTTT, KumoApp has much lower latency and works almost instantly.'",nil);//@"Allows you to use KumoApps such as 'Turn on light when sensor detected motion', or 'turn on an appliance when my phone gets close to home'. Unlike IFTTT, KumoApp has much lower latency and works almost instantly.";
 		else return nil;
 	}
@@ -116,13 +116,13 @@
 {
 	if(section==0)return 2+self.tagsToUndelete.count;
 	else if(section==1)return 1;
-	else if(section==2)return honeywellLoginMode?3:1+self.scannedHoneywell.count;
-	else if(section==3)return 1+self.scannedThermostats.count;
+	//else if(section==2)return honeywellLoginMode?3:1+self.scannedHoneywell.count;
+	else if(section==2)return 1+self.scannedThermostats.count;
 	else{
 		if(!_delegate.showDropcam)section++;
 		
-		if(section==4)return dropcamLoginMode?3:1+self.scannedDropcam.count;
-		else if(section==6 && _delegate.showWeMoButton)return 1+self.scannedWeMo.count;
+		if(section==3)return dropcamLoginMode?3:1+self.scannedDropcam.count;
+		else if(section==5 && _delegate.showWeMoButton)return 1+self.scannedWeMo.count;
 		else return 1;
 	}
 }
@@ -271,7 +271,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 			_addManagerCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Add a Tag Manager",nil) Progress:NSLocalizedString(@"Loading Web Interface...",nil)];
 		return _addManagerCell;
 	}
-	else if(indexPath.section==2){
+/*	else if(indexPath.section==2){
 		
 		if(indexPath.row==0){
 			if(_addHoneywellBtnCell==nil)
@@ -307,7 +307,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 			return cell;
 		}
 	}
-	else if(indexPath.section==3){
+	*/else if(indexPath.section==2){
 		if(indexPath.row==0){
 			if(_addNestBtnCell==nil){
 				_addNestBtnCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Link/Unlink Nest Thermostats",nil) Progress:NSLocalizedString(@"Loading...",nil)];
@@ -327,7 +327,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 		NSUInteger section=indexPath.section;
 		if(!_delegate.showDropcam)section++;
 
-		if(section==4){
+		if(section==3){
 			if(indexPath.row==0){
 				if(_addDropcamBtnCell==nil)
 					_addDropcamBtnCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Link/Unlink Dropcam",nil) Progress:NSLocalizedString(@"Loading...",nil)];
@@ -362,12 +362,12 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 				return cell;
 			}
 		}
-		else if(section==5){
+		else if(section==4){
 			if(_iftttBtnCell==nil)
 				_iftttBtnCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Activate WirelessTag IFTTT Channel",nil) Progress:NSLocalizedString(@"Loading...",nil)];
 			return _iftttBtnCell;
 		}
-		else if(section==6 && _delegate.showWeMoButton){
+		else if(section==5 && _delegate.showWeMoButton){
 			if(indexPath.row==0){
 				if(_addWeMoBtnCell==nil)
 					_addWeMoBtnCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Link/Unlink WeMo LED/switches",nil) Progress:NSLocalizedString(@"Loading...",nil)];
@@ -394,9 +394,9 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 	[super viewWillDisappear:animated];
 }
 -(void)viewWillAppear:(BOOL)animated{
-	if([self.navigationController respondsToSelector:@selector(setPreferredContentSize:)])
-		self.navigationController.preferredContentSize= CGSizeMake(480, 400);
-	self.navigationController.contentSizeForViewInPopover = CGSizeMake(480, 400);
+	/*if([self.navigationController respondsToSelector:@selector(setPreferredContentSize:)])
+		self.navigationController.preferredContentSize= CGSizeMake(480, 400);*/
+	self.navigationController.preferredContentSize = CGSizeMake([[UIScreen mainScreen] bounds].size.width, 400);
 
 	self.navigationController.toolbarHidden=YES;
 	[super viewWillAppear:animated];
@@ -462,9 +462,9 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 					  NSURLRequest *req = [NSURLRequest requestWithURL:url];
 					  [[wv webView] loadRequest:req];
 					  
-					  if([self.navigationController respondsToSelector:@selector(setPreferredContentSize:)])
-						  self.navigationController.preferredContentSize= CGSizeMake(750, 1000);
-					  self.navigationController.contentSizeForViewInPopover = CGSizeMake(750, 1000);
+					  /*if([self.navigationController respondsToSelector:@selector(setPreferredContentSize:)])
+						  self.navigationController.preferredContentSize= CGSizeMake(750, 1000);*/
+					  self.navigationController.preferredContentSize = CGSizeMake([[UIScreen mainScreen] bounds].size.width, 1000);
 					  
 				  }errorBlock:^(NSError* err, id* showFrom){
 					  *showFrom = sender;
@@ -476,7 +476,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 -(void)associateVirtualTagBtnPressed:(id)sender{
 	__block int associationPending=0;
 	
-	for(int i=0;i<self.scannedHoneywell.count;i++){
+	/*for(int i=0;i<self.scannedHoneywell.count;i++){
 		NSDictionary* tstat = [self.scannedHoneywell objectAtIndex:i];
 		UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i+1 inSection:2]];
 		
@@ -510,11 +510,11 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 						  }
 							 errorBlock:nil setMac:nil];
 		}
-	}
+	}*/
 
 	for(int i=0;i<self.scannedThermostats.count;i++){
 		NSDictionary* tstat = [self.scannedThermostats objectAtIndex:i];
-		UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i+1 inSection:3]];
+		UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i+1 inSection:2]];
 		
 		if(tstat.slaveId==0 && cell.accessoryType==UITableViewCellAccessoryCheckmark){
 			associationPending++;
@@ -550,7 +550,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 
 	for(int i=0;i<self.scannedDropcam.count;i++){
 		NSDictionary* tstat = [self.scannedDropcam objectAtIndex:i];
-		UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i+1 inSection:4]];
+		UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i+1 inSection:3]];
 		
 		if(tstat.slaveId==0 && cell.accessoryType==UITableViewCellAccessoryCheckmark){
 			associationPending++;
@@ -586,7 +586,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 
 	for(int i=0;i<self.scannedWeMo.count;i++){
 		NSDictionary* tstat = [self.scannedWeMo objectAtIndex:i];
-		UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i+1 inSection: _delegate.showDropcam? 6:5]];
+		UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i+1 inSection: _delegate.showDropcam? 5:4]];
 		
 		if(tstat.slaveId==0 && cell.accessoryType==UITableViewCellAccessoryCheckmark){
 			associationPending++;
@@ -626,11 +626,11 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 	[self.tableView reloadData];
 	[NSTimer scheduledTimerWithTimeInterval:0.4 block:^()
 	 {
-		 if([self respondsToSelector:@selector(setPreferredContentSize:)])
-			 self.preferredContentSize=self.tableView.contentSize;
+		 /*if([self respondsToSelector:@selector(setPreferredContentSize:)])
+			 self.preferredContentSize=self.tableView.contentSize;*/
 		 
-		 if(self.contentSizeForViewInPopover.height<self.tableView.contentSize.height)
-			 self.contentSizeForViewInPopover = self.tableView.contentSize;
+		 if(self.preferredContentSize.height<self.tableView.contentSize.height)
+			 self.preferredContentSize = self.tableView.contentSize;
 	 } repeats:NO];
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -705,7 +705,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 		}];
 		
 	}
-	else if(indexPath.section==2){
+/*	else if(indexPath.section==2){
 		if(indexPath.row==0)
 		{
 			[self.tableView beginUpdates];
@@ -725,8 +725,8 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 			else
 				cell.accessoryType =UITableViewCellAccessoryCheckmark;
 		}
-	}
-	else if(indexPath.section==3){
+	} */
+	else if(indexPath.section==2){
 		if(indexPath.row==0){
 			[_addNestBtnCell showLoading];
 			
@@ -759,7 +759,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 		if(!_delegate.showDropcam)section++;
 
 		
-		else if(section==4){
+		if(section==3){
 			if(indexPath.row==0){
 				/*			NSString* storedEmail = [[NSUserDefaults standardUserDefaults] stringForKey:DropCamEmailPrefKey];
 				 if(storedEmail!=nil){
@@ -783,12 +783,12 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 					cell.accessoryType =UITableViewCellAccessoryCheckmark;
 			}
 		}
-		else if(section==5){
+		else if(section==4){
 			[_iftttBtnCell showLoading];
 			[self.delegate redirectToURL:[NSURL URLWithString:@"https://ifttt.com/wirelesstag"] title:NSLocalizedString(@"Activate IFTTT",nil)];
 			[_iftttBtnCell revertLoading];
 		}
-		else if(section==6 && _delegate.showWeMoButton){
+		else if(section==5 && _delegate.showWeMoButton){
 			if(indexPath.row==0){
 				
 				if(_delegate.wemoPhoneKey.length==0){
@@ -806,10 +806,22 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 								  completeBlock:^(NSDictionary* retval){
 									  [_addWeMoBtnCell revertLoading];
 									  self.scannedWeMo = [retval objectForKey:@"d"];
-									  self.navigationItem.rightBarButtonItem =
-									  [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self
-																					 action:@selector(associateVirtualTagBtnPressed:)] autorelease];
-									  [self updateTable];
+									  
+									  if(self.scannedWeMo.count>0){
+										  self.navigationItem.rightBarButtonItem =
+										  [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self
+																						 action:@selector(associateVirtualTagBtnPressed:)] autorelease];
+										  [self updateTable];
+									  }else{
+										  UIAlertView *alert = [[UIAlertView alloc] init];
+										  [alert setTitle:@"Something is wrong with WeMo server"];
+										  [alert setMessage:[NSString stringWithFormat:@"Diagnostic Info: %@, %@, %@\n Please take a screenshot and share it with technical support.", _delegate.wemoHomeID, _delegate.wemoPhoneID, _delegate.wemoPhoneKey]];
+										  [alert addButtonWithTitle:NSLocalizedString(@"Continue",nil)];
+										  [alert setCancelButtonIndex:0];
+										  [alert show];
+										  [alert release];
+
+									  }
 								  }
 									 errorBlock:^(NSError* err, id* showFrom){
 										 *showFrom = _addWeMoBtnCell;
@@ -910,7 +922,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	self.contentSizeForViewInPopover = CGSizeMake(480, 400);
+	self.preferredContentSize = self.tableView.contentSize; //CGSizeMake(480, 400);
 
 	self.title = NSLocalizedString(@"Found Tag",nil);
 	_associateBtn = [[UIBarButtonItem alloc]initWithTitle:NSLocalizedString(@"Associate",nil) style:UIBarButtonItemStyleDone target:self action:@selector(_associateBtnPressed:)];
@@ -932,7 +944,7 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 	_cachePostbackCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
 	_cachePostbackCell.textLabel.lineBreakMode = NSLineBreakByWordWrapping; //UILineBreakModeWordWrap;
 	_cachePostbackCell.textLabel.numberOfLines = 0;
-	_cachePostbackCell.textLabel.text =  [NSLocalizedString(@"Buffer multiple temperature/humidity data points locally before updating",nil) stringByAppendingString:@" ℹ️"];
+	_cachePostbackCell.textLabel.text =  [NSLocalizedString(@"Buffer multiple temperature/humidity data points locally before transmitting",nil) stringByAppendingString:@" ℹ️"];
 	_cachePostbackCell.accessoryType = UITableViewCellAccessoryNone; //UITableViewCellAccessoryCheckmark;
 	UITapGestureRecognizer* recog =[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapTooltip:)] autorelease];
 	recog.cancelsTouchesInView=NO;
@@ -1108,7 +1120,8 @@ NSString * const HoneywellPwdPrefKey = @"HoneywellPwdPrefKey";
 				
 				UIAlertView *alert = [[UIAlertView alloc] init];
 				[alert setTitle:@"Please read below to understand what to expect when this option is ON"];
-				[alert setMessage:@"For example, if you set recording interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. As a result temperature you see on screen can be up to 130 minute old unless you manually update, but you will get approx. 10% longer battery life (because it is more efficient to send in bulk) and can add more tags at a shorter logging interval to a single tag manager. "];
+				[alert setMessage:@"With this option, if you set update every 10 minutes, temperature is recorded every 10 minutes, but is updated/transmitted to the app every 130 minutes including 13 data points in each update or transmission. You will NOT see recent temperature on screen unless you manually click update, but you will get longer battery life because it is more efficient to send more data in one transmission. In recorded temperature/RH/lux graphs, data points will be spaced every 10 minutes."];
+				//[alert setMessage:@"For example, if you set recording interval to every 10 minutes, temperature is recorded every 10 minutes, but is transmitted every 130 minutes including 13 data points in one transmission. As a result temperature you see on screen can be up to 130 minute old unless you manually update, but you will get approx. 10% longer battery life (because it is more efficient to send in bulk) and can add more tags at a shorter logging interval to a single tag manager. "];
 				[alert addButtonWithTitle:NSLocalizedString(@"Continue",nil)];
 				[alert setCancelButtonIndex:0];
 				[alert show];

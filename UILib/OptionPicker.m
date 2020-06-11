@@ -159,7 +159,7 @@
 	}
 	[self.tableView reloadData];
 	CGFloat height = [super tableView:self.tableView heightForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]]*_options.count;
-	self.contentSizeForViewInPopover = CGSizeMake(350, height>600?600:height);
+	self.preferredContentSize = CGSizeMake(350, height>600?600:height);
 }
 - (void)doneBtnPressed:(id)sender{
 	//_dismissUI();

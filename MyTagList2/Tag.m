@@ -82,7 +82,8 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 		case ALS8k: return @"Tag Pro ALS";
 		case TCProbe: return @"Outdoor Probe";
 		case Usb: return self.version1==5?@"Precision External Power": @"External Power";
-		case UsbALS: return @"External Power w/ ALS";
+		case UsbALS: return @"External Power Ambient Light";
+		case UsbZmod: return @"External Power Air Quality";
 		default: return @"Unknown";
 	}
 }
@@ -104,6 +105,7 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 		case TCProbe: return @"ph_probe.png";
 		case Usb: return @"ph_usb.png";
 		case UsbALS: return @"ph_usb.png";
+		case UsbZmod: return @"ph_usb.png";
 		default: return @"PlaceHolder.png";
 	}
 	
@@ -130,16 +132,21 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 		case 0x6E: return self.tagType==TagPro?@"2KPT No-Motion" : @"RH/No-Motion";
 		case 0x6D: return self.tagType==TagPro?@"4KPT Temperature-Only" : @"Temperature-Only";
 		case 0x6A: return @"Accelerator Based 2KPT";
-		case 0x7F:return self.tagType==TagPro?@"8192pt" : (self.tagType==TCProbe?@"Thermocouple" :@".7F");
+		case 0x7F:
+			return self.tagType==TagPro?@"8192pt" : (self.tagType==TCProbe?@"Thermocouple" :@".7F");
 		case 0x7E:return self.tagType==TagPro?@"8KPT No-Motion" : (self.tagType==TCProbe?@"Protimeter" : @"RH/No-Motion");
 		case 0x7D:return self.tagType==TagPro?@"16KPT Temperature-Only" : (self.tagType==TCProbe?@"Basic Temperature" :@"Temperature-Only");
-		case 0x7A: return @"Accelerator Based 8KPT";
+		case 0x7A:
+		case 0x9A:
+		case 0xBA:
+			return @"Accelerator Based 8KPT";
 		case 0x8F: return @".8F";
 		case 0x8D: return @".8D Temperature-Only";
 		case 0x9F:return self.tagType==TCProbe?@"Thermocouple" : @".9F";
 		case 0x9E:return self.tagType==TCProbe?@"Protimeter" : @"RH/No-Motion";
 		case 0x9D:return self.tagType==TCProbe?@"Basic Temperature" : @"Temperature-Only";
-		default: return @"";
+		case 0xBF:return self.tagType==TCProbe?@"Thermocouple" : @".BF";
+		default: return [NSString stringWithFormat:@".%X", self.rev];
 	}
 }
 -(NSString*)managerName{ 
@@ -242,7 +249,7 @@ BOOL optimizeForV2Tag, isTagListEmpty;
 @end
 @implementation NSDictionary (Tag)
 
--(BOOL) hasHighResTemp{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==Usb|| t==UsbALS||  t==ALS8k || t==TCProbe || t==CapSensor; }
+-(BOOL) hasHighResTemp{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==Usb|| t==UsbALS|| t==UsbZmod|| t==ALS8k || t==TCProbe || t==CapSensor; }
 
 -(float) lux{return [[self objectForKey:@"lux"] floatValue];}
 
@@ -354,16 +361,23 @@ NSTimeInterval serverTime2LocalTime = 0.0;
 -(BOOL) hasMotion{TagType t=self.tagType; int rev=self.rev; if(rev>=0x4E && (rev&0xF)==0xE)return false;
 	return t==MotionSensor || t==MotionRH || t==ReedSensor || t==ReedSensor_noHTU || t==PIR || t==TagPro || t==ALS8k;}
 -(BOOL) has3DCompass{TagType t=self.tagType; return t==MotionSensor || t==MotionRH || t==TagPro; }
--(BOOL) hasLogger{TagType t=self.tagType; return t==TagPro || t==ALS8k || t==Usb || t==UsbALS; }
+-(BOOL) hasLogger{TagType t=self.tagType; return t==TagPro || t==ALS8k || t==Usb || t==UsbALS || t==UsbZmod; }
 -(BOOL) hasALS{TagType t=self.tagType; return t==ALS8k || t==UsbALS; }
 -(BOOL)hasProtimeter{return self.tagType==TCProbe && (self.rev&0xF)==0xE; }
 -(BOOL)hasThermocouple{return self.tagType==TCProbe && (self.rev&0xF)==0xF; }
--(BOOL) has13bit{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==Usb|| t==UsbALS||  t==ALS8k || (t==TCProbe && self.shorted /*using SHT20*/); }
+-(BOOL) has13bit{TagType t=self.tagType; return t==MotionRH || t==ReedSensor ||  t==PIR || t==TagPro || t==Usb|| t==UsbALS|| t==UsbZmod|| t==ALS8k || (t==TCProbe && self.shorted /*using SHT20*/); }
 
 -(BOOL) hasTemperatureSensor {TagType t=self.tagType; return t!=WeMo && t!=DropCam;}
--(BOOL) hasCap{TagType t=self.tagType; int rev=self.rev; if(rev>=0x4D && (rev&0xF)==0xD)return false;
+-(BOOL) hasCap{TagType t=self.tagType; int rev=self.rev;
+	// shorted means SHT20 enabled. For both Basic and Thermocouple.
 	if(t==TCProbe && ((rev&0xF)==0xE || self.shorted))return true;
-	return t==MotionRH || t==ReedSensor ||  t==PIR || t==CapSensor || t==TagPro || t==ALS8k || t==Usb || t==UsbALS;}
+	if(t==TCProbe && ((rev&0xF)==0xD && !self.ds18)){
+		float cap = self.cap;
+		if(cap<105 && cap>0)
+			return true;
+	}
+	if(rev>=0x4D && (rev&0xF)==0xD)return false;
+	return t==MotionRH || t==ReedSensor ||  t==PIR || t==CapSensor || t==TagPro || t==ALS8k || t==Usb || t==UsbALS || t==UsbZmod;}
 
 -(BOOL) hasPIR{TagType t=self.tagType; return t==PIR;}
 -(BOOL) hasThermostat{TagType t=self.tagType; return t==Thermostat;}

@@ -142,7 +142,7 @@ int64_t getfiletime(void)
 -(void)setMvcBar{
 	[_pcDots setCurrentPage:1];
 	
-	[self.navigationController setToolbarHidden:NO animated:NO];
+	[self.navigationController setToolbarHidden:NO animated:YES];
 	
 	self.navigationItem.title=_mvc.title;
 	self.navigationItem.leftBarButtonItem = mvc_left;
@@ -491,7 +491,7 @@ int64_t getfiletime(void)
 	return NO;
 }
  */
-#pragma mark UISearchDisplayController Delegate Methods
+
 - (void)filterListBySearchText:(NSString*)searchText
 {
 

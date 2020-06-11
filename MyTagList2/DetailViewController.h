@@ -47,6 +47,8 @@
 -(void) oorOptionsBtnPressed:(id)sender;
 -(void) specialOptionsBtnPressed: (id)sender;
 
+-(void)phoneOptionsBtnPressed:(id)sender;
+
 -(void) capOptionsBtnPressed:(id)sender;
 -(void) lightOptionsBtnPressed:(id)sender;
 
@@ -57,6 +59,8 @@
 -(void) resetEventBtnPressed:(id)sender;
 -(void) doorStatsBtnPressed:(id)sender;
 -(void) tempStatsBtnPressed:(id)sender withLux:(BOOL) withLux;
+
+
 -(void)lightOnBtnPressed:(id)sender;
 -(void)lightOffBtnPressed:(id)sender;
 -(void) tagUpdated;
@@ -100,7 +104,7 @@ UIImagePickerControllerDelegate,UINavigationControllerDelegate, UIPopoverControl
 	*batteryCell, *updatedCell, *temperatureCell, *capCell, *beepOptionCell, *signalCell, *managerCell, *dimSpeedCell, *lightCell;
 	IASKPSTextFieldSpecifierViewCell* camDetailCell;
 	
-	TableLoadingButtonCell* resetStatesCell, *specialOptionsCell, *unassociateCell, *doorStatsCell, *resetEventCell; //, *armBtnCell, *disarmBtnCell;
+	TableLoadingButtonCell  *phoneOptionsCell, *resetStatesCell, *specialOptionsCell, *unassociateCell, *doorStatsCell, *resetEventCell; //, *armBtnCell, *disarmBtnCell;
 	TableLoadingButtonCell* lightOnCell, *lightOffCell, *tempStatsCell, *tempALSStatsCell, *calibrateRadioCell, *addScriptCell;
 
 	IASKPSSliderSpecifierViewCell *dimCell;

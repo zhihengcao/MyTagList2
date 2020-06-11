@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
+#import <Webkit/Webkit.h>
 
-
-@interface WebViewController : UIViewController<UIWebViewDelegate>
+@interface WebViewController : UIViewController<WKNavigationDelegate>
 {
 }
 
 -(id)initWithTitle:(NSString*)title;
-@property (nonatomic, readonly) UIWebView *webView;
+@property (nonatomic, readonly) WKWebView *webView;
 @property(nonatomic, copy) void (^completion)();
 @property(nonatomic, copy) void (^webviewClosed)(BOOL cancelled);
 

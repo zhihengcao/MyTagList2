@@ -34,7 +34,8 @@ static iToastSettings *sharedSettings = nil;
 	[self showFrom:nil];
 }
 -(void)showFrom:(id)sender {
-	
+
+
 	iToastSettings *theSettings = _settings;
 	
 	if (!theSettings) {
@@ -47,9 +48,13 @@ static iToastSettings *sharedSettings = nil;
 	//window = [[[UIApplication sharedApplication] windows] objectAtIndex:0];
     //window = [UIApplication sharedApplication].keyWindow;
     //if (!window) {
+	if([UIApplication sharedApplication].windows.count==0)
+		window =[UIApplication sharedApplication].keyWindow;
+	else
         window = [[UIApplication sharedApplication].windows objectAtIndex:0];			
     //}
-
+	if(window==nil)return;
+	
 	CGFloat windowWidth =window.frame.size.width;
 	CGFloat screenwidth = showInPopover?480:windowWidth;
 	if(screenwidth>480)screenwidth=480;

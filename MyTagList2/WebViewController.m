@@ -1,4 +1,5 @@
 #import "WebViewController.h"
+#import <Webkit/Webkit.h>
 
 
 @implementation WebViewController
@@ -20,14 +21,22 @@
 {
     CGRect screenFrame = self.navigationController.view.frame;   //[[UIScreen mainScreen] applicationFrame];
 
-    UIWebView *wv = [[UIWebView alloc] initWithFrame:screenFrame];
-    [wv setScalesPageToFit:YES];
-    [wv setDelegate:self];
-	
-    [self setView:wv];
-    [wv release];
+    WKWebView *wv = [[WKWebView alloc] initWithFrame:screenFrame];
+	wv.navigationDelegate = self;
+    //[wv setScalesPageToFit:YES];
+    //[wv setDelegate:self];
 
-	self.contentSizeForViewInPopover = CGSizeMake(480, 600);
+	if (@available(iOS 11.0, *)) {
+		for(NSHTTPCookie* cookie in NSHTTPCookieStorage.sharedHTTPCookieStorage.cookies){
+			[wv.configuration.websiteDataStore.httpCookieStore setCookie:cookie completionHandler:nil];
+		}
+	}
+    [self setView:wv];
+
+
+	[wv release];
+
+	//self.preferredContentSize = CGSizeMake(480, 600);
 }
 - (void)viewDidAppear:(BOOL)animated
 {
@@ -40,12 +49,13 @@
 	return YES;
 }
 
-- (UIWebView *)webView
+- (WKWebView *)webView
 {
-    return (UIWebView *)[self view];
+    return (WKWebView *)[self view];
 }
--(void)webViewDidFinishLoad:(UIWebView *)webView{
-	[webView stringByEvaluatingJavaScriptFromString:@"history.back = function () { location.href = '//close.webview'; }"];
+-(void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
+
+	[webView evaluateJavaScript:@"history.back = function () { location.href = '//close.webview'; }" completionHandler:nil];
 	if(self.completion)self.completion();
 	self.completion=nil;
 }
@@ -54,23 +64,33 @@
 	self.webviewClosed=nil;
 	[super dealloc];
 }
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
-	NSString* url =request.URL.absoluteString;
+-(void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler
+{
+	NSString* url =navigationAction.request.URL.absoluteString;
 	NSLog(@"URL=%@", url);
 	if([url rangeOfString:@"//close.webview"].length>0){
 		[self.navigationController popViewControllerAnimated:YES];
 		if(self.webviewClosed!=nil)
 			self.webviewClosed(YES);
-		return NO;
+		//return NO;
+		decisionHandler( WKNavigationActionPolicyCancel);
+		return;
 	}
+	if([url rangeOfString:@"ifttt.com"].length>0){
+		decisionHandler( WKNavigationActionPolicyAllow);
+		return;
+	}
+	
 	if([url rangeOfString:@"/eth/index.html"].length>0  && [url rangeOfString:@"#indexPage"].length>0 && [url rangeOfString:@"ui-state=dialog"].length==0){
 
 		[self.navigationController popViewControllerAnimated:YES];
 		if(self.webviewClosed!=nil)
 			self.webviewClosed(NO);
-		return NO;
+		decisionHandler( WKNavigationActionPolicyCancel);
+		return;
 	}
-	return YES;
+	decisionHandler( WKNavigationActionPolicyAllow);
+	return;
 }
 
 @end

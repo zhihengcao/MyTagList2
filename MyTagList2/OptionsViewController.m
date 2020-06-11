@@ -25,8 +25,8 @@ float dewPoint(float RH, float T){
 		 if([self respondsToSelector:@selector(setPreferredContentSize:)])
 			 self.preferredContentSize=self.tableView.contentSize;
 		 
-		 if(self.contentSizeForViewInPopover.height<self.tableView.contentSize.height)
-			 self.contentSizeForViewInPopover = self.tableView.contentSize;
+		 if(self.preferredContentSize.height<self.tableView.contentSize.height)
+			 self.preferredContentSize = self.tableView.contentSize;
 	 } repeats:NO];
 	
 }
@@ -80,7 +80,7 @@ float dewPoint(float RH, float T){
 	
 	//CGSize reqsz =  self.tableView.contentSize;
 	//self.contentSizeForViewInPopover = CGSizeMake(480, reqsz.height>600?620:reqsz.height+20);
-	self.contentSizeForViewInPopover = self.tableView.contentSize;
+	self.preferredContentSize = self.tableView.contentSize;
 }
 -(void)presentPicker:(OptionPicker*)picker fromCell:(UITableViewCell*)cell{
 	if(!picker)return;
@@ -117,7 +117,6 @@ float dewPoint(float RH, float T){
 
 @implementation MSOptionsViewController
 @synthesize modified=_modified, isReedPir=_isReedPir, isPir=_isPir, isALS=_isALS, isHmcTimeout=_isHmcTimeout, armDisarmState=_armDisarmState, rnc_open=_rnc_open, rnc_detected=_rnc_detected;
-@synthesize loginEmail=_loginEmail;
 
 static int trigger_delay_choices_val[]={0 ,30,60,120,300,600,900,1800,3600,7200};
 static int auto_reset_choices_val[]={-1,10,20,30,45,60,120,300,600,1800};
@@ -209,6 +208,17 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	return (int)(comp.hour * 60+comp.minute); // + tzo;
 }
 -(void)releaseViews{
+
+	[sms_moved release]; sms_moved=nil;
+	[sms_opened release]; sms_opened=nil;
+	[sms_detected release]; sms_detected=nil;
+	[sms_timedout release]; sms_timedout=nil;
+	[call_moved release]; call_moved=nil;
+	[call_opened release]; call_opened=nil;
+	[call_detected release]; call_detected=nil;
+	[call_timedout release]; call_timedout=nil;
+	[ifttt_create release]; ifttt_create=nil;
+	
 	[sensitivity release]; sensitivity=nil; [threshold_angle release]; threshold_angle=nil;
 	[responsiveness release]; responsiveness=nil; [trigger_delay release]; trigger_delay=nil; 
 	[email release]; email=nil; 
@@ -222,6 +232,8 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	
 	[apns_sound release]; apns_sound=nil;
 	[apns_pause release]; apns_pause=nil;
+	[apns_ca release]; apns_ca=nil;
+	
 	[trigger_delay release]; trigger_delay=nil;
 	[auto_reset_delay release]; auto_reset_delay=nil;
 	[aa1_tod release]; aa1_tod=nil; [aa2_tod release];aa2_tod=nil;
@@ -271,6 +283,8 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	c.aa1_en = en_aa1.toggle.on;
 	c.aa2_en=en_aa2.toggle.on;
 	c.tzo = (int)-[[NSTimeZone localTimeZone] secondsFromGMT]/60;
+	
+	c.apnsCA = apns_ca.toggle.on;
 }
 -(void)navbarSave{
 	[self saveToConfig];
@@ -294,7 +308,9 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		[sensitivity2 setVal:(float)c.sensitivity2];
 		responsiveness.label.text = NSLocalizedString(@"Duration for Carried Away",nil);
 	}else{
-		responsiveness.textField.text = [responsiveness_choices objectAtIndex:c.interval-1];
+		NSUInteger resp = c.interval;
+		if(resp>responsiveness_choices.count)resp=responsiveness_choices.count;
+		responsiveness.textField.text = [responsiveness_choices objectAtIndex:resp-1];
 		responsiveness.label.text = NSLocalizedString(@"Sampling Frequency",nil);
 	}
 	trigger_delay.textLabel.text = [trigger_delay_choices objectAtIndex:c.door_mode_delay_index];
@@ -313,7 +329,8 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	
 	apns_sound.textField.text = c.apnsSound.isEmpty?apns_sound_choices[0]:c.apnsSound;
 	apns_pause.textField.text = apns_pause_choices[ c.apns_pause_index ];
-
+	apns_ca.toggleOn = c.apnsCA;
+	
 	aa1_tod.textField.text =[tod_f stringFromDate:[MSOptionsViewController tod2NSDate:c.aa1_tod]]; //[tod_choices objectAtIndex:[tod_min_utc indexOfObject:[NSNumber numberWithInt:c.aa1_tod]]];
 	aa2_tod.textField.text = [tod_f stringFromDate:[MSOptionsViewController tod2NSDate:c.aa2_tod]]; 
 	ada1_tod.textField.text = [tod_f stringFromDate:[MSOptionsViewController tod2NSDate:c.ada1_tod]];
@@ -333,6 +350,16 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	responsiveness = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:_isAccel?NSLocalizedString(@"Duration for Carried Away",nil): NSLocalizedString(@"Sampling Frequency",nil)];
 	sensitivity2=[IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Sensitivity for Carried Away",nil) Min:0 Max:100 Step:1 Unit:@"%" delegate:self];
 	
+	sms_moved = [TableLoadingButtonCell newWithTitle:@"Text me if tag is moved" Progress:@"Loading ifttt.com"];
+	sms_opened = [TableLoadingButtonCell newWithTitle:@"Text me if door is open" Progress:@"Loading ifttt.com"];
+	sms_detected = [TableLoadingButtonCell newWithTitle:@"Text me if motion is detected" Progress:@"Loading ifttt.com"];
+	sms_timedout = [TableLoadingButtonCell newWithTitle:@"Text me if motion stops" Progress:@"Loading ifttt.com"];
+	call_moved = [TableLoadingButtonCell newWithTitle:@"Call me if tag is moved" Progress:@"Loading ifttt.com"];
+	call_opened = [TableLoadingButtonCell newWithTitle:@"Call me if door is open" Progress:@"Loading ifttt.com"];
+	call_detected = [TableLoadingButtonCell newWithTitle:@"Call me if motion is detected" Progress:@"Loading ifttt.com"];
+	call_timedout = [TableLoadingButtonCell newWithTitle:@"Call me if motion stops" Progress:@"Loading ifttt.com"];
+	ifttt_create = [TableLoadingButtonCell newWithTitle:@"Other options..." Progress:@"Loading ifttt.com"];
+
 	trigger_delay = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
 	trigger_delay.textLabel.font = [UIFont systemFontOfSize:17];
 	trigger_delay.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -340,7 +367,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	auto_reset_delay.textLabel.font = [UIFont systemFontOfSize:17];
 	auto_reset_delay.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
-	email = [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:NSLocalizedString(@"Enter Email Addresses",nil) isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
+	email = [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:@"Email addresses (separate by comma)" isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
 	door_mode = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Door/Gate Mode",nil) helpText:NSLocalizedString(@"Door/gate mode calculates the angle between current orientation and the orientation when tag was armed. If it becomes larger than a threshold angle, tag is reported open, if it becomes smaller, tag is reported closed.",nil) delegate:self];
 	hmc_timeout_mode =[IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Notify @Motion Start/Stop",nil) helpText:NSLocalizedString(@"If enabled, tag will only transmit moved event once at start of motion, and if no motion is detected for longer than specified timeout, transmit a timed out event.",nil) delegate:self];
 
@@ -355,10 +382,11 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	beep_pc = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notifications",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' upon motion sensor events.",nil) delegate:self];
 	use_speech = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
 	beep_pc_loop = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tRing Until Reset or Closed",nil) helpText:NSLocalizedString(@"In door/gate mode, keep beeping until door/gate is closed. In motion detection mode, keep beeping until reset or time out.",nil) delegate:self];
-	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-Sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
+	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
 	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
 	apns_pause =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPause Action Effective For: ",nil)];
-	
+	apns_ca = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tCritical Alert",nil) helpText:NSLocalizedString(@"Send as \"Critical Alert\" even if your phone is in Do Not Disturb mode (iOS 12 and later).",nil)  delegate:self];
+
 //	beep_tag = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:@"Make Tag Beep" helpText:@"Automatically trigger tag to beep upon the moved or opened event." delegate:self];
 	
 	en_aa1 = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Enable Schedule 1",nil) helpText:nil delegate:self];
@@ -403,7 +431,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 // [when moved/opened (when tag movement is detected/when has been opened for x, send email, address, also, ringpc, usespeech, keep, vib, tagbeep)  
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return (_isReedPir?3:4 ) + (_armDisarmState!=ArmDisarmSwitchStateHidden?1:0);
+	return (_isReedPir?3:4 ) + (_armDisarmState!=ArmDisarmSwitchStateHidden?1:0) + 1;
 }
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
@@ -419,7 +447,8 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		return NSLocalizedString(@"When Moved/Opened:",nil);
 	}
 	else if(section==2)return NSLocalizedString(@"Arm/Disarm Schedule 1:",nil);
-	else return NSLocalizedString(@"Arm/Disarm Schedule 2:",nil);
+	else if(section==3)return NSLocalizedString(@"Arm/Disarm Schedule 2:",nil);
+	else return @"Using IFTTT";
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -434,9 +463,10 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		return (door_mode.toggleOn?4:3) + (!door_mode.toggleOn&&_isHmcTimeout?1:0);
 	else if(section==0 && _isAccel)
 		return (door_mode.toggleOn?2:5);
-	else if(section==1)return (_isReedPir?1:2)+(send_email.toggleOn?2:1)+(send_tweet.toggleOn?2:1)+1+(beep_pc.toggleOn?6:1);
+	else if(section==1)return (_isReedPir?1:2)+(send_email.toggleOn?2:1)+(send_tweet.toggleOn?2:1)+1+(beep_pc.toggleOn?7:1);
 	else if(section==2)return en_aa1.toggleOn?10:1;
-	else return en_aa2.toggleOn?10:1;
+	else if(section==3)return en_aa2.toggleOn?10:1;
+	else return [self iftttCalls].count;
 }
 -(void) setArmDisarmState:(ArmDisarmSwitchState)armDisarmState{
 	_armDisarmState=armDisarmState;
@@ -487,7 +517,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	}else if(cell == door_mode){
 		NSLog(@"OptionsViewController editedTableViewCell door_mode called");
 
-		[self.tableView beginUpdates];
+		/*[self.tableView beginUpdates];
 		[door_mode updateToggleOn];
 		if(_isAccel){
 			if(door_mode.toggle.on){
@@ -525,9 +555,10 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		[self.tableView reloadRowsAtIndexPaths:
 		 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:0 inSection:actionSection], nil] withRowAnimation:UITableViewRowAnimationFade];
 		[self.tableView endUpdates];
+		[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:4] withRowAnimation:UITableViewRowAnimationFade];*/
 		
-		//[door_mode updateToggleOn];
-		//[self.tableView reloadData];
+		[door_mode updateToggleOn];
+		[self.tableView reloadData];
 		
 	}else if(cell==hmc_timeout_mode){
 		NSLog(@"OptionsViewController editedTableViewCell hmc_timeout_mode called");
@@ -554,6 +585,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 						[NSIndexPath indexPathForRow:base+2 inSection:actionSection],
 						[NSIndexPath indexPathForRow:base+3 inSection:actionSection],
 						[NSIndexPath indexPathForRow:base+4 inSection:actionSection],
+						[NSIndexPath indexPathForRow:base+5 inSection:actionSection],
 						nil];
 		if(beep_pc.toggle.on){	
 			[self.tableView insertRowsAtIndexPaths:ips withRowAnimation:UITableViewRowAnimationTop];
@@ -609,6 +641,23 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	if(_isALS && section==1)return NSLocalizedString(@"Motion light sensor detects when there is sudden change in brightness caused by moving the tag or changing its surroundings abruptly, such as picking up the tag by hand or opening a drawer containing the tag.",nil);
 	else return nil;
 }
+-(NSArray*)iftttCalls{
+	if(_isALS){
+		if(hmc_timeout_mode.toggleOn)
+			return @[sms_moved, call_moved, sms_timedout, call_timedout, ifttt_create];
+		else
+			return @[sms_moved, call_moved, ifttt_create];
+	}
+	else if(_isPir){
+		return @[sms_detected, call_detected, sms_timedout, call_timedout, ifttt_create];
+	}
+	else if(door_mode.toggleOn || (_isReedPir & !_isPir))
+		return @[sms_opened, call_opened,ifttt_create];
+	else if(hmc_timeout_mode.toggleOn)
+		return @[sms_moved, call_moved, sms_timedout, call_timedout,ifttt_create];
+	else
+		return @[sms_moved, call_moved,ifttt_create];
+}
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)ip
 {
 	int section = (int)(_isReedPir?  ip.section+1:ip.section);
@@ -659,8 +708,9 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		[cells addObject:beep_pc];
 		if(beep_pc.toggleOn){
 			[cells addObject:use_speech];
-			[cells addObject:apns_pause];
 			[cells addObject:apns_sound];
+			[cells addObject:apns_ca];
+			[cells addObject:apns_pause];
 			[cells addObject:vibrate];
 			[cells addObject:beep_pc_loop];
 		}
@@ -701,6 +751,8 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 			cell.accessoryType = self.config.aa2_dow&(1<<(ip.row-3)) ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
 			return cell;
 		}
+	}else{
+		return [[self iftttCalls] objectAtIndex:ip.row];
 	}
 	return nil;
 }
@@ -954,6 +1006,25 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 				[self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObjects:[NSIndexPath indexPathForRow:ip.row inSection:ip.section-1], nil] withRowAnimation:UITableViewRowAnimationFade];
 			}
 		}
+	}else if(section==4){
+		if(cell==sms_timedout)
+		   [self.delegate iftttCall:@"DKPTSydh" From:sms_timedout];
+		else if(cell==call_timedout)
+			[self.delegate iftttCall:@"PpXvKHWn" From:call_timedout];
+		else if(cell==sms_detected)
+			[self.delegate iftttCall:@"QmKBSj2Q" From:sms_detected];
+		else if(cell==call_detected)
+			[self.delegate iftttCall:@"qhfP5NaB" From:call_detected];
+		else if(cell==sms_moved)
+			[self.delegate iftttCall:@"TFdyq89P" From:sms_moved];
+		else if(cell==call_moved)
+			[self.delegate iftttCall:@"vNrRGgcC" From:call_moved];
+		else if(cell==sms_opened)
+			[self.delegate iftttCall:@"EVmYJ7Z9" From:sms_opened];
+		else if(cell==call_opened)
+			[self.delegate iftttCall:@"ADMKJNw4" From:call_opened];
+		else if(cell==ifttt_create)
+			[self.delegate iftttCreateCallFrom:ifttt_create];
 	}
 	[super presentPicker:picker fromCell:[tableView cellForRowAtIndexPath:ip]];
 }
@@ -964,7 +1035,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 
 @implementation OorOptionsViewController
 @synthesize modified=_modified;
-@synthesize loginEmail=_loginEmail;
+//@synthesize loginEmail=_loginEmail;
 - (id)initWithDelegate:(id<OptionsViewControllerDelegate>)delegate
 {
     self = [super initWithDelegate:delegate];
@@ -980,6 +1051,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	[tweetLogin release]; tweetLogin=nil;
 	[beep_pc_oor release]; beep_pc_oor=nil; [use_speech_oor release]; use_speech_oor=nil; [vibrate_oor release]; vibrate_oor=nil;
 	[apns_sound release]; apns_sound=nil; [oor_grace release]; oor_grace=nil;
+	[apns_ca release]; apns_ca=nil;
 }
 -(void)dealloc{
 	self.loginEmail=nil;
@@ -997,6 +1069,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	c.beep_pc_tts_oor = use_speech_oor.toggle.on;
 	c.beep_pc_vibrate_oor = vibrate_oor.toggle.on;
 	c.send_tweet = send_tweet.toggle.on;
+	c.apnsCA = apns_ca.toggle.on;
 	
 	if(self.delegate)
 		[self.delegate optionViewSaveBtnClicked:self ];
@@ -1012,7 +1085,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	beep_pc_oor.toggleOn= c.beep_pc_oor;
 	use_speech_oor.toggleOn=c.beep_pc_tts_oor;
 	vibrate_oor.toggleOn=c.beep_pc_vibrate_oor;
-
+	apns_ca.toggleOn = c.apnsCA;
 	apns_sound.textField.text = c.apnsSound.isEmpty?apns_sound_choices[0]:c.apnsSound;
 	[super setConfig:c];
 }
@@ -1021,16 +1094,18 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 {
     [super viewDidLoad];
 		
-	email_oor =  [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:NSLocalizedString(@"Enter Email Addresses",nil) isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
+	email_oor =  [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:@"Email addresses (separate by comma)" isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
 	send_email_oor = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Email",nil) helpText:NSLocalizedString(@"Get notified by email when the tag is out of range or back in range.",nil) delegate:self];
 	send_tweet = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Post Tweet",nil) helpText:NSLocalizedString(@"Automatically post a tweet when the tag is out of range or back in range.",nil) delegate:self];
 	tweetLogin = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Twitter Login",nil) Progress:NSLocalizedString(@"Redirecting...",nil)];
 	beep_pc_oor = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notification",nil) helpText:NSLocalizedString(@"Receive push notifications on iOS/Android devices chosen at 'Phone Options' when the tag is out of range and when it is back in range.",nil) delegate:self];
 	use_speech_oor = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
-	vibrate_oor = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil) delegate:self];
+	vibrate_oor = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil) delegate:self];
 	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
+	apns_ca = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tCritical Alert",nil) helpText:NSLocalizedString(@"Send as \"Critical Alert\" even if your phone is in Do Not Disturb mode (iOS 12 and later).",nil)  delegate:self];
+
 	oor_grace = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Grace Period:",nil)];
-	
+
 	UITapGestureRecognizer *gestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)] autorelease];
 	gestureRecognizer.cancelsTouchesInView=NO;
 	[self.tableView addGestureRecognizer:gestureRecognizer];
@@ -1075,7 +1150,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 	if(section==0)
 		return 1;
 	else
-		return (send_email_oor.toggleOn?2:1)+(send_tweet.toggleOn?2:1)+(beep_pc_oor.toggleOn?4:1);
+		return (send_email_oor.toggleOn?2:1)+(send_tweet.toggleOn?2:1)+(beep_pc_oor.toggleOn?5:1);
 }
 -(void) editedTableViewCell:(UITableViewCell*)cell{
 	_modified=YES;
@@ -1113,11 +1188,11 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		if(beep_pc_oor.toggle.on){
 			[self.tableView insertRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:base inSection:1],
-			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1],nil] withRowAnimation:UITableViewRowAnimationTop];
+			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1],[NSIndexPath indexPathForRow:base+3 inSection:1], nil] withRowAnimation:UITableViewRowAnimationTop];
 		}else{
 			[self.tableView deleteRowsAtIndexPaths:
 			 [NSArray arrayWithObjects:[NSIndexPath indexPathForRow:base inSection:1],
-			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1], nil] withRowAnimation:UITableViewRowAnimationTop];
+			  [NSIndexPath indexPathForRow:base+1 inSection:1],[NSIndexPath indexPathForRow:base+2 inSection:1],[NSIndexPath indexPathForRow:base+3 inSection:1], nil] withRowAnimation:UITableViewRowAnimationTop];
 		}
 		[self.tableView endUpdates];
 	}
@@ -1184,6 +1259,7 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		if(beep_pc_oor.toggleOn){
 			[cells addObject:use_speech_oor];
 			[cells addObject:apns_sound];
+			[cells addObject:apns_ca];
 			[cells addObject:vibrate_oor];
 		}
 		return [cells objectAtIndex:ip.row];
@@ -1194,7 +1270,6 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 
 @implementation LbOptionsViewController
 @synthesize modified=_modified;
-@synthesize loginEmail=_loginEmail;
 - (id)initWithDelegate:(id<OptionsViewControllerDelegate>)delegate
 {
     self = [super initWithDelegate:delegate];
@@ -1261,17 +1336,17 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 {
     [super viewDidLoad];
 	
-	email =  [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:NSLocalizedString(@"Enter Email Addresses",nil) isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
+	email =  [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:@"Email addresses (separate by comma)" isLast:YES delegate:self]; //[IASKPSTextFieldSpecifierViewCell newEditableWithTitle:@"\tto:" delegate:self];
 	send_email = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Email",nil) helpText:NSLocalizedString(@"The tag will notify you by email when the the battery drops below a threshold.",nil) delegate:self];
 	send_tweet = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Post Tweet",nil) helpText:NSLocalizedString(@"Automatically post a tweet when the tag battery drops below a threshold.",nil) delegate:self];
 	tweetLogin = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Twitter Login",nil) Progress:NSLocalizedString(@"Redirecting...",nil)];
 	beep_pc = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Send Push Notification",nil) helpText:NSLocalizedString(@"Send push notifications to iOS/Android devices chosen at 'Phone Options' when battery drops below a threshold.",nil) delegate:self];
 	use_speech = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tUse Speech",nil) helpText:NSLocalizedString(@"Instead of a simple beep, speak the name of the tag and the event at your iOS device (when app is open) and Android device (always) with the push notification.",nil) delegate:self];
-	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent/No-sound",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
+	vibrate = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"\tSilent",nil) helpText:NSLocalizedString(@"Do no play any sound together with the push notification.",nil)  delegate:self];
 	apns_sound = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"\tPush Notification Sound: ",nil)];
 	
 	enabled =[IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"Enable Low-Battery Alerts",nil) helpText:NSLocalizedString(@"If enabled, the Cloud checks the battery voltage reported by the tag everytime it communicates with the tag. If battery voltage is lower than a threshold, notification(s) are sent.",nil) delegate:self];
-	threshold = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold",nil) Min:1.5 Max:3.5 Step:0.05 Unit:@"volts" delegate:self];
+	threshold = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"Threshold",nil) Min:2.15 Max:4.15 Step:0.01 Unit:@"volts" delegate:self];
 	notify_every =[IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Notify Every:",nil)];
 
 	UITapGestureRecognizer *gestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)] autorelease];
@@ -1444,11 +1519,22 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
     self = [super initWithDelegate:delegate];
     if (self) {
 		_modified=NO;
+		self.report_choices = @[@"Do not email", @"Daily", @"Weekly", @"Bi-weekly", @"Monthly"];
     }
     return self;
 }
+-(void)releaseViews
+{
+	[email release]; email=nil;
+	[rssiRep release]; rssiRep=nil;
+	[tempRep release]; tempRep=nil;
+	[capRep release]; capRep=nil;
+	[luxRep release]; luxRep=nil;
+}
 -(void)dealloc{
 	self.config=nil;
+	self.report_choices=nil;
+	[self releaseViews];
 	[super dealloc];
 }
 
@@ -1459,6 +1545,10 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		[mn setValue:[NSNumber numberWithBool:!enabled] forKey:@"disabled"];
 		[mn removeObjectForKey:@"name"];
 	}	
+
+	self.config.rssiMode = rssiRep.toggle.on;
+	self.config.email = email.textField.text;
+
 	if(self.delegate)
 		[self.delegate optionViewSaveBtnClicked:self];
 }
@@ -1478,16 +1568,66 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 		[mobile_notifications addObject:cell];
 		[cell release];
 	}
+	
+	rssiRep.toggleOn = c.rssiMode;
+	email.textField.text = c.email;
+	if(email.textField.text.length==0)email.textField.text = self.loginEmail;
+	tempRep.textField.text = [_report_choices  objectAtIndex: c.tempReportFreq ];
+	capRep.textField.text = [_report_choices objectAtIndex: c.capReportFreq ];
+	luxRep.textField.text = [_report_choices objectAtIndex:c.luxReportFreq ];
+
 	[super setConfig:c];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)ip
+{
+	OptionPicker *picker=nil;
+	NSMutableDictionary* c = self.config;
+	UITableViewCell* cell =[self tableView:tableView cellForRowAtIndexPath:ip];
+	if([cell isKindOfClass:[IASKPSToggleSwitchSpecifierViewCell class]]){
+		[((IASKPSToggleSwitchSpecifierViewCell*)cell) toggleHelp];
+		[tableView beginUpdates];
+		[tableView endUpdates];
+		[self scheduleRecalculatePopoverSize];
+	}
+	else{
+		if(cell == tempRep){
+			picker = [[[OptionPicker alloc]initWithOptions:_report_choices Selected:c.tempReportFreq
+													  Done:^(NSInteger selected, BOOL now){
+														  tempRep.textField.text = [_report_choices objectAtIndex:selected];
+														  c.tempReportFreq=(int)selected;
+													  } ] autorelease];
+		}else 		if(cell == capRep){
+			picker = [[[OptionPicker alloc]initWithOptions:_report_choices Selected:c.capReportFreq
+													  Done:^(NSInteger selected, BOOL now){
+														  capRep.textField.text = [_report_choices objectAtIndex:selected];
+														  c.capReportFreq=(int)selected;
+													  } ] autorelease];
+		}else 		if(cell == luxRep){
+			picker = [[[OptionPicker alloc]initWithOptions:_report_choices Selected:c.luxReportFreq
+													  Done:^(NSInteger selected, BOOL now){
+														  luxRep.textField.text = [_report_choices objectAtIndex:selected];
+														  c.luxReportFreq=(int)selected;
+													  } ] autorelease];
+		}
+		if(picker)
+			[super presentPicker:picker fromCell:cell];
+	}
 }
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+	email = [IASKPSTextFieldSpecifierViewCell newEditableWithPlaceholder:NSLocalizedString(@"Email addresses (separate by comma)",nil) isLast:YES delegate:self];
+	rssiRep = [IASKPSToggleSwitchSpecifierViewCell newWithTitle:NSLocalizedString(@"When receiver mode is changed",nil) helpText:NSLocalizedString(@"Notify by email when system automatically set tag Receiver Mode to Setup Mode due to low radio signal quality.",nil) delegate:self];
+	tempRep = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Max/min temperature: ",nil)];
+	capRep = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Max/min humidity/moisture: ",nil)];
+	luxRep = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"Max/min ambient light: ",nil)];
 }
 - (void)viewDidUnload
 {
+	[self releaseViews];
     [super viewDidUnload];
 }
 
@@ -1499,24 +1639,42 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 // [enable notifications on () ] 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 1;
+	return 2;
 }
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-	return NSLocalizedString(@"Enable Notifications On:",nil);
+	if(section==0)
+		return NSLocalizedString(@"Enable Push Notifications On:",nil);
+	else
+		return @"Email Reports";
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	return self.config.mobile_notifications.count;
+	if(section==0)
+		return self.config.mobile_notifications.count;
+	else
+		return _hasCap?(_hasALS?5:4):3;
 }
 
 -(void) editedTableViewCell:(UITableViewCell*)cell{
 	_modified=YES;
 }
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)ip{
+	UITableViewCell* cell = [self tableView:tableView cellForRowAtIndexPath:ip];
+	if([cell isKindOfClass:[IASKPSToggleSwitchSpecifierViewCell class]])
+		return [((IASKPSToggleSwitchSpecifierViewCell*)cell) getHeight];
+	else
+		return 44;
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)ip
 {
-	return [mobile_notifications objectAtIndex:ip.row];
+	if(ip.section==0)
+		return [mobile_notifications objectAtIndex:ip.row];
+	else{
+		NSArray* cells = _hasCap?(_hasALS?@[tempRep,capRep,luxRep,rssiRep,email]:@[tempRep,capRep,rssiRep,email]):@[tempRep,rssiRep,email];
+		return [cells objectAtIndex:ip.row];
+	}
 }
 @end
 
@@ -1557,6 +1715,15 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 
 -(BOOL) silent_arming{return [[self objectForKey:@"silent_arming"] boolValue]; }
 -(void) setSilent_arming:(BOOL)silent_arming{ [self setObject:[NSNumber numberWithBool:silent_arming] forKey:@"silent_arming"]; }
+
+-(BOOL)rssiMode{return [[self objectForKey:@"rssiMode"] boolValue];}
+-(void)setRssiMode:(BOOL)mode{[self setObject:[NSNumber numberWithBool:mode] forKey:@"rssiMode"];}
+-(int)tempReportFreq{return [[self objectForKey:@"tempReportFreq"] intValue];}
+-(int)capReportFreq{return [[self objectForKey:@"capReportFreq"] intValue];}
+-(int)luxReportFreq{return [[self objectForKey:@"luxReportFreq"] intValue];}
+-(void)setTempReportFreq:(int)tempReportFreq{[self setObject:[NSNumber numberWithInt:tempReportFreq] forKey:@"tempReportFreq"]; }
+-(void)setCapReportFreq:(int)tempReportFreq{[self setObject:[NSNumber numberWithInt:tempReportFreq] forKey:@"capReportFreq"]; }
+-(void)setLuxReportFreq:(int)tempReportFreq{[self setObject:[NSNumber numberWithInt:tempReportFreq] forKey:@"luxReportFreq"]; }
 
 -(BOOL) door_mode{return [[self objectForKey:@"door_mode"] boolValue];}
 -(void)setDoor_mode:(BOOL)door_mode{[self setObject:[NSNumber numberWithBool:door_mode] forKey:@"door_mode"];}
@@ -1693,6 +1860,9 @@ static int notify_every_choices_val[] = {7200, 21600,86400, 259200, 604800};
 -(void)setThreshold:(float)threshold{[self setObject:[NSNumber numberWithFloat:threshold] forKey:@"threshold"];}
 -(BOOL)enabled{return [[self objectForKey:@"enabled"] boolValue];}
 -(void)setEnabled:(BOOL)enabled{[self setObject:[NSNumber numberWithBool:enabled] forKey:@"enabled"];}
+-(BOOL)apnsCA{return [[self objectForKey:@"apnsCA"] boolValue];}
+-(void)setApnsCA:(BOOL)apnsCA{[self setObject:[NSNumber numberWithBool:apnsCA] forKey:@"apnsCA"];}
+
 -(int)notify_every{return [[self objectForKey:@"notify_every"] intValue];}
 -(void)setNotify_every:(int)notify_every{[self setObject:[NSNumber numberWithInt:notify_every] forKey:@"notify_every"];}
 

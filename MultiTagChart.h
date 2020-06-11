@@ -8,6 +8,7 @@
 
 #import "RawDataChart.h"
 #import "iToast.h"
+#import "NSData+Base64.h"
 
 @interface MultiTagChart : RawDataChart <SChartDatasource>
 {

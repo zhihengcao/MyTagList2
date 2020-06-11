@@ -77,16 +77,18 @@
 }
 - (NSString*)setImage:(UIImage *)image forKey:(NSString *)s
 {
-    [dictionary setObject:image forKey:s];
+	if(image==nil || s==nil)return @"";
+	[dictionary setObject:image forKey:s];
     
     NSString *imagePath = pathInDocumentDirectory(s);
     NSData *d = UIImageJPEGRepresentation(image, 0.5);
     [d writeToFile:imagePath atomically:YES];
 
     UIImage *small = [image resizedImage:CGSizeMake(THUMB_WIDTH, THUMB_HEIGHT) interpolationQuality:kCGInterpolationHigh];
-	[UIImageJPEGRepresentation(small, 0.5) writeToFile:[imagePath stringByAppendingPathExtension:@"thumb"] atomically:YES];
-	[thumb_cache setObject:small forKey:s];
-	
+	if(small){
+		[UIImageJPEGRepresentation(small, 0.5) writeToFile:[imagePath stringByAppendingPathExtension:@"thumb"] atomically:YES];
+		[thumb_cache setObject:small forKey:s];
+	}
 	NSString* md5 = [d Base64MD5];
 	[self setBase64MD5:md5 ForKey:s];
 	return md5;

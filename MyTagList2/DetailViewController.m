@@ -107,8 +107,8 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	}
 	else if(!_tag.isCam && oldtag.isCam)
 	{
-		lightOnCell.title = NSLocalizedString(@"Light On",nil);
-		lightOffCell.title = NSLocalizedString(@"Light Off",nil);
+		lightOnCell.title = NSLocalizedString(@"Turn on LED",nil);
+		lightOffCell.title = NSLocalizedString(@"Turn off LED",nil);
 	}
 	[self updateCellArray];
 	
@@ -180,10 +180,10 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		if(_tag.shorted)
 			capCell.label.text=NSLocalizedString(@"Humidity",nil);
 		else
-			capCell.label.text= _tag.hasThermocouple?NSLocalizedString(@"Chip Temperature",nil): NSLocalizedString(@"Wood Moisture Equivalent",nil);
+			capCell.label.text= _tag.hasThermocouple?NSLocalizedString(@"Ambient Temperature",nil): NSLocalizedString(@"Wood Moisture Equivalent",nil);
 
 		if(_tag.hasThermocouple && !_tag.shorted){
-			capCell.iconImage.image = [UIImage imageNamed:@"icon_chip"];
+			capCell.iconImage.image = [UIImage imageNamed:@"icon_ambient_temp"];
 			capCell.accessoryType = UITableViewCellAccessoryNone;
 			capCell.userInteractionEnabled=NO;
 		}else{
@@ -192,7 +192,13 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 			capCell.userInteractionEnabled=YES;
 		}
 	}
-	if(_tag.cap!=0)
+	else{
+		capCell.label.text=NSLocalizedString(@"Humidity",nil);
+		capCell.iconImage.image = [UIImage imageNamed:@"icon_humidity"];
+		capCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+		capCell.userInteractionEnabled=YES;
+	}
+	if(_tag.hasCap)//  _tag.cap!=0)
 	{
 		NSString *capCellText;
 		if(_tag.has13bit ){
@@ -341,14 +347,16 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 }
 // don't change _dvc.tag.scripts directly, call this function
 -(void)updateScripts:(NSMutableArray*) scripts{
-	NSMutableArray* old_list = [_tag.scripts retain];
+	//NSMutableArray* old_list = [_tag.scripts retain];
 	
-	[self.tableView beginUpdates];
+	//[self.tableView beginUpdates];
 	_tag.scripts = scripts;
 
-	[self animateScriptListFromOld:old_list ToNew:scripts];
-	[self.tableView endUpdates];
-	[old_list release];
+	//[self animateScriptListFromOld:old_list ToNew:scripts];
+	//[self.tableView endUpdates];
+	//[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationFade];
+	[self.tableView reloadData];
+	//[old_list release];
 }
 -(void)animateScriptListFromOld:(NSArray*)old_list ToNew:(NSArray*)new_list{
 	NSUInteger base;
@@ -372,12 +380,12 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		[self.tableView insertRowsAtIndexPaths:ips withRowAnimation:UITableViewRowAnimationFade];
 	}//else
 		//base = old_list.count+1;
-	/*
-	NSMutableArray* ips2 =[[[NSMutableArray alloc] initWithCapacity:base-1] autorelease];
-	for(NSUInteger i=1;i<base;i++)
-		[ips2 addObject:[NSIndexPath indexPathForRow:i inSection:1]];
-	[self.tableView reloadRowsAtIndexPaths:ips2 withRowAnimation:UITableViewRowAnimationFade];
-	*/
+	
+	//NSMutableArray* ips2 =[[[NSMutableArray alloc] initWithCapacity:base-1] autorelease];
+	//for(NSUInteger i=1;i<base;i++)
+		//[ips2 addObject:[NSIndexPath indexPathForRow:i inSection:1]];
+	//[self.tableView reloadRowsAtIndexPaths:ips2 withRowAnimation:UITableViewRowAnimationFade];
+	
 	else [self.tableView reloadData];
 }
 -(void)animateCellPresence:(UITableViewCell*)cell fromArray:(NSArray*)oldCells toArray:(NSArray*)newCells{
@@ -448,7 +456,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 			
 	}
 	if(_tag.hasProtimeter){
-		temperatureCell.label.text = NSLocalizedString(@"Chip Temperature",nil);
+		temperatureCell.label.text = NSLocalizedString(@"Ambient Temperature",nil);
 	}else{
 		temperatureCell.label.text = NSLocalizedString(@"Temperature",nil);
 	}
@@ -771,7 +779,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		if(_tag.isNest)return _tag.supportsHomeAway?3:2;
 		if(_tag.isWeMo || _tag.isCam)return 1;  // only unassociate.
 		// light on, light off, more... (temp stats, door stats, reset tag, unassociate)
-		return (_tag.hasThermostat?4: 3) + (moreCell2.expansionStyle==UIExpansionStyleExpanded?4:0) + (_tag.hasMotion?1:0) + (_tag.hasALS?1:0);
+		return 1+(_tag.hasThermostat?4: 3) + (moreCell2.expansionStyle==UIExpansionStyleExpanded?4:0) + (_tag.hasMotion?1:0) + (_tag.hasALS?1:0);
 	}else{
 		return (_tag.scripts.count)+1;
 	}
@@ -842,8 +850,8 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 			[self.tableView endUpdates];
 		}
 	}else if(btn==moreCell2){
-		int base = _tag.hasThermostat?4: 3;
-		if(!_tag.hasMotion)base--;
+		int base = indexPath.row; /*_tag.hasThermostat?5: 4;
+		if(!_tag.hasMotion)base--;*/
 		
 		NSMutableArray* ips = [NSMutableArray arrayWithObjects:[NSIndexPath indexPathForRow:base+1 inSection:2],
 						[NSIndexPath indexPathForRow:base+2 inSection:2],[NSIndexPath indexPathForRow:base+3 inSection:2],[NSIndexPath indexPathForRow:base+4 inSection:2], nil];
@@ -908,6 +916,9 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	}
 	else if(btn==motionCell){
 		[_delegate msOptionsBtnPressed:btn];
+	}
+	else if(btn==phoneOptionsCell){
+		[_delegate phoneOptionsBtnPressed:btn];
 	}
 	else if(btn==capCell){
 		[_delegate capOptionsBtnPressed:btn];
@@ -1013,7 +1024,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		}
 		beepOptionPopover = [[UIPopoverController alloc]
 							 initWithContentViewController:picker];
-		beepOptionPopover.popoverContentSize = picker.contentSizeForViewInPopover; //CGSizeMake(280, 350);
+		beepOptionPopover.popoverContentSize = picker.preferredContentSize; //CGSizeMake(280, 350);
 		picker.dismissUI=^(BOOL animated){
 			[beepOptionPopover dismissPopoverAnimated:animated];
 			[beepOptionPopover autorelease]; beepOptionPopover=nil;
@@ -1117,9 +1128,12 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 		}else{
 			NSMutableArray* cellArray2 = [[[NSMutableArray alloc] initWithCapacity:10]autorelease];
 			[cellArray2 addObject:tempStatsCell];
+
 			if(_tag.hasALS)[cellArray2 addObject:tempALSStatsCell];
 			if(_tag.hasMotion)[cellArray2 addObject:doorStatsCell];
-			
+
+			[cellArray2 addObject:phoneOptionsCell];
+
 			if(!_tag.isNest){
 				[cellArray2 addObject:_tag.lit?lightOffCell:lightOnCell];
 				[cellArray2 addObject:moreCell2];
@@ -1320,6 +1334,15 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	specialOptionsCell.textLabel.text = specialOptionsCell.title = NSLocalizedString(@"Special Options",nil);
 	specialOptionsCell.textLabel.textAlignment = NSTextAlignmentCenter;
 	specialOptionsCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	specialOptionsCell.imageView.image = [UIImage imageNamed:@"icon_gear.png"];
+
+	
+	phoneOptionsCell =  [[TableLoadingButtonCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
+	phoneOptionsCell.textLabel.textColor = [UISwitch appearance].onTintColor;
+	phoneOptionsCell.textLabel.text = phoneOptionsCell.title = NSLocalizedString(@"Notification and Reports",nil);
+	phoneOptionsCell.textLabel.textAlignment = NSTextAlignmentCenter;
+	phoneOptionsCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	phoneOptionsCell.imageView.image = [UIImage imageNamed:@"icon_bell.png"];
 
 
 	resetStatesCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Reset States",nil) Progress:NSLocalizedString(@"Resetting...",nil) andIcon:@"icon_reset.png"];
@@ -1328,8 +1351,8 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	resetEventCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Reset Moved/Detected",nil) Progress:NSLocalizedString(@"Resetting...",nil)];
 	calibrateRadioCell =[TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Calibrate Radio",nil) Progress:NSLocalizedString(@"Calibrating...",nil)];
 	
-	lightOnCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Light On",nil) Progress:NSLocalizedString(@"Finding...",nil) andIcon:@"icon_light.png"];
-	lightOffCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Light Off",nil) Progress:NSLocalizedString(@"Finding...",nil)];
+	lightOnCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Turn on LED",nil) Progress:NSLocalizedString(@"Finding...",nil) andIcon:@"icon_light.png"];
+	lightOffCell = [TableLoadingButtonCell newWithTitle:NSLocalizedString(@"Turn off LED",nil) Progress:NSLocalizedString(@"Finding...",nil) andIcon: @"icon_light_off.png"];
 	dimCell = [IASKPSSliderSpecifierViewCell newWithTitle:NSLocalizedString(@"LED Brightness",nil) Min:0 Max:100 Step:0.5 Unit:@"%" delegate:self];
 	dimSpeedCell = [IASKPSTextFieldSpecifierViewCell newMultipleChoiceWithTitle:NSLocalizedString(@"   Transition Speed",nil)];
 	
@@ -1407,6 +1430,7 @@ static NSInteger dim_speed_choices_val[] = {0, 10, 50};
 	self.pingBtn=nil;
 	self.pingNowBtn=nil;
 	self.pictureBtn=nil;
+	[phoneOptionsCell release]; phoneOptionsCell=nil;
 	[specialOptionsCell release]; specialOptionsCell=nil;
 	[spacerItem release];spacerItem=nil;
 	[headerView release]; headerView=nil;

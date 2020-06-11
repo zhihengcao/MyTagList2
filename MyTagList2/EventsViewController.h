@@ -10,19 +10,20 @@ extern int64_t getfiletime();
 typedef void (^downloadEventsBlock_t)(EventsViewController* ui, int64_t olderThan, int topN);
 typedef void (^downloadNewEventsBlock_t)(EventsViewController* ui, int64_t newerThan);
 
-@interface EventsViewController : UITableViewController<UISearchDisplayDelegate, UISearchBarDelegate>{
+@interface EventsViewController : UITableViewController<UISearchResultsUpdating, UISearchBarDelegate>{
 	
 	NSMutableArray* _events;
 	NSMutableArray* _filteredEvents;
 	NSMutableArray* _dates;  // section headers
 	
 	BOOL			runLoader;
-	BOOL			searchWasActive;
-	CGPoint			contentOffsetBeforeSearch;
+//	BOOL			searchWasActive;
+//	CGPoint			contentOffsetBeforeSearch;
 	int64_t			olderThan;
 }
 @property (nonatomic, assign) TopPagingViewController* topPVC;
 @property (nonatomic, retain) 	NSString		*savedSearchTerm;
+
 @property (nonatomic, copy) downloadEventsBlock_t loader;
 @property (nonatomic, copy) downloadNewEventsBlock_t newLoader;
 @property (nonatomic, retain) NSMutableDictionary *uuid2events;
@@ -45,6 +46,8 @@ typedef void (^downloadNewEventsBlock_t)(EventsViewController* ui, int64_t newer
 -(void)restorePreviousPage;
 //-(void)openMvcNoAnimation;
 -(id)initWithMvc:(MasterViewController*)mvc andEvc:(EventsViewController*)evc andTvc:(TrendTableViewController*)tvc;
+@property(nonatomic) 	NSInteger     savedSearchScopeEvc;
+@property(nonatomic) 	NSInteger     savedSearchScopeMvc;
 @property (nonatomic, retain) UIPageControl* pcDots;
 @property (nonatomic, retain) MasterViewController* mvc;
 @property (nonatomic, retain)	 EventsViewController* evc;
@@ -52,6 +55,8 @@ typedef void (^downloadNewEventsBlock_t)(EventsViewController* ui, int64_t newer
 @property (nonatomic, retain) UIBarButtonItem* mvc_left, *mvc_right, *evc_left, *evc_right, *tvc_left, *tvc_right;
 @property (nonatomic, readonly)BOOL isTagManagerChoiceVisible;
 @property (nonatomic, readonly)BOOL isMVCVisible;
+
+@property (strong, nonatomic) UISearchController *searchController;
 
 @end
 

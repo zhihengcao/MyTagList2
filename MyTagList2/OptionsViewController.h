@@ -21,6 +21,7 @@ extern NSString* const dewPointModeKey;
 extern float dewPoint(float RH, float T);
 
 extern int chosen_temp_unit;
+
 static NSString* apns_sound_choices[] = {@"Default", @"Quack", @"Single Click", @"Sosumi", @"Temple", @"Uh oh", @"Voltage", @"Whit", @"Wild Eep",
 	@"moof", @"Bip", @"Boing", @"ChuToy", @"Clink-Klank", @"Droplet", @"Indigo", @"Laugh", @"Monkey", @"Computer Error", @"Door Bell",
 	@"Door Chime", @"Honk", @"Solemn", @"Thin Air", @"Train Horn", @"Your Turn", @"End Fx", @"Door Buzzer",
@@ -54,6 +55,12 @@ static NSString* rnc_timespan_choices[]= {@"Just once", @"Every 10 minute",@"Eve
 @property(nonatomic)BOOL silent_arming;
 //@property (nonatomic) BOOL beep_tag_autostop;
 @property (nonatomic) BOOL door_mode;
+
+@property (nonatomic) BOOL rssiMode;
+@property (nonatomic) int tempReportFreq;
+@property (nonatomic) int capReportFreq;
+@property (nonatomic) int luxReportFreq;
+
 @property(nonatomic) BOOL hmc_timeout_mode;
 @property (nonatomic) float door_mode_angle;
 @property (nonatomic) int door_mode_delay;
@@ -89,6 +96,7 @@ static NSString* rnc_timespan_choices[]= {@"Just once", @"Every 10 minute",@"Eve
 @property (nonatomic) BOOL enabled;
 @property (nonatomic) int notify_every;
 
+@property (nonatomic) BOOL apnsCA;
 @property (nonatomic, retain) NSString *apnsSound;
 -(int) apns_sound_index;
 
@@ -130,6 +138,8 @@ static NSString* rnc_timespan_choices[]= {@"Just once", @"Every 10 minute",@"Eve
 -(void)optionEarnReferralBtnClicked:(TableLoadingButtonCell*)btncell;
 - (void)disarmBtnPressed:(id)sender;
 - (void)armBtnPressed:(id)sender withConfig:(NSDictionary*)config;
+-(void)iftttCall:(NSString*)appletID From:(TableLoadingButtonCell*)btncell;
+-(void)iftttCreateCallFrom:(TableLoadingButtonCell*)btncell;
 @end
 
 @interface OptionsViewController : TableTBViewController 
@@ -141,6 +151,8 @@ static NSString* rnc_timespan_choices[]= {@"Just once", @"Every 10 minute",@"Eve
 
 -(void)presentPicker:(OptionPicker*)picker fromCell:(UITableViewCell*)cell;
 -(void)playAiff:(NSInteger)index;
+
+@property(nonatomic, retain) NSString* loginEmail;
 
 @property(nonatomic,retain)NSMutableArray* updatedRepeatNotifyConfigs;
 
@@ -172,6 +184,8 @@ typedef enum ArmDisarmSwitchState ArmDisarmSwitchState;
 	NSArray* day_of_week;
 	//NSMutableArray *tod_choices, *tod_min_utc;
 	
+	TableLoadingButtonCell *sms_moved, *sms_opened, *sms_detected, *sms_timedout, *call_moved, *call_opened, *call_detected, *call_timedout, *ifttt_create;
+	
 	IASKPSSliderSpecifierViewCell* sensitivity,*sensitivity2, *threshold_angle;
 	IASKPSTextFieldSpecifierViewCell* responsiveness, *email;
 	UITableViewCell* trigger_delay, *auto_reset_delay; 
@@ -179,7 +193,7 @@ typedef enum ArmDisarmSwitchState ArmDisarmSwitchState;
 	IASKPSTextFieldSpecifierViewCell *aa1_tod, *ada1_tod, *aa2_tod, *ada2_tod;
 	IASKPSTextFieldSpecifierViewCell *apns_sound, *apns_pause, *rn_open, *rn_detected;
 	IASKPSToggleSwitchSpecifierViewCell *door_mode, *hmc_timeout_mode, *send_email, *send_tweet, *send_email_close, *beep_pc, *use_speech, *beep_pc_loop,
-	*vibrate, /* *beep_tag, */ *en_aa1, *en_aa2, *silent_arm;
+	*vibrate, /* *beep_tag, */ *en_aa1, *en_aa2, *silent_arm, *apns_ca;
 	IASKPSToggleSwitchSpecifierViewCell *arm_disarm;
 }
 +(NSDate*)tod2NSDate:(int)tod;
@@ -189,7 +203,7 @@ typedef enum ArmDisarmSwitchState ArmDisarmSwitchState;
 @property (nonatomic, retain) NSMutableDictionary* rnc_open;
 @property (nonatomic, retain) NSMutableDictionary* rnc_detected;
 
-@property(nonatomic, retain) NSString* loginEmail;
+
 @property (nonatomic, readonly) BOOL modified;
 @property (nonatomic, assign) ArmDisarmSwitchState armDisarmState;
 @property (nonatomic, assign) BOOL isReedPir;
@@ -208,10 +222,10 @@ typedef enum ArmDisarmSwitchState ArmDisarmSwitchState;
 	IASKPSTextFieldSpecifierViewCell *apns_sound, *oor_grace;
 	int _oor_grace_selected_index;
 	
-	IASKPSToggleSwitchSpecifierViewCell *send_email_oor, *send_tweet, *beep_pc_oor, *use_speech_oor, *vibrate_oor;
+	IASKPSToggleSwitchSpecifierViewCell *send_email_oor, *send_tweet, *beep_pc_oor, *use_speech_oor, *vibrate_oor, *apns_ca;
 	TableLoadingButtonCell* tweetLogin;
 }
-@property(nonatomic, retain) NSString* loginEmail;
+
 @property (nonatomic, readonly) BOOL modified;
 @property(nonatomic)int oorGrace;
 -(void) editedTableViewCell:(id)cell;
@@ -229,7 +243,7 @@ typedef enum ArmDisarmSwitchState ArmDisarmSwitchState;
 	
 	NSArray* notify_every_choices;
 }
-@property(nonatomic, retain) NSString* loginEmail;
+
 @property (nonatomic, readonly) BOOL modified;
 -(void) editedTableViewCell:(id)cell;
 @end
@@ -239,8 +253,14 @@ typedef enum ArmDisarmSwitchState ArmDisarmSwitchState;
 @interface PhoneOptionsViewController : OptionsViewController <IEditableTableViewCellDelegate>
 {
 	NSMutableArray* mobile_notifications;
+	IASKPSTextFieldSpecifierViewCell *email;
+	IASKPSTextFieldSpecifierViewCell *tempRep, *capRep, *luxRep;
+	IASKPSToggleSwitchSpecifierViewCell *rssiRep;
 }
+@property(retain) 	NSArray* report_choices;
 @property (nonatomic, readonly) BOOL modified;
+@property (nonatomic, assign) BOOL hasALS;
+@property (nonatomic, assign) BOOL hasCap;
 -(void) editedTableViewCell:(id)cell;
 @end
 

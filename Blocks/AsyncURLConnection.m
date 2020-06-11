@@ -126,6 +126,7 @@ NSString *const TagListGroupName = @"group.com.mytaglist";
 	request.HTTPMethod=@"GET";
 	NSString* cookie = [AsyncURLConnection getCookie];//[[NSUserDefaults standardUserDefaults]objectForKey:TagListCookiePrefKey];
 	if(cookie)[request addValue:cookie forHTTPHeaderField:@"Cookie"];
+	
 	NSURLResponse* response=nil;
 	NSData* data_= [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:error];
 	int lastStatusCode = (int)[(NSHTTPURLResponse*)response statusCode];
@@ -154,7 +155,8 @@ NSString *const TagListGroupName = @"group.com.mytaglist";
 	NSString* cookie = [AsyncURLConnection getCookie];//[[NSUserDefaults standardUserDefaults]objectForKey:TagListCookiePrefKey];
 	if(cookie)[request addValue:cookie forHTTPHeaderField:@"Cookie"];
 	if(setMac)[request addValue:setMac forHTTPHeaderField:@"X-Set-Mac"];
-	
+	[request addValue:@"true" forHTTPHeaderField:@"X-Use-Base64"];
+
 	request.HTTPBody = [jsonS dataUsingEncoding:NSUTF8StringEncoding];//[NSData dataWithBytes:[jsonS UTF8String] length:[jsonS length]];
 	[request setValue:[NSString stringWithFormat:@"%d", (int)[request.HTTPBody length]] forHTTPHeaderField:@"Content-Length"];
 
@@ -238,6 +240,7 @@ NSString *const TagListGroupName = @"group.com.mytaglist";
 	if(cookie)[request addValue:cookie forHTTPHeaderField:@"Cookie"];
 	
 	if(setMac)[request addValue:setMac forHTTPHeaderField:@"X-Set-Mac"];
+	[request addValue:@"true" forHTTPHeaderField:@"X-Use-Base64"];
 	
 	if(data){
 		request.HTTPBody = [data dataUsingEncoding:NSUTF8StringEncoding]; //[NSData dataWithBytes:[data UTF8String] length:[data length]];

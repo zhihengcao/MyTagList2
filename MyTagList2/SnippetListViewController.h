@@ -18,19 +18,20 @@ typedef void (^scriptConfigDoneBlock_t)(NSString* name, NSArray* tagAssignments,
 typedef void (^snippetChoiceDoneBlock_t)(NSDictionary* selectedSnippet);
 typedef void (^downloadScriptLogBlock_t)(TableLoadingButtonCell* btn);
 
-@interface SnippetListViewController : UITableViewController<UISearchDisplayDelegate, UISearchBarDelegate>{
+@interface SnippetListViewController : UITableViewController<UISearchResultsUpdating, UISearchBarDelegate>{
 	NSArray* _snippets;
 	NSMutableArray* _filteredSnippets;
 	snippetChoiceDoneBlock_t _done;
 
-	NSString		*savedSearchTerm;
+/*	NSString		*savedSearchTerm;
 	BOOL			searchWasActive;
-	CGPoint			contentOffsetBeforeSearch;
+	CGPoint			contentOffsetBeforeSearch;*/
 }
 @property (nonatomic, retain) NSArray *snippets;
 //@property (nonatomic, copy) dismissUIBlock_t dismissUI;
 
 - (id)initWithSnippets:(NSArray*) snippets Done:(snippetChoiceDoneBlock_t) done;
+@property (strong, nonatomic) UISearchController *searchController;
 
 @end
 

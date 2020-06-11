@@ -16,6 +16,11 @@
 #import "AsyncURLConnection.h"
 #import "Tag.h"
 
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#import <mach-o/dyld.h>
+#import <mach-o/loader.h>
+
 #include <libkern/OSAtomic.h>
 #include <execinfo.h>
 
@@ -61,8 +66,6 @@ const NSInteger UncaughtExceptionHandlerReportAddressCount = 5;
 	}
 }
 
-#include <sys/types.h>
-#include <sys/sysctl.h>
 - (NSString *) platform{
     size_t size;
     sysctlbyname("hw.machine", NULL, &size, NULL, 0);
@@ -72,8 +75,6 @@ const NSInteger UncaughtExceptionHandlerReportAddressCount = 5;
     free(machine);
     return platform;
 }
-#import <mach-o/dyld.h>
-#import <mach-o/loader.h>
 
 static NSUUID *ExecutableUUID(void)
 {

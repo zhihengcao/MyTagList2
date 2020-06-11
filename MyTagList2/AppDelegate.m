@@ -29,6 +29,8 @@
 #import "SnippetCategoryCollectionViewController.h"
 #import "SpecialOptionsViewController.h"
 #import <objc/runtime.h>
+#import <ifaddrs.h>
+#import <arpa/inet.h>
 
 static const char kBundleKey = 0;
 
@@ -63,14 +65,21 @@ static const char kBundleKey = 0;
 @implementation  UINavigationController(DoublePushError)
 
 - (void)pushViewController2:(UIViewController *)viewController{
-	if(![self.topViewController isKindOfClass:[viewController class]]) {
+/*	if(![self.topViewController isKindOfClass:[viewController class]]) {
 		 @try {
 			 [self pushViewController:viewController animated:YES];
 		 } @catch (NSException * ex) {
 			 [self popToViewController:viewController animated:NO];
 		 } @finally {
 		 }
-	}
+	}*/
+	if(self.topViewController == viewController)
+		return;
+	
+	if([self.viewControllers containsObject:viewController])
+		[self popToViewController:viewController animated:YES];
+	else
+		[self pushViewController:viewController animated:YES];
 }
 
 
@@ -753,7 +762,7 @@ static const char kBundleKey = 0;
 		if(_optnav) {
 			[_optnav pushViewController2:wv];
 			if([_optnav respondsToSelector:@selector(setPreferredContentSize:)])
-				_optnav.preferredContentSize= CGSizeMake(760, 700);
+				_optnav.preferredContentSize= CGSizeMake([[UIScreen mainScreen] bounds].size.width, 700);
 
 		}else{
 			[(UINavigationController*)self.window.rootViewController pushViewController2:wv];
@@ -763,7 +772,49 @@ static const char kBundleKey = 0;
 
 	
 }
+-(void)iftttCreateCallFrom:(TableLoadingButtonCell *)btncell {
+	[btncell showLoading];
+	WebViewController* wv = [[WebViewController alloc]initWithTitle:@"IFTTT"];
+	
+	NSURL *url = [NSURL URLWithString:	@"https://ifttt.com/create/if-wirelesstag?sid=1"];
+	NSURLRequest *req = [NSURLRequest requestWithURL:url];
+	
+	[wv loadRequest:req WithCompletion:^{
+		[btncell revertLoading];
+		if(_optnav) {
+			[_optnav pushViewController2:wv];
+			if([_optnav respondsToSelector:@selector(setPreferredContentSize:)])
+				_optnav.preferredContentSize= CGSizeMake([[UIScreen mainScreen] bounds].size.width, 700);
+			
+		}else{
+			[(UINavigationController*)self.window.rootViewController pushViewController2:wv];
+		}
+		[wv release];
+	} onClose:^(BOOL cancelled) {
+	}];
+}
 
+-(void)iftttCall:(NSString *)appletID From:(TableLoadingButtonCell *)btncell {
+	[btncell showLoading];
+	WebViewController* wv = [[WebViewController alloc]initWithTitle:@"IFTTT"];
+
+	NSURL *url = [NSURL URLWithString:	[NSString stringWithFormat:@"https://ifttt.com/applets/%@/embed?email=%@&redirect_uri=https://mytaglist.com/eth/index.html",appletID, _loginEmail]];
+	NSURLRequest *req = [NSURLRequest requestWithURL:url];
+	
+	[wv loadRequest:req WithCompletion:^{
+		[btncell revertLoading];
+		if(_optnav) {
+			[_optnav pushViewController2:wv];
+			if([_optnav respondsToSelector:@selector(setPreferredContentSize:)])
+				_optnav.preferredContentSize= CGSizeMake([[UIScreen mainScreen] bounds].size.width, 700);
+			
+		}else{
+			[(UINavigationController*)self.window.rootViewController pushViewController2:wv];
+		}
+		[wv release];
+	} onClose:^(BOOL cancelled) {
+	}];
+}
 -(void)optionViewWebAccountBtnClicked:(TableLoadingButtonCell *)btncell{
 	[btncell showLoading];
 	WebViewController* wv = [[WebViewController alloc]initWithTitle:NSLocalizedString(@"Web Interface",nil)];
@@ -776,7 +827,7 @@ static const char kBundleKey = 0;
 		if(_optnav) {
 			[_optnav pushViewController2:wv];
 			if([_optnav respondsToSelector:@selector(setPreferredContentSize:)])
-				_optnav.preferredContentSize= CGSizeMake(720, 700);
+				_optnav.preferredContentSize= CGSizeMake([[UIScreen mainScreen] bounds].size.width, 700);
 
 		}else{
 			[(UINavigationController*)self.window.rootViewController pushViewController2:wv];
@@ -933,12 +984,15 @@ static const char kBundleKey = 0;
 				  completeBlock:^(NSDictionary* retval){
 					  
 					  if(opv.config.isTempConfig){
+						  [_tvc reload];		// update threshold shades
 						  [_opv_temp armDisarmTempsensorAsNeededWithApplyAll:opv_apply_all];
 					  }
 					  else if(opv.config.isLightConfig){
+						  [_tvc reload];		// update threshold shades
 						  [_opv_light armDisarmLightSensorAsNeededWithApplyAll:opv_apply_all];
 					  }
 					  else if(opv.config.isCapConfig){
+						  [_tvc reload];		// update threshold shades
 						  [_opv_cap armDisarmCapsensorAsNeededWithApplyAll:opv_apply_all];
 					  }
 					  else if(opv.config.isLBConfig){
@@ -1071,6 +1125,11 @@ static const char kBundleKey = 0;
 	opv_apply_all=NO;
 	[self open_opv_temp:_dvc.tag BarItem:sender];	
 }
+-(void) phoneOptionsBtnPressed:(id)sender{
+	opv_apply_all=NO;
+	[self open_opv_phones:_dvc.tag BarItem:sender];
+}
+
 -(void) oorOptionsBtnPressed:(id)sender{
 	opv_apply_all=NO;
 	[self open_opv_oor:_dvc.tag BarItem:sender];	
@@ -1123,7 +1182,7 @@ static const char kBundleKey = 0;
 			}];
 		}
 	}
-	[sheet addButtonWithTitle:NSLocalizedString(@"Phone Options",nil) block:^(NSInteger index){
+	[sheet addButtonWithTitle:NSLocalizedString(@"Notification and Reports",nil) block:^(NSInteger index){
 		opv_apply_all=NO;
 		[self open_opv_phones:_dvc.tag BarItem:sender];
 	}];
@@ -1333,6 +1392,10 @@ static const char kBundleKey = 0;
 																			}andType:nil andDataLoader:loader ] autorelease];
 
 	SingleTagChart* chart =((LandscapeGraphViewController*)vc).chart;
+	/*chart.tempBaseline = [_dvc.tag objectForKey:@"tempBL"];
+	chart.capBaseline = [_dvc.tag objectForKey:@"capBL"];
+	chart.luxBaseline = [_dvc.tag objectForKey:@"luxBL"];*/
+	
 	chart.dewPointMode = (_dvc.tag.hasThermocouple&&!_dvc.tag.shorted) || withLux || (_dvc.tag.has13bit&&dewPointMode);
 	chart.capIsChipTemperatureMode=(_dvc.tag.hasThermocouple && !_dvc.tag.shorted);
 	chart.hasALS = withLux;
@@ -2156,6 +2219,12 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				UITableViewCell* cell = sender;
 				[_updateOption_popov presentPopoverFromRect:cell.bounds inView:cell.contentView
 								   permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+			}else if([sender isKindOfClass:[UINavigationBar class]]){
+				UINavigationBar* bar = sender;
+				CGRect b = bar.bounds;
+				b.size.height = 32;
+				[_updateOption_popov presentPopoverFromRect:b inView:bar
+								   permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
 			}else if([sender isKindOfClass:[UIView class]]){
 				UIView* cell = sender;
 				[_updateOption_popov presentPopoverFromRect:cell.bounds inView:cell
@@ -2169,9 +2238,9 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 	}else{
 		_updateOption_popov=nil;
 		picker.dismissUI=^(BOOL animated){
-			[_mvc.navigationController popViewControllerAnimated:animated];
+			[_mvc.topPVC.navigationController popViewControllerAnimated:animated];
 		};
-		[_mvc.navigationController pushViewController2:picker ];
+		[_mvc.topPVC.navigationController pushViewController2:picker ];
 	}
 }
 // TODO: Tag and Tag2 structure must include "postBackInterval" if different from MAC postback interval.
@@ -2276,7 +2345,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 																	   [self open_opv_oor:_dvc.tag BarItem:sender];
 																   }
 															   }
-														} helpText:/*NSLocalizedString(@"Configure auto-update interval to allow tag transmit temperature and other data periodically in order to capture graphs and detect out-of-range/back-in-range events.",nil)*/@"	Configure how often to record temperature and other data for building graphs and out-of-range detection. Tag may send a single data point, 9, 13 or 26 data points (depending on 'transmit multiple data point' option and tag type) in one update (transmission)."];
+														} helpText:/*NSLocalizedString(@"Configure auto-update interval to allow tag transmit temperature and other data periodically in order to capture graphs and detect out-of-range/back-in-range events.",nil)*/@"	Configure how often to record temperature and other data for building graphs and out-of-range detection. Tag may send a single data point, 9, 13 or 26 data points (depending on 'buffer multiple data point' option and tag type) in one update (transmission)."];
 	[self showUpdateOptionPicker:picker From:sender];
 	[picker release];
 
@@ -2711,6 +2780,11 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 -(void) open_opv_phones:(NSDictionary*)tag BarItem:(id)sender{
 	if(!_opv_phone)
 		_opv_phone = [[PhoneOptionsViewController alloc]initWithDelegate:self];
+	
+	_opv_phone.loginEmail = self.loginEmail;
+	_opv_phone.hasALS = tag.hasALS;
+	_opv_phone.hasCap = tag.hasCap;
+	
 	[opv_apply_all?_mvc:_dvc showLoadingBarItem:sender];
 	[AsyncURLConnection request:[WSROOT 
 								 stringByAppendingString:@"ethClient.asmx/LoadMobileNotificationConfig"]
@@ -2719,7 +2793,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 				  completeBlock:^(NSDictionary* retval){
 					  [opv_apply_all?_mvc:_dvc revertLoadingBarItem:sender];
 					  NSMutableDictionary* config = [retval objectForKey:@"d"];
-					  _opv_phone.title = [NSLocalizedString(@"Phone Notification Options for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
+					  _opv_phone.title = [NSLocalizedString(@"Notification and Reports for ",nil) stringByAppendingString:(opv_apply_all?@"All Tags" : tag.name)];
 					  [self open_opv:_opv_phone BarItem:sender];
 					  _opv_phone.config = config;
 					  //[_opv_popov setPopoverContentSize:_opv_phone.contentSizeForViewInPopover animated:YES];
@@ -2937,7 +3011,8 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 					  [_opv_cap setConfig:config andTag:tag];
 					  [self open_opv:_opv_cap BarItem:sender];
 					  
-					  [AsyncURLConnection request:[WSROOT
+					  if(tag.uuid)
+						  [AsyncURLConnection request:[WSROOT
 												   stringByAppendingString:@"ethClient.asmx/LoadRepeatNotifyConfig"]
 										  jsonObj:@{@"uuid":tag.uuid, @"sensorType":@2}
 									completeBlock:^(NSDictionary* retval){
@@ -2951,7 +3026,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 									} errorBlock:^BOOL(NSError *error, id *sender) {
 										return NO;
 									} setMac:nil];
-					  if(_opv_cap.cap2Config!=nil){
+					  if(_opv_cap.cap2Config!=nil && tag.uuid!=nil){
 						  [AsyncURLConnection request:[WSROOT
 													   stringByAppendingString:@"ethClient.asmx/LoadRepeatNotifyConfig"]
 											  jsonObj:@{@"uuid":tag.uuid, @"sensorType":@3}
@@ -3048,7 +3123,8 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 					  [self open_opv:_opv_temp BarItem:sender];
 					  [_opv_temp setConfig:config andTag:tag];
 					  
-					  [AsyncURLConnection request:[WSROOT
+					  if(tag.uuid)
+						  [AsyncURLConnection request:[WSROOT
 												   stringByAppendingString:@"ethClient.asmx/LoadRepeatNotifyConfig"]
 										  jsonObj:@{@"uuid":tag.uuid, @"sensorType":@1}
 									completeBlock:^(NSDictionary* retval){
@@ -3145,7 +3221,7 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 		opv_apply_all=YES;
 		[self open_opv_lb:ms!=nil?ms:basic BarItem:sender];
 	}];
-	[sheet addButtonWithTitle:NSLocalizedString(@"Phone Options",nil) block:^(NSInteger index){
+	[sheet addButtonWithTitle:NSLocalizedString(@"Notification and Reports",nil) block:^(NSInteger index){
 		opv_apply_all=YES;
 		[self open_opv_phones:ms!=nil?ms:basic BarItem:sender];
 	}];
@@ -3252,8 +3328,6 @@ static int revive_choices_val[]={1,2,3,4,6,12,24};
 	}
 }
 
-#import <ifaddrs.h>
-#import <arpa/inet.h>
 static char* getWiFiAddress() {
 
 //    NSString *address = @"error";
@@ -3348,8 +3422,8 @@ static char* getWiFiAddress() {
 											   
 											   } errorBlock:^(NSError* err, id* showFrom){
 												   
-												   /*iToast *toast2 = [[iToast makeText:[@"Error getting detail for WeMo at " stringByAppendingString:host] andDetail:[err description]] setDuration:iToastDurationLong];
-												   [toast2 show];*/
+												   iToast *toast2 = [[iToast makeText:[@"Error getting detail for WeMo at " stringByAppendingString:host] andDetail:[err description]] setDuration:iToastDurationLong];
+												   [toast2 show];
 
 												   self.showWeMoButton=NO;
 												   return NO;
@@ -3557,7 +3631,7 @@ static char* getWiFiAddress() {
 			UIPopoverController* popover = [[UIPopoverController alloc] 
 								 initWithContentViewController:picker];
 			popover.delegate=self;
-			CGSize sz = picker.contentSizeForViewInPopover;
+			CGSize sz = picker.preferredContentSize;
 			sz.width = 420;
 			[popover setPopoverContentSize:sz animated:YES];
 			picker.dismissUI=^(BOOL animated){
@@ -3667,21 +3741,41 @@ static char* getWiFiAddress() {
 	
 	NSString* url, *soapAction, *xml;
 	if ([[NSUserDefaults standardUserDefaults] boolForKey:TagManagerChooseAllPrefKey]) {
-		url=@"ethComet.asmx?op=GetNextUpdateForAllManagersOnDB";
-		soapAction = @"http://mytaglist.com/ethComet/GetNextUpdateForAllManagersOnDB" ;
-		xml = [NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><GetNextUpdateForAllManagersOnDB xmlns=\"http://mytaglist.com/ethComet\"><dbid>%d</dbid></GetNextUpdateForAllManagersOnDB></soap:Body></soap:Envelope>", dbid];
+		url=@"ethComet.asmx?op=GetNextUpdateForAllManagersOnDB2";
+		soapAction = @"http://mytaglist.com/ethComet/GetNextUpdateForAllManagersOnDB2" ;
+		xml = [NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><GetNextUpdateForAllManagersOnDB2 xmlns=\"http://mytaglist.com/ethComet\"><dbid>%d</dbid></GetNextUpdateForAllManagersOnDB2></soap:Body></soap:Envelope>", dbid];
 	}else{
-		url=@"ethComet.asmx?op=GetNextUpdate";
-		soapAction = @"http://mytaglist.com/ethComet/GetNextUpdate" ;
-		xml = @"<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><GetNextUpdate xmlns=\"http://mytaglist.com/ethComet\" /></soap:Body></soap:Envelope>";
+		url=@"ethComet.asmx?op=GetNextUpdate2";
+		soapAction = @"http://mytaglist.com/ethComet/GetNextUpdate2" ;
+		xml = @"<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><GetNextUpdate2 xmlns=\"http://mytaglist.com/ethComet\" /></soap:Body></soap:Envelope>";
 	}
 	
 	AsyncSoapURLConnection* __weak __block weakSelf = [[AsyncSoapURLConnection soapRequest: [WSROOT stringByAppendingString: url]
 														  soapAction: soapAction
 																	 xml: xml
-						completeBlock:^(id retval){							
-							for(NSMutableDictionary* tag in (NSArray*)retval){
-								[self updateTag:tag];
+						completeBlock:^(id retval){
+							if([retval isKindOfClass:[NSArray class]])
+								for(NSMutableDictionary* tag in (NSArray*)retval){
+									[self updateTag:tag];
+								}
+							else{
+								for(NSString* mac in retval)
+								{
+									int i = [tagManagerMacList indexOfObject:mac];
+									if(i!=NSNotFound){
+										NSString* name = [tagManagerNameList objectAtIndex:i];
+										if([name hasPrefix:@"Offline)"]){
+											if([[retval objectForKey:mac] boolValue]==YES)
+												[tagManagerNameList replaceObjectAtIndex:i withObject:[name substringToIndex:[name length]-10]];
+										}else{
+											if([[retval objectForKey:mac] boolValue]==NO)
+												[tagManagerNameList replaceObjectAtIndex:i withObject:[name stringByAppendingString:@" (Offline)"]];
+										}
+									}
+								}
+								if(![[NSUserDefaults standardUserDefaults] boolForKey:TagManagerChooseAllPrefKey])
+									_tvc.title=_mvc.title = [tagManagerNameList objectAtIndex:currentTagManagerIndex];
+
 							}
 							if(should_run_comet && comets!=nil)		// not aborted
 							{
@@ -3838,68 +3932,118 @@ NSString * const NotificationActionDisarm = @"DISARM";
 	}
 	
 	if (isOS8){
-		UIMutableUserNotificationAction *pause = [[[UIMutableUserNotificationAction alloc] init] autorelease];
-		[pause setActivationMode:UIUserNotificationActivationModeBackground];
-		[pause setTitle:NSLocalizedString(@"Pause",nil)];
-		[pause setIdentifier:NotificationActionPause];
-		[pause setDestructive:NO];
-		[pause setAuthenticationRequired:NO];
 		
-		UIMutableUserNotificationAction *disarm = [[[UIMutableUserNotificationAction alloc] init] autorelease];
-		[disarm setActivationMode:UIUserNotificationActivationModeBackground];
-		[disarm setTitle:NSLocalizedString(@"Disarm",nil)];
-		[disarm setIdentifier:NotificationActionDisarm];
-		[disarm setDestructive:YES];
-		[disarm setAuthenticationRequired:YES];
 
-		UIMutableUserNotificationAction *disable = [[[UIMutableUserNotificationAction alloc] init] autorelease];
-		[disable setActivationMode:UIUserNotificationActivationModeBackground];
-		[disable setTitle:NSLocalizedString(@"Stop Monitoring",nil)];
-		[disable setIdentifier:NotificationActionDisarm];
-		[disable setDestructive:NO];
-		[disable setAuthenticationRequired:YES];
-		
-		UIMutableUserNotificationCategory *motionCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
-		[motionCategory setIdentifier:NotificationCategoryMotion];
-		[motionCategory setActions:@[pause, disarm]
-						forContext:UIUserNotificationActionContextDefault];
-		[motionCategory setActions:@[pause, disarm]
-						forContext:UIUserNotificationActionContextMinimal];
-		
-		
-		UIMutableUserNotificationCategory *tempCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
-		[tempCategory setIdentifier:NotificationCategoryTemp];
-		[tempCategory setActions:@[pause, disable]
-					  forContext:UIUserNotificationActionContextDefault];
-		[tempCategory setActions:@[pause, disable]
-					  forContext:UIUserNotificationActionContextMinimal];
-		
-		UIMutableUserNotificationCategory *capCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
-		[capCategory setIdentifier:NotificationCategoryCap];
-		[capCategory setActions:@[pause, disable]
-						forContext:UIUserNotificationActionContextDefault];
-		[capCategory setActions:@[pause, disable]
-						forContext:UIUserNotificationActionContextMinimal];
+		if (@available(iOS 10.0, *)) {
+			UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+			center.delegate = self;
+			UNNotificationAction *pause = [UNNotificationAction actionWithIdentifier:NotificationActionPause title:NSLocalizedString(@"Pause",nil) options:0];
+			UNNotificationAction *disarm = [UNNotificationAction actionWithIdentifier:NotificationActionDisarm title:NSLocalizedString(@"Disarm",nil)
+																			  options:UNNotificationActionOptionAuthenticationRequired];
+			UNNotificationAction *disable = [UNNotificationAction actionWithIdentifier:NotificationActionDisarm title:NSLocalizedString(@"Stop Monitoring",nil) options:UNNotificationActionOptionAuthenticationRequired];
+			UNNotificationCategory *motionCategory = [UNNotificationCategory categoryWithIdentifier:NotificationCategoryMotion actions:@[pause, disarm] intentIdentifiers:@[] options:UNNotificationCategoryOptionAllowInCarPlay|UNNotificationCategoryOptionHiddenPreviewsShowTitle];
+			UNNotificationCategory *tempCategory = [UNNotificationCategory categoryWithIdentifier:NotificationCategoryTemp actions:@[pause, disable] intentIdentifiers:@[]
+																						  options:UNNotificationCategoryOptionAllowInCarPlay|UNNotificationCategoryOptionHiddenPreviewsShowTitle];
+			UNNotificationCategory *capCategory = [UNNotificationCategory categoryWithIdentifier:NotificationCategoryCap actions:@[pause, disable] intentIdentifiers:@[] options:UNNotificationCategoryOptionAllowInCarPlay|UNNotificationCategoryOptionHiddenPreviewsShowTitle];
+			UNNotificationCategory *lightCategory = [UNNotificationCategory categoryWithIdentifier:NotificationCategoryLight actions:@[pause, disable] intentIdentifiers:@[] options:UNNotificationCategoryOptionAllowInCarPlay|UNNotificationCategoryOptionHiddenPreviewsShowTitle];
+			[center setNotificationCategories:[NSSet setWithObjects:motionCategory,tempCategory,capCategory, lightCategory, nil]];
+			
+			if (@available(iOS 12.0, *)) {
+				[center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge |
+				/*UNAuthorizationOptionProvidesAppNotificationSettings|*/ UNAuthorizationOptionCriticalAlert) completionHandler:^(BOOL granted, NSError * _Nullable error){
+					if( error ){
+						[self standardShowError:error Title:@"If you need to receive notifications, please open Settings app and grant permissions to WirelessTag."];
+					}else{
+						dispatch_async(dispatch_get_main_queue(), ^{
+							[[UIApplication sharedApplication] registerForRemoteNotifications];
+						});
+					}
+				}];
+			}else{
+				[center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge ) completionHandler:^(BOOL granted, NSError * _Nullable error){
+					if( error ){
+						[self standardShowError:error Title:@"If you need to receive notifications, please open Settings app and grant permissions to WirelessTag."];
+					}else{
+						dispatch_async(dispatch_get_main_queue(), ^{
+							[[UIApplication sharedApplication] registerForRemoteNotifications];
+						});
+					}
+				}];
 
-		UIMutableUserNotificationCategory *lightCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
-		[lightCategory setIdentifier:NotificationCategoryLight];
-		[lightCategory setActions:@[pause, disable]
-						forContext:UIUserNotificationActionContextDefault];
-		[lightCategory setActions:@[pause, disable]
-						forContext:UIUserNotificationActionContextMinimal];
+			}
 
+		}else{
+			
+			UIMutableUserNotificationAction *pause = [[[UIMutableUserNotificationAction alloc] init] autorelease];
+			[pause setActivationMode:UIUserNotificationActivationModeBackground];
+			[pause setTitle:NSLocalizedString(@"Pause",nil)];
+			[pause setIdentifier:NotificationActionPause];
+			[pause setDestructive:NO];
+			[pause setAuthenticationRequired:NO];
+			
+			UIMutableUserNotificationAction *disarm = [[[UIMutableUserNotificationAction alloc] init] autorelease];
+			[disarm setActivationMode:UIUserNotificationActivationModeBackground];
+			[disarm setTitle:NSLocalizedString(@"Disarm",nil)];
+			[disarm setIdentifier:NotificationActionDisarm];
+			[disarm setDestructive:YES];
+			[disarm setAuthenticationRequired:YES];
+			
+			UIMutableUserNotificationAction *disable = [[[UIMutableUserNotificationAction alloc] init] autorelease];
+			[disable setActivationMode:UIUserNotificationActivationModeBackground];
+			[disable setTitle:NSLocalizedString(@"Stop Monitoring",nil)];
+			[disable setIdentifier:NotificationActionDisarm];
+			[disable setDestructive:NO];
+			[disable setAuthenticationRequired:YES];
+			
+			UIMutableUserNotificationCategory *motionCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
+			[motionCategory setIdentifier:NotificationCategoryMotion];
+			[motionCategory setActions:@[pause, disarm]
+							forContext:UIUserNotificationActionContextDefault];
+			[motionCategory setActions:@[pause, disarm]
+							forContext:UIUserNotificationActionContextMinimal];
+			
+			
+			UIMutableUserNotificationCategory *tempCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
+			[tempCategory setIdentifier:NotificationCategoryTemp];
+			[tempCategory setActions:@[pause, disable]
+						  forContext:UIUserNotificationActionContextDefault];
+			[tempCategory setActions:@[pause, disable]
+						  forContext:UIUserNotificationActionContextMinimal];
+			
+			UIMutableUserNotificationCategory *capCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
+			[capCategory setIdentifier:NotificationCategoryCap];
+			[capCategory setActions:@[pause, disable]
+						 forContext:UIUserNotificationActionContextDefault];
+			[capCategory setActions:@[pause, disable]
+						 forContext:UIUserNotificationActionContextMinimal];
+			
+			UIMutableUserNotificationCategory *lightCategory = [[[UIMutableUserNotificationCategory alloc] init] autorelease];
+			[lightCategory setIdentifier:NotificationCategoryLight];
+			[lightCategory setActions:@[pause, disable]
+						   forContext:UIUserNotificationActionContextDefault];
+			[lightCategory setActions:@[pause, disable]
+						   forContext:UIUserNotificationActionContextMinimal];
+			
+			
+			[[UIApplication sharedApplication] registerUserNotificationSettings:
+			 [UIUserNotificationSettings settingsForTypes:UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge|UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeSound categories:
+			  [NSSet setWithObjects:motionCategory,tempCategory,capCategory, lightCategory, nil]
+			  ]];
+
+		}
 		
-		[[UIApplication sharedApplication] registerUserNotificationSettings:
-		 [UIUserNotificationSettings settingsForTypes:UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound categories:
-		  [NSSet setWithObjects:motionCategory,tempCategory,capCategory, lightCategory, nil]
-		  ]];
 	}else
 		[[UIApplication sharedApplication] registerForRemoteNotificationTypes:
 		 UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
 
 }
-- (void)application:(UIApplication *)application handleActionWithIdentifier:(NSString *)identifier forRemoteNotification:(NSDictionary *)userInfo completionHandler:(void (^)())completionHandler
+- (void)application:(UIApplication *)application handleActionWithIdentifier:(NSString *)identifier forRemoteNotification:(NSDictionary *)userInfo completionHandler:(void (^)(void))completionHandler
 {
+	[self apnsCategoryAction:identifier userInfo:userInfo completionHandler:completionHandler];
+}
+-(void)apnsCategoryAction:(NSString*)identifier userInfo:(NSDictionary*)userInfo completionHandler:(void (^)(void))completionHandler{
+	
+	
 	NSString* category = [[userInfo objectForKey:@"aps"] objectForKey:@"category"];
 	if([identifier isEqualToString:NotificationActionPause]){
 		[AsyncURLConnection request:[WSROOT stringByAppendingString:@"ethMobileNotifications.asmx/PauseNotificationFor"]
@@ -4389,8 +4533,45 @@ NSString * const NotificationActionDisarm = @"DISARM";
 */
 }
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler
+{
+	NSLog( @"Handle push from foreground" );
+	[self handleApns:notification.request.content.userInfo foreground:	YES];
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response
+		 withCompletionHandler:(void (^)(void))completionHandler
+{
+	NSLog( @"Handle push from background or closed" );
+	// if you set a member variable in didReceiveRemoteNotification, you  will know if this is from closed or background
+	if(![response.actionIdentifier isEqualToString: UNNotificationDismissActionIdentifier]){
+		NSDictionary* userInfo = response.notification.request.content.userInfo;
+		[self apnsCategoryAction:response.actionIdentifier userInfo:userInfo completionHandler:completionHandler];
+		if([response.actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier])
+			[self handleApns:userInfo foreground:NO];
+	}
+}
+
+// TODO
+/*- (void)userNotificationCenter:(UNUserNotificationCenter *)center openSettingsForNotification:(UNNotification *)notification
+{
+	//        Open notification settings screen in app
+	NSDictionary *userInfo = notification.request.content.userInfo;
+	NSString* mac = [userInfo objectForKey:@"mac"];
+	if(mac!=nil){
+		int slaveid =  [[userInfo objectForKey:@"slaveid"] intValue];
+	}
+}*/
+
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
+	if (@available(iOS 10.0, *)) {
+	}else
+		[self handleApns:userInfo foreground:	YES];
+}
+-(void)handleApns:(NSDictionary* )userInfo foreground:(BOOL)isForeground{
+	
+
 	NSLog(@"didReceiveRemoteNotification: %@", userInfo);
 
 	NSString* alert = nil;
@@ -4465,7 +4646,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 							}else{
 								[self reloadTagBySlaveId:slaveid];
 								[_evc reload];
-								[self focusOnTagUUID:[NSString stringWithFormat:@"@%d",slaveid]];
+								//[self focusOnTagUUID:[NSString stringWithFormat:@"@%d",slaveid]];   // the user might be viewing other things. This causes  is pushing the same view controller instance (<DetailViewController: 0x102017000>) more than once error.
 							}
 						}
 						else{
@@ -4592,6 +4773,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 	
+
 #ifdef DEBUG_WS
 	if(WSROOT==nil)WSROOT=@"https://my.wirelesstag.net/";
 #else
@@ -4611,7 +4793,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 	isOS8 = ([[UIDevice currentDevice].systemVersion floatValue] >= 8);
 	self.wemoTriedForPhoneID = [[[NSMutableDictionary alloc]init] autorelease];
 	
-	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
+	//if ([[UIDevice currentDevice].systemVersion floatValue] >= 7){
 				
 		UIColor* tint =
 		//[UIColor colorWithRed:69.0/255.0 green:162.0/255.0 blue:1.0 alpha:1.0];
@@ -4625,8 +4807,10 @@ NSString * const NotificationActionDisarm = @"DISARM";
 		[UIActionSheet appearance].tintColor = tint;
 		[UISlider appearance].tintColor = tint;
 		//[UITextField appearance].textColor = tint;
-		[[UIView appearanceWhenContainedIn:[UIAlertController class], nil] setTintColor:tint];
-	}
+		//[[UIView appearanceWhenContainedIn:[UIAlertController class], nil] setTintColor:tint];
+	
+	//}
+	
 	//[UIPageControl appearance].backgroundColor = [UIColor redColor];
 	
 	/*	UIColor* tint =[UIColor colorWithRed:210.0/255.0 green:0.95 blue:210.0/255.0 alpha:1];
@@ -4663,9 +4847,8 @@ NSString * const NotificationActionDisarm = @"DISARM";
 		return YES;
 	}
 
-	
-    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-		
+	self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+
 	_evc = [[EventsViewController alloc]initWithLoader:^(EventsViewController* ui, int64_t olderThan, int topN){
 
 		[UIApplication sharedApplication].networkActivityIndicatorVisible=YES;
@@ -4738,15 +4921,6 @@ NSString * const NotificationActionDisarm = @"DISARM";
 					 } setMac:nil];
 
 	
-/*	if(SYSTEM_VERSION_GRATERTHAN_OR_EQUALTO(@"10.0")){
-		UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-		[center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error){
-			if( error ){
-				[self standardShowError:error Title:@"Please open Settings app to allow this app to generate notifications."];
-			}
-		}];
-	}
- */
 	return YES;
 }
 -(void)reloadRootViewController{
@@ -4776,7 +4950,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 		
 		self.dvc = [[[DetailViewController alloc] initWithNibName:@"DetailViewController_iPad" bundle:nil delegate:self] autorelease];
 		UINavigationController *right_nc = [[[UINavigationController alloc] initWithRootViewController:_dvc] autorelease];
-		//right_nc.navigationBar.tintColor = [UIColor whiteColor];
+		right_nc.navigationBar.tintColor = [UIColor whiteColor];
 		
 		self.splitViewController = [[[UISplitViewController alloc] init] autorelease];
 		_splitViewController.presentsWithGesture = NO;
@@ -4784,6 +4958,7 @@ NSString * const NotificationActionDisarm = @"DISARM";
 			_splitViewController.preferredPrimaryColumnWidthFraction = 0.4;
 			_splitViewController.maximumPrimaryColumnWidth = MIN( _splitViewController.view.bounds.size.width, _splitViewController.view.bounds.size.height);
 			_splitViewController.minimumPrimaryColumnWidth = 180;
+			_splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
 		}
 		
 		_splitViewController.delegate = _dvc;
